@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import requests
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure, output_file, show, curdo
 from bokeh.embed import components
+
 
 #from .models import Greeting
 
@@ -31,4 +32,5 @@ def homepage(request):
     plot = figure(title = 'Line Graph', x_axis_label = 'X-axis', y_axis_label = 'Y-axis', plot_width = 400, plot_height = 400)
     plot.line(x, y, line_width = 2)
     script, div = components(plot)
+    curdoc().add_root(plot)
     return render(request, 'pages/base.html', {'script' : script, 'div' : div } )
