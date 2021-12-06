@@ -1,1 +1,1 @@
-web: gunicorn gettingstarted.wsgi
+web: bokeh serve — port=$PORT — allow-websocket-origin=myapp.herokuapp.com — address=0.0.0.0 — use-xheaders manage.py
