@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 #from .secret import *
 import os
 import django_heroku
+import dj_database_url
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -26,9 +27,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "CHANGE_ME!!!! (P.S. the SECRET_KEY environment variable will be used, if set, instead)."
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 
 # Application definition
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "website",
+    "whitenoise.runserver_nostatic",
 ]
 
 MIDDLEWARE = [
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware"
 ]
 
 ROOT_URLCONF = "gettingstarted.urls"
@@ -78,11 +81,21 @@ WSGI_APPLICATION = "gettingstarted.wsgi.application"
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
-    "default": {
+    "sqlite3": {
         "ENGINE" : "django.db.backends.sqlite3",
         "NAME": os.path.join(BASE_DIR, "db.sqlite3")
+    },
+    "default": {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'website',
+        'USER': 'django',
+        'PASSWORD': 'Tulane4010',
+        'PORT': '5433'
     }
 }
+
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default']=(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -116,5 +129,13 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = "/static/"
+STATICFILES_STORAGE = "whitenoise.storage.CompresesdManifestStaticFilesStorage"
+STATICFILES_DIR = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 
 django_heroku.settings(locals())
