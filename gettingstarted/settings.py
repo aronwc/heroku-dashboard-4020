@@ -90,12 +90,15 @@ DATABASES = {
         'NAME': 'website',
         'USER': 'django',
         'PASSWORD': 'Tulane4010',
-        'PORT': '5433'
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
-db_from_env = dj_database_url.config(conn_max_age=600)
-DATABASES['default']=(db_from_env)
+#db_from_env = dj_database_url.config(conn_max_age=600)
+#DATABASES['default']=(db_from_env)
+#DATABASES['default'] = dj_database_url.config(default=os.getenv('DATABASE_URL'))  
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

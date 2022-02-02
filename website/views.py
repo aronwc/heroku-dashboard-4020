@@ -11,22 +11,22 @@ from bokeh.transform import factor_cmap
 #from .models import Greeting
 
 # Create your views here.
-#def index(request):
-    # return HttpResponse('Hello from Python!')
+def index(request):
+    #return HttpResponse('Hello from Python!')
     #return render(request, "index.html")
-#    r = requests.get('http://httpbin.org/status/418')
-#    print(r.text)
-#    return HttpResponse('<pre>' + r.text + '</pre>')
+    r = requests.get('http://httpbin.org/status/418')
+    print(r.text)
+    return HttpResponse('<pre>' + r.text + '</pre>')
 
 
-#def db(request):
-#
-#    greeting = Greeting()
-#    greeting.save()
-#
-#    greetings = Greeting.objects.all()
-#
-#    return render(request, "db.html", {"greetings": greetings})
+def db(request):
+
+    greeting = Greeting()
+    greeting.save()
+
+    greetings = Greeting.objects.all()
+
+    return render(request, "db.html", {"greetings": greetings})
 
 def homepage(request):
     x = [1, 2, 3, 4, 5]
@@ -87,9 +87,7 @@ def plot(request):
     plot2.toolbar.active_scroll = None
     plot2.toolbar.active_tap = None
 
-
     script1, div1 = components(plot)
     script2, div2 = components(plot2)
-
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})

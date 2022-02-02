@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         {% load static %}
@@ -7,14 +8,13 @@
         <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.1.min.js" crossorigin="anonymous">></script>
         <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.1.min.js" crossorigin="anonymous">></script>
         <link href=”https://fonts.googleapis.com/css?family=Open+Sans|Oswald" rel=”stylesheet”>
-        {{ script1 | safe }}
-        {{ script2 | safe }}
+        {{ script | safe }}
         <title> Dashboard </title>
     </head>
 
     <body>
-        <div> {{div1 | safe }} </div>
+        <div> {{div | safe }} </div>
         <br> </br>
-        <div> {{div2 | safe }} </div>
     </body>
 </html>
+<
