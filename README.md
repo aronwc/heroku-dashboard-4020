@@ -1,5 +1,10 @@
 # Dashboard Connected to Heroku
+Progress:
+- successfully made Bokeh visuals appear on heroku site
+  - https://heroku-dashboard-4020.herokuapp.com/graph/
+- connected to PostgreSQL database successfully
+
 To Do:
-- successfully make Bokeh visuals appear through views.py
-- convert to PostgreSQL database successfully
-- add security
+- add data to PSQL database
+- create visualizations based on data
+- improve security 
