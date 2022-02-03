@@ -16,6 +16,5 @@ import website.views
 
 urlpatterns = [
     path("", include('website.urls')),
-    path("db/", website.views.db, name="db"),
     path("admin/", admin.site.urls),
 ]
