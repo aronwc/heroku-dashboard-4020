@@ -1,0 +1,26 @@
+{
+    "DataSources": [{
+        "Type": "csv",
+        "Indexes": {
+            "sample-index": {
+                "Path": "sample-data/data.csv"
+            }
+        }
+    }],
+    "Security":
+    {
+        "Authorization":
+        {
+            "Enabled": false
+        },
+        "CORS":
+        {
+            "AllowOrigin": "*"
+        }
+    },
+    "DataStorageOptions":
+    {
+        "DataRefreshTime": "60"
+    },
+    "Port": "9500"
+}

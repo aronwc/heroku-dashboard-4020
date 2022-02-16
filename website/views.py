@@ -8,12 +8,9 @@ from bokeh.palettes import Spectral6
 from bokeh.transform import factor_cmap
 
 # Create your views here.
-def index(request):
+def test(request):
     #return HttpResponse('Hello from Python!')
-    return render(request, "index.html")
-    #r = requests.get('http://httpbin.org/status/418')
-    #print(r.text)
-    #return HttpResponse('<pre>' + r.text + '</pre>')
+    return render(request, "test.html")
 
 def plot(request):
     #Number of Case Appearances Observed Bar Graph
@@ -69,3 +66,7 @@ def plot(request):
     script2, div2 = components(plot2)
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
+
+def psql(request):
+    
+    return 
