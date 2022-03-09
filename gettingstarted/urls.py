@@ -16,7 +16,7 @@ import website.views
 # Learn more here: https://docs.djangoproject.com/en/2.1/topics/http/urls/
 
 urlpatterns = [
-    #path("", include('website.urls')),
-    path("", lambda x: HttpResponseRedirect('/admin')),
+    path("", include('website.urls')),
+    #path("", lambda x: HttpResponseRedirect('/admin/')),
     path("admin/", admin.site.urls),
 ]

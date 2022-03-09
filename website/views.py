@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
@@ -68,5 +67,34 @@ def plot(request):
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
 def psql(request):
+    # template = "pages/responses_test.html"
+    # data = responses.objects.all()
+
+    # prompt = {
+    #     'order': 'Order of the CSV should be id, court, bail, judge, ethnicity',
+    #     'rsps': data
+    # }
+    # if request.method == "GET":
+    #     return render(request, template, prompt)
     
-    return 
+    # csv_file = request.FILES['file']
+
+    # if not csv_file.name.endswith('.csv'):
+    #     messages.error(request, "THIS IS NOT A CSV FILE")
+
+    # data_set = csv_file.read().decode("UTF-8")
+
+    # io_string = io.StringIO(data_set)
+    # next(io_string)
+    # for column in csv.reader(io_string, delimiter=",", quotechar="|"):
+    #     _, created = responses.objects.update_or_create(
+    #         id=column[0],
+    #         court=column[1],
+    #         bail=column[2],
+    #         judge=column[3],
+    #         ethnicity=column[4],
+    #     )
+    # context = {}
+
+    #return render(request, template, context)
+    return
