@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from website.models import Responses
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
@@ -13,6 +14,11 @@ def test(request):
 
 def plot(request):
     #Number of Case Appearances Observed Bar Graph
+    #for p in Responses.objects.raw('SELECT * FROM website_responses'):
+    #    print(p)
+
+    #TODO: Query responses to create visualizations
+
     courts = ["Criminal District", "Magistrate", "Municipal"]
     years = ["2016", "2017", "2018", "2019", "2020"]
 

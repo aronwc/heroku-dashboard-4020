@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-class responses(models.Model):
+class Responses(models.Model):
     MUNICIPAL = "MUN"
     MAGISTRATE = "MAG"
     CRIMINAL = "CDC"
@@ -16,6 +16,7 @@ class responses(models.Model):
         choices=COURT_CHOICES, 
         default=MUNICIPAL
         )
+
     bail = models.IntegerField()
 
     JUDGES_CHOICES = [
@@ -59,7 +60,9 @@ class responses(models.Model):
         choices=JUDGES_CHOICES,
         default="Sens",
     )
+    
     ethnicity = models.CharField(max_length=80)
+
     YEAR_CHOICES = [
         ("2018", "2018"),
         ("2019", "2019"),
@@ -70,4 +73,4 @@ class responses(models.Model):
         max_length=4,
         choices=YEAR_CHOICES, 
         default="2021"
-        )
+    )
