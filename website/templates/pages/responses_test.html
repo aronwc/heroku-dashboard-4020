@@ -1,30 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+    <head>
+        {% load static %}
+        <link href="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.1.min.css" rel="stylesheet” type="text/css">
+        <link href="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.1.min.css" rel="stylesheet" type=”text/css">
+        <link rel="stylesheet">
+        <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.1.min.js" crossorigin="anonymous">></script>
+        <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.1.min.js" crossorigin="anonymous">></script>
+        <link href=”https://fonts.googleapis.com/css?family=Open+Sans|Oswald" rel=”stylesheet”>
+        {{ script | safe }}
+        <title> Dashboard </title>
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+    <body>
+        {% comment %} <div id="pivotContainer"></div>
+        <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
 
-<body>
-    {% if messages %}
-        {% for message in messages %}
-            <div>
-                <strong>{{message|safe}}</strong>
-            </div>
-        {% endfor %}
-    {% else %}
-    {{order}}
-    <form action="" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="file1">Upload a file</label>
-        <input type="file" id="file1" name="file">
-        <small>Only accepts CSV files</small>
-        <button type="submit">Upload</button>
-    </form>
-    {% end if %}
-    {% for response in responses %}
-    {{response.id}}
-    {% endfor %}
-</body>
+        <script>
+            var pivot = new Flexmonster({
+                container: "pivotContainer",
+                toolbar: true,
+                report: {
+                    dataSource: {
+                        type: "api",
+                        url: "http://localhost:9500",
+                        index: "index-database"
+                    }
+                }
+            });
+        </script>  {% endcomment %}
+        <div> {{div | safe }} </div>
+    </body>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.4.2.min.js"></script>
 </html>

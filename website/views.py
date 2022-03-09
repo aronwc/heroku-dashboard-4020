@@ -6,6 +6,9 @@ from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6
 from bokeh.transform import factor_cmap
+import pandas as pd
+import numpy as np
+import psycopg2
 
 # Create your views here.
 def test(request):
@@ -13,11 +16,6 @@ def test(request):
     return render(request, "test.html")
 
 def plot(request):
-    #Number of Case Appearances Observed Bar Graph
-    #for p in Responses.objects.raw('SELECT * FROM website_responses'):
-    #    print(p)
-
-    #TODO: Query responses to create visualizations
 
     courts = ["Criminal District", "Magistrate", "Municipal"]
     years = ["2016", "2017", "2018", "2019", "2020"]
@@ -73,34 +71,56 @@ def plot(request):
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
 def psql(request):
-    # template = "pages/responses_test.html"
-    # data = responses.objects.all()
-
-    # prompt = {
-    #     'order': 'Order of the CSV should be id, court, bail, judge, ethnicity',
-    #     'rsps': data
-    # }
-    # if request.method == "GET":
-    #     return render(request, template, prompt)
     
-    # csv_file = request.FILES['file']
+    #Number of Case Appearances Observed Bar Graph
+    for p in Responses.objects.raw('SELECT * FROM website_responses'):
+       print(p)
+    def connect():
+        print("Connecting to database...")
+        conn = psycopg2.connect(
+            host="localhost",
+            database="website",
+            user="django",
+            password="Tulane4010"
+            )
+        df = pd.read_sql_query("""
+                SELECT * FROM website_responses
+                """, conn)
+        
+        #print(df)
+        return df
+    
+    responses = connect()
+    data = dict(
+         year = [d for d in responses['year']],
+         id = [d for d in responses['id']],
+        # court = [d['court'] for d in responses],
+        # bail = [d['bail'] for d in responses],
+        # judge = [d['judge'] for d in responses],
+        # ethnicity = [d['ethnicity'] for d in responses],
+    )
+    #edit csv to count number of each element instead
+    source = ColumnDataSource(data)
+    print(data['year'])
+    sorted_ids = sorted(source.year, key=lambda x: source.id[source.year.index(x)])
 
-    # if not csv_file.name.endswith('.csv'):
-    #     messages.error(request, "THIS IS NOT A CSV FILE")
+    homicides = ['Homicide Incidents', 'Homicide Arrests']
+    years = ['2019', '2020']
+    data = {
+        'homicides' : homicides,
+        '2019' : [124, 44],
+        '2020' : [184, 49]
+    }
+    x = [(homicide, year) for homicide in homicides for year in years]
+    counts = sum(zip(data['2019'], data['2020']), ())
+    source = ColumnDataSource(data=dict(x=x, counts=counts))
+    plot = figure(x_range=FactorRange(*x), plot_height=250, title="Responses per Year", toolbar_location=None, tools="")
+    plot.vbar(x='x', top='counts', width=0.9, source=source, line_color = "white", fill_color=factor_cmap('x', palette=Spectral6, factors=years, start=1, end=2))
+    plot.y_range.start = 0
+    plot.x_range.range_padding = 0.1
+    plot.axis.major_label_orientation = 1
+    plot.xgrid.grid_line_color = None
+    
+    script,div = components(plot)
 
-    # data_set = csv_file.read().decode("UTF-8")
-
-    # io_string = io.StringIO(data_set)
-    # next(io_string)
-    # for column in csv.reader(io_string, delimiter=",", quotechar="|"):
-    #     _, created = responses.objects.update_or_create(
-    #         id=column[0],
-    #         court=column[1],
-    #         bail=column[2],
-    #         judge=column[3],
-    #         ethnicity=column[4],
-    #     )
-    # context = {}
-
-    #return render(request, template, context)
-    return
+    return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
