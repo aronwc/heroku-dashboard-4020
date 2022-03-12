@@ -75,35 +75,35 @@ def psql(request):
     #Number of Case Appearances Observed Bar Graph
     # for p in Responses.objects.raw('SELECT * FROM website_responses'):
     #    print(p)
-    def connect():
-        print("Connecting to database...")
-        conn = psycopg2.connect(
-            host="localhost",
-            database="website",
-            user="django",
-            password="Tulane4010"
-            )
-        df = pd.read_sql_query("""
-                SELECT * FROM website_responses
-                """, conn)
+    # def connect():
+    #     print("Connecting to database...")
+    #     conn = psycopg2.connect(
+    #         host="localhost",
+    #         database="website",
+    #         user="django",
+    #         password="Tulane4010"
+    #         )
+    #     df = pd.read_sql_query("""
+    #             SELECT * FROM website_responses
+    #             """, conn)
         
-        #print(df)
-        return df #put this in config instead; doesn't need to be in views
+    #     #print(df)
+    #     return df #put this in config instead; doesn't need to be in views
     # get a online version up with a single query using database
     #clean csv --> ucf-8
-    responses = connect()
-    data = dict(
-         year = [d for d in responses['year']],
-         id = [d for d in responses['id']],
-        # court = [d['court'] for d in responses],
-        # bail = [d['bail'] for d in responses],
-        # judge = [d['judge'] for d in responses],
-        # ethnicity = [d['ethnicity'] for d in responses],
-    )
-    #edit csv to count number of each element instead
-    source = ColumnDataSource(data)
-    print(data['year'])
-    count = data['year'].count(2020)
+    # responses = connect()
+    # data = dict(
+    #      year = [d for d in responses['year']],
+    #      id = [d for d in responses['id']],
+    #     # court = [d['court'] for d in responses],
+    #     # bail = [d['bail'] for d in responses],
+    #     # judge = [d['judge'] for d in responses],
+    #     # ethnicity = [d['ethnicity'] for d in responses],
+    # )
+    # #edit csv to count number of each element instead
+    # source = ColumnDataSource(data)
+    # print(data['year'])
+    # count = data['year'].count(2020)
     
     # sorted_ids = sorted(source.year, key=lambda x: source.id[source.year.index(x)])
 
