@@ -73,8 +73,8 @@ def plot(request):
 def psql(request):
     
     #Number of Case Appearances Observed Bar Graph
-    for p in Responses.objects.raw('SELECT * FROM website_responses'):
-       print(p)
+    # for p in Responses.objects.raw('SELECT * FROM website_responses'):
+    #    print(p)
     def connect():
         print("Connecting to database...")
         conn = psycopg2.connect(
@@ -88,8 +88,9 @@ def psql(request):
                 """, conn)
         
         #print(df)
-        return df
-    
+        return df #put this in config instead; doesn't need to be in views
+    # get a online version up with a single query using database
+    #clean csv --> ucf-8
     responses = connect()
     data = dict(
          year = [d for d in responses['year']],
@@ -102,20 +103,32 @@ def psql(request):
     #edit csv to count number of each element instead
     source = ColumnDataSource(data)
     print(data['year'])
-    sorted_ids = sorted(source.year, key=lambda x: source.id[source.year.index(x)])
+    count = data['year'].count(2020)
+    
+    # sorted_ids = sorted(source.year, key=lambda x: source.id[source.year.index(x)])
 
     homicides = ['Homicide Incidents', 'Homicide Arrests']
-    years = ['2019', '2020']
+    yrs = ['2020', '2021']
+    #years = ['2019', '2020']
+    courts = ['Magistrate', 'Municipal', 'Criminal']
+    # data = {
+    #     'homicides' : homicides,
+    #     '2019' : [124, 44],
+    #     '2020' : [184, 49]
+    # }
     data = {
-        'homicides' : homicides,
-        '2019' : [124, 44],
-        '2020' : [184, 49]
+        'yrs' : yrs,
+        'Magistrate': [10, 20],
+        'Municipal': [20, 10],
+        'Criminal' : [15, 15]
     }
-    x = [(homicide, year) for homicide in homicides for year in years]
-    counts = sum(zip(data['2019'], data['2020']), ())
+    #x = [(homicide, year) for homicide in homicides for year in years]
+    x = [(yr, court) for yr in yrs for court in courts]
+    #counts = sum(zip(data['2019'], data['2020']), ())
+    counts = sum(zip(data['Magistrate'], data['Municipal'], data['Criminal']), ())
     source = ColumnDataSource(data=dict(x=x, counts=counts))
-    plot = figure(x_range=FactorRange(*x), plot_height=250, title="Responses per Year", toolbar_location=None, tools="")
-    plot.vbar(x='x', top='counts', width=0.9, source=source, line_color = "white", fill_color=factor_cmap('x', palette=Spectral6, factors=years, start=1, end=2))
+    plot = figure(x_range=FactorRange(*x), plot_height=250, title="Cases per Year", toolbar_location=None, tools="")
+    plot.vbar(x='x', top='counts', width=0.9, source=source, line_color = "white", fill_color=factor_cmap('x', palette=Spectral6, factors=yrs, start=1, end=2))
     plot.y_range.start = 0
     plot.x_range.range_padding = 0.1
     plot.axis.major_label_orientation = 1

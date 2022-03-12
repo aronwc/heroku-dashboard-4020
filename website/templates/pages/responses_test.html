@@ -13,12 +13,23 @@
     </head>
 
     <body>
-        {% comment %} <div id="pivotContainer"></div>
+        <div id="pivotContainer"></div>
         <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
 
         <script>
-            var pivot = new Flexmonster({
+            {% comment %} let pivot = new Flexmonster({
                 container: "pivotContainer",
+                componentFolder: "https://cdn.flexmonster.com/",
+                toolbar: true,
+                report: {
+                    dataSource: {
+                        filename: "https://cdn.flexmonster.com/data/data.json"
+                    }
+                }
+            }); {% endcomment %}
+            let pivot = new Flexmonster({
+                container: "pivotContainer",
+                componentFolder: "https://cdn.flexmonster.com/",
                 toolbar: true,
                 report: {
                     dataSource: {
@@ -28,7 +39,7 @@
                     }
                 }
             });
-        </script>  {% endcomment %}
+        </script>
         <div> {{div | safe }} </div>
     </body>
     <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
