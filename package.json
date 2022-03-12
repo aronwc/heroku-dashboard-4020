@@ -1,0 +1,19 @@
+{
+  "name": "heroku-dashboard-4020",
+  "version": "1.0.0",
+  "description": "Progress:\r - successfully made Bokeh visuals appear on heroku site\r   - https://heroku-dashboard-4020.herokuapp.com/graph/\r - connected to PostgreSQL database successfully\r - added data to database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vli4142/heroku-dashboard-4020.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vli4142/heroku-dashboard-4020/issues"
+  },
+  "homepage": "https://github.com/vli4142/heroku-dashboard-4020#readme"
+}
