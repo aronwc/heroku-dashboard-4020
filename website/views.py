@@ -136,4 +136,5 @@ def psql(request):
     
     script,div = components(plot)
 
-    return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
+    #return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
+    return render(request, 'pages/responses_test.html')
