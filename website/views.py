@@ -1,5 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template import loader
+from django.urls import reverse
+from .models import Response, Question, ResponseOptions, Survey
 import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
@@ -69,3 +72,11 @@ def plot(request):
     script2, div2 = components(plot2)
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
+
+
+def pretrial(request):
+    good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
+    good_qs_ids = [q.question_id for q in qs]
+    good_responses_list = Response.objects.filter(question_id__in=good_qs_ids)
+    output = ', '.join([r.response_text for r in good_responses_list])
+
