@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from website.models import Responses
+from website.models import Response_new
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
@@ -89,6 +89,7 @@ def psql(request):
         
     #     #print(df)
     #     return df #put this in config instead; doesn't need to be in views
+    # get_object_or_404() function
     # get a online version up with a single query using database
     #clean csv --> ucf-8
     # responses = connect()
