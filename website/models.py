@@ -36,3 +36,20 @@ class ResponseOptions(models.Model):
 	choice_id = models.BigIntegerField()
 	response_option_text = models.CharField(max_length=500)
 
+	def __str__(self):
+		return self.response_option_text
+
+class Survey(models.Model):
+	survey_id = models.BigIntegerField()
+	survey_year = models.IntegerField()
+	survey_name = models.CharField(max_length=100)
+	survey_use_start_date = models.IntegerField()
+	survey_use_end_date = models.IntegerField()
+	survey_phase_id = models.IntegerField()
+	survey_phase_venue_type = models.CharField(max_length=15)
+	survey_part_id = models.CharField(max_length=10)
+	survey_observation_level = models.CharField(max_length=15)
+	observer_type = models.CharField(max_length=40)
+	court_id = models.CharField(max_length=20)
+	survey_notes = models.CharField(max_length=40)
+

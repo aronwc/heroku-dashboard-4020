@@ -6,12 +6,28 @@ File to initially load data from csv's into models
 
 import pandas as pd
 import numpy as np
-from website.models import Response
+from website.models import Response, Question, ResponseOptions, Survey
 
 def run():
+
+	# delete all initial data
 	Response.objects.all().delete()
-	response_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/responses_cleaned_1.csv', index_col=0)
-	for index, row in response_df.iterrows():
+	Question.objects.all().delete()
+	ResponseOptions.objects.all().delete()
+	Survey.objects.all().delete()
+
+
+	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/responses_cleaned_1.csv', index_col=0)
+
+	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/all.questions.csv', index_col=0)
+
+	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/all.response.options.csv', index_col=0)
+
+	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/all.surveys.csv')
+
+
+
+	for index, row in responses_df.iterrows():
 		print(type(list(row)[-1]))
 		# we use 0 instead of np.nan because IntegerField's cannot take nans
 		fields = [x if type(x) != float else 0 for x in list(row)]
