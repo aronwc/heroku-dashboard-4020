@@ -151,7 +151,7 @@ def pretrial(request):
     possible_responses = [ '0', '1', '2', '3', '4', '5' ]
     counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #makeshift counts
     source = ColumnDataSource(dict(possible_responses=possible_responses, counts=counts))
-    plot = figure(x_range=FactorRange(*possible_responses), plot_height=250, title="What is the defendant's pretrial risk score?", toolbar_location=None, tools="")
+    plot = figure(x_range=FactorRange(*possible_responses), plot_height=250, title="What is the defendant's pretrial risk score?", toolbar_location=None, tools="", x_axis_label = "Score", y_axis_label = "Total Count")
 
     plot.vbar(x='possible_responses', top='counts', width=0.9, source=source)
 
