@@ -11,17 +11,17 @@ from website.models import Response, Question, ResponseOptions, Survey
 def run():
 
 	# delete all initial data
-	#Response.objects.all().delete()
-	#Question.objects.all().delete()
-	#ResponseOptions.objects.all().delete()
+	Response.objects.all().delete()
+	Question.objects.all().delete()
+	ResponseOptions.objects.all().delete()
 	Survey.objects.all().delete()
 
 
-	#responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
+	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
 
-	#questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.csv', encoding='latin1', index_col=0)
+	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.csv', encoding='latin1', index_col=0)
 
-	#response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
+	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
 
 	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
 

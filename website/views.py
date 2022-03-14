@@ -73,10 +73,20 @@ def plot(request):
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
-
+# do pie chart here with bokeh
 def pretrial(request):
+    print('made')
     good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
-    good_qs_ids = [q.question_id for q in qs]
-    good_responses_list = Response.objects.filter(question_id__in=good_qs_ids)
+
+    good_qs_ids = [q.question_id for q in list(good_qs_list)]
+
+    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
+
     output = ', '.join([r.response_text for r in good_responses_list])
+
+    return HttpResponse(output)
+
+# pie chart with bokeh
+def afford_bond(request):
+    pass
 
