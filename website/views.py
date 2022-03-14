@@ -145,7 +145,7 @@ def pretrial(request):
     good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
     #print("list is ", good_qs_list)
     good_qs_ids = [q.question_id for q in list(good_qs_list)]
-    print("id is ", good_qs_ids)
+    #print("id is ", good_qs_ids)
     good_responses_list = list(Response_new.objects.filter(question_id__in=good_qs_ids))
     output = ', '.join([r.response_text for r in good_responses_list])
     possible_responses = [ '0', '1', '2', '3', '4', '5' ]
