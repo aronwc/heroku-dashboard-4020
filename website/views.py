@@ -9,6 +9,8 @@ from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6
 from bokeh.transform import factor_cmap
+from django.http import JsonResponse
+import json
 
 # Create your views here.
 def index(request):
@@ -89,4 +91,46 @@ def pretrial(request):
 # pie chart with bokeh
 def afford_bond(request):
     pass
+
+def display(request):
+    # this shouldnt be hard coded
+    context = {'courts': ['cdc', 'magistrate', 'municipal']}
+    return render(request, 'website/display.html', context)
+
+def get_topics_ajax(request):
+    print(request)
+    if request.method == "GET":
+        print('made0')
+        #court_id = request.POST['court_id']
+        #court 
+        print('court_id is {}'.format(request.GET['court_id']))
+        #data = json.loads(request.body)
+        #print(data)
+        try:
+            print('made1')
+            # get a QuerySet returning all entries of Survey table that have court.id = to selected court
+            court = Survey.objects.filter(court_id=json.loads(request.GET['court_id']))
+            print('made2')
+            survey_ids_list = [s.survey_id for s in list(court)]
+            print('made3')
+            questions = Question.objects.filter(survey_id__in=survey_ids_list)
+            print('made4')
+            print('questions[0].text is {}'.format(questions[0].question_text[:50]))
+            print('question.values list is {}'.format(list(questions.values('question_text'))[:10]))
+            print('\n'*3)
+            print('json response is {}'.format(str(JsonResponse(list(questions.values('question_text')), safe=False))))
+        except Exception:
+            #data['error_message'] = 'error'
+            print('made5')
+            return HttpResponse(yo)
+        return JsonResponse(list(questions.values('question_text')), safe=False)
+        print('made-1')
+
+
+
+
+
+
+
+
 
