@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from website.models import Response_new
+from website.models import Response_new, Question, ResponseOptions, Survey 
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
@@ -139,3 +139,30 @@ def psql(request):
 
     #return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
     return render(request, 'pages/responses_test.html')
+
+# do pie chart here with bokeh
+def pretrial(request):
+    good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
+    #print("list is ", good_qs_list)
+    good_qs_ids = [q.question_id for q in list(good_qs_list)]
+    print("id is ", good_qs_ids)
+    good_responses_list = list(Response_new.objects.filter(question_id__in=good_qs_ids))
+    output = ', '.join([r.response_text for r in good_responses_list])
+    possible_responses = [ '0', '1', '2', '3', '4', '5' ]
+    counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #makeshift counts
+    source = ColumnDataSource(dict(possible_responses=possible_responses, counts=counts))
+    plot = figure(x_range=FactorRange(*possible_responses), plot_height=250, title="What is the defendant's pretrial risk score?", toolbar_location=None, tools="")
+
+    plot.vbar(x='possible_responses', top='counts', width=0.9, source=source)
+
+    plot.xgrid.grid_line_color = None
+    plot.y_range.start = 0
+
+    script,div = components(plot)
+
+    #return HttpResponse(output)
+    return render(request, 'pages/pretrial.html', {'script':script, 'div':div}) 
+
+# pie chart with bokeh
+def afford_bond(request):
+    pass
