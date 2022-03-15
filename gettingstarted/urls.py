@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 from django.contrib import admin
+#from django.views.generic.base import RedirectView 
 
 admin.autodiscover()
 
@@ -16,5 +17,6 @@ import website.views
 
 urlpatterns = [
     path("", include('website.urls')),
+    #path("", lambda x: HttpResponseRedirect('/admin/')),
     path("admin/", admin.site.urls),
 ]

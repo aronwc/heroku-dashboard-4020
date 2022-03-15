@@ -8,14 +8,35 @@
         <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.1.min.js" crossorigin="anonymous">></script>
         <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.1.min.js" crossorigin="anonymous">></script>
         <link href=”https://fonts.googleapis.com/css?family=Open+Sans|Oswald" rel=”stylesheet”>
+
         {{ script1 | safe }}
         {{ script2 | safe }}
         <title> Dashboard </title>
     </head>
 
     <body>
+        {% comment %} <div id="pivotContainer"></div>
+        <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
+
+        <script>
+            var pivot = new Flexmonster({
+                container: "pivotContainer",
+                toolbar: true,
+                report: {
+                    dataSource: {
+                        type: "api",
+                        url: "http://localhost:9500",
+                        index: "index-database"
+                    }
+                }
+            });
+        </script>  {% endcomment %}
         <div> {{div1 | safe }} </div>
         <br> </br>
         <div> {{div2 | safe }} </div>
     </body>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.4.2.min.js"></script>
 </html>

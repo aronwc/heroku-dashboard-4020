@@ -1,4 +1,3 @@
-
 '''
 File to initially load data from csv's into models
 
@@ -101,7 +100,3 @@ def run():
 		DocketProceeding.objects.create(mag_num=fields[0], date=tz_aware_date, judge=fields[2], text=fields[3])
 	
 	
-
-
-
-
