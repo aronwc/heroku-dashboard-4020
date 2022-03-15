@@ -6,15 +6,20 @@ File to initially load data from csv's into models
 
 import pandas as pd
 import numpy as np
-from website.models import Response, Question, ResponseOptions, Survey
+import pytz
+from datetime import datetime
+from django.utils.dateparse import parse_date
+from website.models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 
 def run():
 
 	# delete all initial data
-	Response.objects.all().delete()
-	Question.objects.all().delete()
-	ResponseOptions.objects.all().delete()
-	Survey.objects.all().delete()
+	#Response.objects.all().delete()
+	#Question.objects.all().delete()
+	#ResponseOptions.objects.all().delete()
+	#Survey.objects.all().delete()
+	DocketCharge.objects.all().delete()
+	DocketProceeding.objects.all().delete()
 
 
 	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
@@ -25,12 +30,16 @@ def run():
 
 	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
 
+	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+
+	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
+
 	
 	
 	# transfer response csv/df to database
 	# WORKS
 
-
+	'''
 	for index, row in responses_df.iterrows():
 		print(type(list(row)[-1]))
 		# we use 0 instead of np.nan because IntegerField's cannot take nans
@@ -74,6 +83,24 @@ def run():
 							survey_phase_id=fields[5], survey_phase_venue_type=fields[6],
 							survey_part_id=fields[7], survey_observation_level=fields[8],
 							observer_type=fields[9], court_id=fields[10], survey_notes=fields[11])
+
+	'''
+
+	for index, row in all_dockets_df.iterrows():
+		fields = list(row)
+		correct_date = datetime.strptime(fields[7], "%m/%d/%Y")
+		tz_aware_date = pytz.timezone('US/Central').localize(correct_date) # best practice to have timezone aware dates
+		DocketCharge.objects.create(mag_num=fields[0], defendant=fields[1], judge=fields[2], 
+								count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
+								date=tz_aware_date)
+	
+	for index, row in all_proceedings_df.iterrows():
+		fields = list(row)
+		correct_date = datetime.strptime(fields[1], "%m/%d/%Y")
+		tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
+		DocketProceeding.objects.create(mag_num=fields[0], date=tz_aware_date, judge=fields[2], text=fields[3])
+	
+	
 
 
 
