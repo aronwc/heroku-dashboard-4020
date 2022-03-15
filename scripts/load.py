@@ -1,32 +1,46 @@
 '''
-File to initially load data from csvs into models
+File to initially load data from csv's into models
 
 '''
 
-import csv
-import os
 import pandas as pd
 import numpy as np
-from website.models import Response_new, Question, ResponseOptions, Survey
+import pytz
+from datetime import datetime
+from django.utils.dateparse import parse_date
+from website.models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 
 def run():
 
 	# delete all initial data
-	Response_new.objects.all().delete()	
-	Question.objects.all().delete()
-	ResponseOptions.objects.all().delete()
-	Survey.objects.all().delete()
+	#Response.objects.all().delete()
+	#Question.objects.all().delete()
+	#ResponseOptions.objects.all().delete()
+	#Survey.objects.all().delete()
+	DocketCharge.objects.all().delete()
+	DocketProceeding.objects.all().delete()
 
-	responses_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
-	questions_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_questions.csv', index_col=0, encoding='latin1')
-	response_options_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_response_options.csv', index_col=0, encoding= 'latin1')
-	surveys_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_surveys.csv', encoding='latin1')
 
-# transfer response csv/df to database
-# 	WORKS
-	print("Responses database updating...")
+	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
+
+	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.csv', encoding='latin1', index_col=0)
+
+	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
+
+	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
+
+	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+
+	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
+
+	
+	
+	# transfer response csv/df to database
+	# WORKS
+
+	'''
 	for index, row in responses_df.iterrows():
-		#print(type(list(row)[-1]))
+		print(type(list(row)[-1]))
 		# we use 0 instead of np.nan because IntegerField's cannot take nans
 		fields = [x if type(x) != float else 0 for x in list(row)]
 		# some data validation for length of str fields
@@ -34,16 +48,15 @@ def run():
 		#print(fields[8], type(fields[8]))
 		fields[3] = str(fields[3])[:5000]
 		fields[8] = str(fields[8])[:200]
-		#print(fields)
+		print(fields)
 		#break
-		Response_new.objects.create(survey_id=fields[0], collector_id=fields[1], response_id=fields[2],
+		Response.objects.create(survey_id=fields[0], collector_id=fields[1], response_id=fields[2],
 								response_text=fields[3], question_id=fields[4],
 								row_id=fields[5], choice_id=fields[6], other_id=fields[7],
 								choice_text=fields[8])
 	
 	# transfer question csv/df to database
 	# WORKS
-	print("Questions database updating...")
 	for index, row in questions_df.iterrows():
 		fields = [x if type(x) != float else 0 for x in list(row)]
 		Question.objects.create(question_id=fields[0], question_text=fields[1], question_type=fields[2], 
@@ -51,7 +64,6 @@ def run():
 	
 	# transfer responseOption csv/df to database
 	# WORKS
-	print("Response options database updating...")
 	for index, row in response_options_df.iterrows():
 		#print(type(list(row)[3]))
 		fields = [x if type(x) != float else 0 for x in list(row)]
@@ -60,17 +72,31 @@ def run():
 										row_id=fields[3], row_text=fields[4], choice_id=fields[5], 
 										response_option_text=fields[6])
 
-	print("Surveys database updating...")
+
 	for index, row in surveys_df.iterrows():
+
 		fields = [int(x) if (i == 1 and len(str(x)) == 6) else 0 if (i == 1) else x if (type(x) != float) else 0 for i, x in enumerate(list(row))]
-		#print("\n", fields)
-		Survey.objects.create(survey_id=fields[0], 
-							survey_year=fields[1], survey_name=fields[2],
+
+		Survey.objects.create(survey_id=fields[0], survey_year=fields[1], survey_name=fields[2],
 							survey_use_start_date=fields[3], survey_use_end_date=fields[4],
 							survey_phase_id=fields[5], survey_phase_venue_type=fields[6],
 							survey_part_id=fields[7], survey_observation_level=fields[8],
-							observer_type=fields[9], 
-							court_id=fields[10], 
-							survey_notes=fields[11]
-							)
-	print("Finished!")
+							observer_type=fields[9], court_id=fields[10], survey_notes=fields[11])
+
+	'''
+
+	for index, row in all_dockets_df.iterrows():
+		fields = list(row)
+		correct_date = datetime.strptime(fields[7], "%m/%d/%Y")
+		tz_aware_date = pytz.timezone('US/Central').localize(correct_date) # best practice to have timezone aware dates
+		DocketCharge.objects.create(mag_num=fields[0], defendant=fields[1], judge=fields[2], 
+								count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
+								date=tz_aware_date)
+	
+	for index, row in all_proceedings_df.iterrows():
+		fields = list(row)
+		correct_date = datetime.strptime(fields[1], "%m/%d/%Y")
+		tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
+		DocketProceeding.objects.create(mag_num=fields[0], date=tz_aware_date, judge=fields[2], text=fields[3])
+	
+	

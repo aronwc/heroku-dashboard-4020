@@ -1,11 +1,17 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template import loader
+from django.urls import reverse
+from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
+import requests
 from website.models import Response_new, Question, ResponseOptions, Survey 
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6
 from bokeh.transform import factor_cmap
+from django.http import JsonResponse
+import json
 import pandas as pd
 import numpy as np
 import psycopg2
@@ -69,6 +75,45 @@ def plot(request):
     script2, div2 = components(plot2)
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
+
+# do pie chart here with bokeh
+def pretrial(request):
+    print('made')
+    good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
+
+    good_qs_ids = [q.question_id for q in list(good_qs_list)]
+
+    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
+
+    output = ', '.join([r.response_text for r in good_responses_list])
+
+    return HttpResponse(output)
+
+# pie chart with bokeh
+def afford_bond(request):
+    pass
+
+def display(request):
+    # this shouldnt be hard coded
+    context = {'courts': ['cdc', 'magistrate', 'municipal']}
+    return render(request, 'website/display.html', context)
+
+def get_topics_ajax(request):
+    if request.method == "GET":
+    
+        try:
+
+            # get a QuerySet returning all entries of Survey table that have court.id = to selected court
+            court = Survey.objects.filter(court_id=json.loads(request.GET['court_id']))
+
+            survey_ids_list = [s.survey_id for s in list(court)]
+
+            questions = Question.objects.filter(survey_id__in=survey_ids_list)
+           
+        except Exception:
+            #data['error_message'] = 'error'
+            return HttpResponse(yo)
+        return JsonResponse(list(questions.values('question_text')), safe=False)
 
 def psql(request):
     
