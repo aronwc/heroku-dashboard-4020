@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "website",
     "whitenoise.runserver_nostatic",
     "django_extensions"
+
 ]
 
 MIDDLEWARE = [
@@ -92,7 +93,7 @@ DATABASES = {
         'USER': 'bennett',
         'PASSWORD': 'django_tut_you_cant_guess123',
         'HOST': 'localhost',
-        'PORT': '5432'
+        'PORT': '5432',
     }
 }
 
