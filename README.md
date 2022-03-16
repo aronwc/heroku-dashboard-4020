@@ -9,7 +9,6 @@ Progress:
 
 To Do:
 - improve security
-  - remove csv files from scripts
   - make website only accessible after logging into admin
 - update Flexmonster API with slices; include multiple tables
 - move Bokeh visualizations to the same site, and add interactive functions
