@@ -10,11 +10,70 @@
         <link href=”https://fonts.googleapis.com/css?family=Open+Sans|Oswald" rel=”stylesheet”>
 
         {{ script | safe }}
+<<<<<<< HEAD
+=======
+        {{ script1 | safe }}
+>>>>>>> 97ecbda32baff759acd332f90c6be7fb76e25c5d
         <title> Dashboard </title>
     </head>
 
     <body>
+<<<<<<< HEAD
         <div> {{div | safe }} </div>
+=======
+        <div id="pivotContainer"></div>
+        <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
+        <script>
+            {% comment %} let pivot = new Flexmonster({
+                container: "pivotContainer",
+                componentFolder: "https://cdn.flexmonster.com/",
+                toolbar: true,
+                report: {
+                    dataSource: {
+                        type: "api",
+                        url: "http://localhost:9500",
+                        index: "index-database"
+                    }, {% endcomment %}
+                    {% comment %} "options" : {
+                        "viewType" : "charts",
+                        "chart": {
+                            "type": "bar"
+                        }
+                    } {% endcomment %}
+                    {% comment %} slice : {
+                        rows: [ {
+                            uniqueName: "survey_name"
+                        } ],
+                        columns: [ {
+                            uniqueName: "id"
+                        } ],
+                        measures: [ {
+                            uniqueName: "count"
+                        } ],
+                    } {% endcomment %}
+                }
+            }); 
+        </script>
+        {% comment %} <script>
+            function runQuery() {
+                let slice = {
+                    rows: [ {
+                        uniqueName: "survey_name"
+                    } ],
+                    columns: [ {
+                        uniqueName: "id"
+                    } ],
+                    measures: [ {
+                        uniqueName: "count"
+                    } ],
+                };
+                flexmonster.runQuery(slice)
+            }
+        </script> {% endcomment %}
+        {% comment %} <button onclick="runQuery()">Run query</button> {% endcomment %}
+        <div> {{div | safe }} </div>
+        <div> {{div1 | safe }} </div>
+>>>>>>> 97ecbda32baff759acd332f90c6be7fb76e25c5d
     </body>
     <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
     <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 '''
 File to initially load data from csv's into models
 

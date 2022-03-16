@@ -6,6 +6,9 @@ import datetime
 
 class Response(models.Model):
 
+#class Response(models.Model):
+
+
 
 # class Response(models.Model):
 #     MUNICIPAL = "MUN"
@@ -87,7 +90,11 @@ class Response(models.Model):
 #     ada = models.CharField(max_length=80, default="yes")
 #     afford = models.CharField(max_length=80, default="yes")
 
+<<<<<<< HEAD
 #class Response_new(models.Model):
+=======
+class Response_new(models.Model):
+>>>>>>> 97ecbda32baff759acd332f90c6be7fb76e25c5d
 	survey_id = models.BigIntegerField()
 	collector_id = models.BigIntegerField()
 	response_id = models.BigIntegerField()

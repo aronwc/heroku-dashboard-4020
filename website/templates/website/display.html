@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 
@@ -18,6 +19,8 @@
 
 <body>
   {% csrf_token %}
+
+  <!-- Drop down for court -->
   <div class="col-md-6">
     <div class="form-group">
       <label for="inputStatus">Court</label>
@@ -30,7 +33,20 @@
     </div>
   </div>
 
-  
+  <!-- Drop down for year -->
+  <div class="col-md-6">
+    <div class="form-group">
+      <label for="inputStatus">Court</label>
+      <select id="question-subject" name="question-subject" class="form-control-sm custom-select" method="get">
+        <option >Choose a court</option>
+        {% for court in courts %}
+        <option id="{{court}}" value="{{court}}">{{court}}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <!-- Drop down for question -->
   <div class="col-md-6">
     <div class="form-group">
       <label for="inputStatus">Question</label>
@@ -66,4 +82,5 @@
   {% endblock javascript %}
 
 </body>
+
 </html>
