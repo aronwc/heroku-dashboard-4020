@@ -4,7 +4,7 @@ import datetime
 
 # Create your models here.
 
-class Response(models.Model):
+#class Response(models.Model):
 
 
 # class Response(models.Model):
@@ -87,7 +87,7 @@ class Response(models.Model):
 #     ada = models.CharField(max_length=80, default="yes")
 #     afford = models.CharField(max_length=80, default="yes")
 
-#class Response_new(models.Model):
+class Response_new(models.Model):
 	survey_id = models.BigIntegerField()
 	collector_id = models.BigIntegerField()
 	response_id = models.BigIntegerField()

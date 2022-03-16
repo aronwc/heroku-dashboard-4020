@@ -89,9 +89,9 @@ DATABASES = {
     },
     "default": {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'cwnola_bennett',
-        'USER': 'bennett',
-        'PASSWORD': 'django_tut_you_cant_guess123',
+        'NAME': 'website',
+        'USER': 'django',
+        'PASSWORD': 'Tulane4010',
         'HOST': 'localhost',
         'PORT': '5432',
     }
