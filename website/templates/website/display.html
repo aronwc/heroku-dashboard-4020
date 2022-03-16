@@ -61,8 +61,8 @@
   <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
 
   <script >
-    // whenever court-dropdown or year-dropdown is changed (i.e. clicked), execute this
-    $('select[name=court-dropdown], select[name=year-dropdown]').change(function () {
+    // whenever court-dropdown is changed (i.e. clicked), execute this
+    $('select[name=court-dropdown]').change(function () {
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
           $.ajax({                       // initialize an AJAX request
@@ -84,8 +84,8 @@
                         html_data_questions += `<option value="${data.question_text}">${JSON.stringify(data.question_text)}</option>`
                       }
                   });
-                  $('select[name=year-dropdown]').html(html_data_years); // replace the contents of the topic input with the data that came from the server
-                  $('select[name=question-dropdown]').html(html_data_questions);
+                  $('select[name=year-dropdown]').html(html_data_years); // replace the contents of the year input with the data that came from the server
+                  $('select[name=question-dropdown]').html(html_data_questions); // likewise for questions
 
               }
 
@@ -94,16 +94,36 @@
       });
   </script>
 
+    <script >
+    // whenever year-dropdown is changed (i.e. clicked), execute this
+    $('select[name=year-dropdown]').change(function () {
+          const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
+          const year_s = $('select[name=year-dropdown]').val();
+          $.ajax({                       // initialize an AJAX request
+              type: "get",
+              url: '{% url "website:get_questions_ajax" %}',
+              data: {
+                  'courts': JSON.stringify(court_s), //,       // add the court id to the POST parameters
+                  'years': JSON.stringify(year_s)
+                  //'csrfmiddlewaretoken':$('input[name=csrfmiddlewaretoken]').val(),
+              },
+              success: function (data) {   // `data` is from `get_topics_ajax` view function
+                  let html_data_questions = '<option value="">---------</option>';
+                  data.forEach(function (data) {
+
+                      if (data.hasOwnProperty('question_text')) {
+                        html_data_questions += `<option value="${data.question_text}">${JSON.stringify(data.question_text)}</option>`
+                      }
+                  });
+
+                  $('select[name=question-dropdown]').html(html_data_questions);
+
+              }
 
 
-
-
-
-
-
-
-
-
+          });
+      });
+  </script>
 
 
   {% endblock javascript %}
