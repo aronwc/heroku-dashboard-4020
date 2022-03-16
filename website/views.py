@@ -3,21 +3,16 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
+#from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
 from website.models import Response_new, Question, ResponseOptions, Survey 
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-<<<<<<< Updated upstream
-from bokeh.palettes import Spectral6
-from bokeh.transform import factor_cmap
-from django.http import JsonResponse
-import json
-=======
 from bokeh.palettes import Spectral6, Category20c
 from bokeh.transform import factor_cmap, cumsum
->>>>>>> Stashed changes
+from django.http import JsonResponse
+import json
 import pandas as pd
 import numpy as np
 import psycopg2
@@ -89,7 +84,7 @@ def pretrial(request):
 
     good_qs_ids = [q.question_id for q in list(good_qs_list)]
 
-    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
+    good_responses_list = list(Response_new.objects.filter(question_id__in=good_qs_ids))
 
     output = ', '.join([r.response_text for r in good_responses_list])
 
