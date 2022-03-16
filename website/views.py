@@ -14,7 +14,6 @@ from bokeh.palettes import Spectral6
 from bokeh.transform import factor_cmap
 #from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
-from website.models import Response_new, Question, ResponseOptions, Survey 
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
