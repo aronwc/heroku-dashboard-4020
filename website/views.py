@@ -111,7 +111,8 @@ def afford_bond(request):
 
 def display(request):
     # this shouldnt be hard coded
-    context = {'courts': ['cdc', 'magistrate', 'municipal']}
+    years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
+    context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
     return render(request, 'website/display.html', context)
 
 def get_topics_ajax(request):
