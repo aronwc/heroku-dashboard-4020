@@ -13,10 +13,10 @@ from website.models import Response, Question, ResponseOptions, Survey, DocketCh
 def run():
 
 	# delete all initial data
-	#Response.objects.all().delete()
-	#Question.objects.all().delete()
-	#ResponseOptions.objects.all().delete()
-	#Survey.objects.all().delete()
+	Response.objects.all().delete()
+	Question.objects.all().delete()
+	ResponseOptions.objects.all().delete()
+	Survey.objects.all().delete()
 	DocketCharge.objects.all().delete()
 	DocketProceeding.objects.all().delete()
 
@@ -38,7 +38,6 @@ def run():
 	# transfer response csv/df to database
 	# WORKS
 
-	'''
 	for index, row in responses_df.iterrows():
 		print(type(list(row)[-1]))
 		# we use 0 instead of np.nan because IntegerField's cannot take nans
@@ -83,7 +82,6 @@ def run():
 							survey_part_id=fields[7], survey_observation_level=fields[8],
 							observer_type=fields[9], court_id=fields[10], survey_notes=fields[11])
 
-	'''
 
 	for index, row in all_dockets_df.iterrows():
 		fields = list(row)

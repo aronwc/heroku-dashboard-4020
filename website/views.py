@@ -4,7 +4,7 @@ from django.template import loader
 from django.urls import reverse
 from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
-from website.models import Response_new, Question, ResponseOptions, Survey 
+from website.models import Response, Question, ResponseOptions, Survey 
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
@@ -15,6 +15,9 @@ import json
 import pandas as pd
 import numpy as np
 import psycopg2
+
+def index(request):
+    return HttpResponse('yo')
 
 # Create your views here.
 def test(request):
@@ -106,10 +109,11 @@ def get_topics_ajax(request):
             # get a QuerySet returning all entries of Survey table that have court.id = to selected court
             court = Survey.objects.filter(court_id=json.loads(request.GET['court_id']))
 
+
             survey_ids_list = [s.survey_id for s in list(court)]
 
             questions = Question.objects.filter(survey_id__in=survey_ids_list)
-           
+            #print(list(questions.values('question_text')))
         except Exception:
             #data['error_message'] = 'error'
             return HttpResponse(yo)
