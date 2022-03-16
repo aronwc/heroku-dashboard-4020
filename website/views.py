@@ -1,3 +1,4 @@
+from math import pi
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
@@ -8,10 +9,15 @@ from website.models import Response_new, Question, ResponseOptions, Survey
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
+<<<<<<< Updated upstream
 from bokeh.palettes import Spectral6
 from bokeh.transform import factor_cmap
 from django.http import JsonResponse
 import json
+=======
+from bokeh.palettes import Spectral6, Category20c
+from bokeh.transform import factor_cmap, cumsum
+>>>>>>> Stashed changes
 import pandas as pd
 import numpy as np
 import psycopg2
@@ -194,19 +200,45 @@ def pretrial(request):
     good_responses_list = list(Response_new.objects.filter(question_id__in=good_qs_ids))
     output = ', '.join([r.response_text for r in good_responses_list])
     possible_responses = [ '0', '1', '2', '3', '4', '5' ]
-    counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #makeshift counts
+    counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #ignore 99
     source = ColumnDataSource(dict(possible_responses=possible_responses, counts=counts))
+    
+    #Bar Graph
     plot = figure(x_range=FactorRange(*possible_responses), plot_height=250, title="What is the defendant's pretrial risk score?", toolbar_location=None, tools="", x_axis_label = "Score", y_axis_label = "Total Count")
-
     plot.vbar(x='possible_responses', top='counts', width=0.9, source=source)
-
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
 
     script,div = components(plot)
+    
+    #Pie Chart
+    x = {
+        '0':output.count('0'),
+        '1':output.count('1'),
+        '2':output.count('2'),
+        '3':output.count('3'),
+        '4':output.count('4'),
+        '5':output.count('5'),
+    }
+    print(x)
+    new_source = pd.Series(x).reset_index(name='counts').rename(columns={'index':'possible_responses'})
+    new_source['angle'] = new_source['counts']/new_source['counts'].sum() *2*pi
+    new_source['color'] = Category20c[len(x)]
 
-    #return HttpResponse(output)
-    return render(request, 'pages/pretrial.html', {'script':script, 'div':div}) 
+    plot2 = figure(height=350, title="What is the defendant's pretrial risk score?", 
+    toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
+
+    plot2.wedge(x=0, y=1, radius=0.4,
+    start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'), 
+    line_color="white", fill_color="color", legend_field="possible_responses", source=new_source)
+
+    plot2.axis.axis_label = None
+    plot2.axis.visible = False
+    plot2.grid.grid_line_color = None
+
+    script1, div1 = components(plot2)
+
+    return render(request, 'pages/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
 
 # pie chart with bokeh
 def afford_bond(request):

@@ -14,6 +14,10 @@ urlpatterns = [
     path("firsttest", views.plot, name="dashboard"),
     path("test", views.test, name="dashboard"),
     path("", views.psql, name="Query"),
+<<<<<<< Updated upstream
+=======
+    path("pretrial", views.pretrial, name='pretrial')
+>>>>>>> Stashed changes
     #path("upload-csv/", views.psql, name="responses_test"),
 
 ]
