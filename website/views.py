@@ -26,6 +26,8 @@ import pandas as pd
 import numpy as np
 import psycopg2
 
+from collections import Counter
+
 
 def index(request):
     return HttpResponse('yo')
@@ -115,13 +117,45 @@ def display(request):
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
     return render(request, 'website/display.html', context)
 
-def get_topics_ajax(request):
+def get_years_ajax(request):
+    print('in')
+    if request.method == "GET":
+        try:
+            print(request)
+            courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+            # get all survey ids that have court id in courts_selected
+            survey_ids_list_from_courts_selected = [s.survey_id for s in list(courts_selected)]
+            # if any of the selected courts have an instance with year x, year x in this query set; else, not in
+            # THESE ARE THE YEARS TO DISPLAY on drop down BASED ON selected courts
+            years_to_display = Survey.objects.filter(survey_id__in=survey_ids_list_from_courts_selected).order_by('survey_year').distinct()
+            print('years to display: {}, type of first: {}'.format(list(years_to_display.values('survey_year')), type(list(years_to_display.values('survey_year'))[0])))
+            # these are the years that have been/are selected
+            # this might need to be changed to survey start date
+            print(request.GET['years'])
+            years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+            survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
+
+            final_filtered_survey_ids = survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected
+            print(Counter(final_filtered_survey_ids))
+
+            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids)
+        except Exception as e:
+            print('in exceptions')
+            print(e)
+            return HttpResponse('yo')
+        #print(list(years.values('survey_year')) + list(questions.values('question_text')))
+        return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_text')), safe=False)
+
+
+def get_questions_ajax(request):
     if request.method == "GET":
     
         try:
 
             # get a QuerySet returning all entries of Survey table that have court.id = to selected court
-            court = Survey.objects.filter(court_id=json.loads(request.GET['court_id']))
+            court = Survey.objects.filter(court_id__in=json.loads(request.GET['court_id']))
+            #print(request.GET['court_id'])
+            #print(court)
 
 
             survey_ids_list = [s.survey_id for s in list(court)]
@@ -131,8 +165,10 @@ def get_topics_ajax(request):
 
         except Exception:
             #data['error_message'] = 'error'
-            return HttpResponse(yo)
+            return HttpResponse('yo')
         return JsonResponse(list(questions.values('question_text')), safe=False)
+
+
 
 def psql(request):
     

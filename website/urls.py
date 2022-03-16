@@ -9,7 +9,8 @@ urlpatterns = [
     path("graph/", views.plot, name="graph"),
     path('pretrial/', views.pretrial, name='pretrial'),
     path('display/', views.display, name='display'),
-    path('get-topics-ajax/', views.get_topics_ajax, name="get_topics_ajax"),
+    path('get-questions-ajax/', views.get_questions_ajax, name="get_questions_ajax"),
+    path('get-years-ajax/', views.get_years_ajax, name="get_years_ajax"),
 
     # path('', views.index, name='index'),
     # path("graph/", views.plot, name="graph"),
