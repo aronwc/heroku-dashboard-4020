@@ -118,10 +118,9 @@ def display(request):
     return render(request, 'website/display.html', context)
 
 def get_years_ajax(request):
-    print('in')
+    '''This function gets executed when Court drop down on display/ page clicked'''
     if request.method == "GET":
         try:
-
             courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
             # get all survey ids that have court id in courts_selected
             survey_ids_list_from_courts_selected = [s.survey_id for s in list(courts_selected)]
@@ -140,12 +139,13 @@ def get_years_ajax(request):
             questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids)
         except Exception as e:
             print(e)
+            print("ERROR")
             return HttpResponse('yo')
-        #print(list(years.values('survey_year')) + list(questions.values('question_text')))
         return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_text')), safe=False)
 
 
 def get_questions_ajax(request):
+    '''This function gets executed when Year drop down on display/ page clicked'''
     if request.method == "GET":
     
         try:
@@ -163,9 +163,12 @@ def get_questions_ajax(request):
             final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
 
             questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids)
+            print(questions_to_display[0].question_text)
 
-        except Exception:
+        except Exception as e:
             #data['error_message'] = 'error'
+            print(e)
+            print("ERROR")
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
