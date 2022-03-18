@@ -99,18 +99,20 @@ def plot(request):
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
 def bennett_bokeh(request):
-
- 
-   #create a plot
-    plot = figure(plot_width=400, plot_height=400)
- 
-   # add a circle renderer with a size, color, and alpha
- 
-    plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
- 
-    script, div = components(plot)
- 
-    return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
+    if request.method == "GET":
+        print("IN BENNETT BOKEH")
+     
+       #create a plot
+        plot = figure(plot_width=400, plot_height=400)
+     
+       # add a circle renderer with a size, color, and alpha
+     
+        plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
+     
+        script, div = components(plot)
+     
+        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
+        return JsonResponse({'script': script, 'div': div})
 
 # do pie chart here with bokeh
 def pretrial(request):
