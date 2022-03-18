@@ -1,11 +1,16 @@
+{% extends "./base.html" %}
 
+{% load static %}
+{% block content %}
 <!DOCTYPE html>
 
 
 
 
 <html>
+
 <head>
+    
     <title>Dashboard</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -18,58 +23,125 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="{% static 'css/display.css' %}">
+
   </head>
+
+<style>
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: minmax(100px, auto);
+}
+.dropdownbg {
+  background-color: rgb(250, 227, 99);
+  grid-column-start: 1;
+  grid-row-start: 1;
+  grid-row-end: 8;
+}
+.one {
+  grid-column: 1;
+  grid-row: 1;
+  padding-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.two {
+  grid-column: 1;
+  grid-row: 2;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.three {
+  grid-column: 1;
+  grid-row: 3;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.four {
+  grid-column: 1;
+  grid-row: 4;
+}
+.five {
+  grid-column: 1;
+  grid-row: 5;
+}
+.six {
+  grid-column: 1;
+  grid-row: 6;
+}
+
+input, select {
+    display: inline-block;
+    width: 10em;
+}
+label {
+    display: inline-block;
+    width: 10em;
+    color: rgb(15, 47, 111);
+    text-align:center;
+}
+
+</style> 
 
 
 <body>
   {% csrf_token %}
 
-   <div class="col-md-6">
-    <div class="form-group">
-      <label for="inputStatus">Simple</label>
-    <select class="selectpicker" data-show-subtext="true" data-live-search="true" >
-      <option data-tokens="name">name</option>
-      <option data-tokens="family">family</option>
-    </select>
-    </div>
-  </div>
 
-  <!-- Drop down for court -->
-  <div class="col-md-6">
-    <div class="form-group">
-      <label for="inputStatus">Court</label>
-      <select id="court-dropdown" name="court-dropdown" class="form-control-sm custom-select" method="get" multiple>
-        <option selected disabled>Choose court(s)</option>
-        {% for court in courts %}
-        <option id="{{court}}" value="{{court}}">{{court}}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </div>
+  <div class="wrapper">
 
-  <!-- Drop down for year -->
-  <div class="col-md-6">
-    <div class="form-group">
-      <label for="inputStatus">Year</label>
-      <select id="year-dropdown" name="year-dropdown" class="form-control-sm custom-select" method="get" multiple>
-        <option selected disabled>Choose year(s)</option>
-        {% for year in years %}
-        <option id="{{court}}" value="{{court}}">{{year}}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </div>
+    <div class="dropdownbg">
 
-  <!-- Drop down for question -->
-  <div class="col-md-6">
-    <div class="form-group">
-      <label for="inputStatus">Question</label>
-      <select id="question-dropdown" class="selectpicker" name="question-dropdown" data-show-subtext="true" data-live-search="true">
-        <option data-tokens="Choose a question" selected disabled>Choose a question</option>
-      </select>
-    </div>
-  </div>
+      <!-- Drop down for court -->
+      <div class="one">
+        <div class="form-group">
+          <label for="inputStatus">Court </label>
+          <select id="court-dropdown" name="court-dropdown" class="form-control-sm custom-select" method="get" multiple>
+            <option selected disabled>Choose court(s)</option>
+            {% for court in courts %}
+            <option id="{{court}}" value="{{court}}">{{court}}</option>
+            {% endfor %}
+          </select>
+        
+        </div>
+      </div>
 
+      <!-- Drop down for year -->
+      <div class="two">
+        <div class="form-group">
+          <label for="inputStatus">Year </label>
+          <select id="year-dropdown" name="year-dropdown" class="form-control-sm custom-select" method="get" multiple>
+            <option selected disabled>Choose year(s)</option>
+            {% for year in years %}
+            <option id="{{court}}" value="{{court}}">{{year}}</option>
+            {% endfor %}
+          </select>
+        
+        </div>
+      </div>
+
+      <!-- Drop down for question -->
+      <div class="three">
+        <div class="form-group">
+          <label for="inputStatus">Question </label>
+          <select id="question-dropdown" class="selectpicker" name="question-dropdown" data-show-subtext="true" data-live-search="true">
+            <option data-tokens="Choose a question" selected disabled>Choose a question</option>
+          </select>
+        
+        </div>
+      </div>
+    </div>
+
+    <div class="bokeh_div">
+      html
+    </div>
+
+
+
+  </div>
+ 
 
   {% block javascript %}
   <!-- <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script> -->
@@ -144,8 +216,11 @@
   </script>
 
 
+
   {% endblock javascript %}
 
 </body>
 
 </html>
+
+ {% endblock %}

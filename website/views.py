@@ -20,6 +20,11 @@ from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFor
 from bokeh.palettes import Spectral6, Category20c
 from bokeh.transform import factor_cmap, cumsum
 
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.plotting import figure
+from bokeh.sampledata.autompg import autompg_clean as df
+from bokeh.transform import factor_cmap
+
 from django.http import JsonResponse
 import json
 import pandas as pd
@@ -93,6 +98,20 @@ def plot(request):
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
+def bennett_bokeh(request):
+
+ 
+   #create a plot
+    plot = figure(plot_width=400, plot_height=400)
+ 
+   # add a circle renderer with a size, color, and alpha
+ 
+    plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
+ 
+    script, div = components(plot)
+ 
+    return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
+
 # do pie chart here with bokeh
 def pretrial(request):
     print('made')
@@ -136,7 +155,7 @@ def get_years_ajax(request):
             # get unique
             final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
 
-            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids)
+            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
         except Exception as e:
             print(e)
             print("ERROR")
@@ -149,20 +168,25 @@ def get_questions_ajax(request):
     if request.method == "GET":
     
         try:
-
+            print(request)
             courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
             # get all survey ids that have court id in courts_selected
             survey_ids_list_from_courts_selected = [s.survey_id for s in list(courts_selected)]
 
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
+            print('made0')
+            print(request.GET['years'])
             years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+            print('made1')
             survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
+            print('made2')
 
             # get unique
             final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
+            print('made3')
 
-            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids)
+            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
             print(questions_to_display[0].question_text)
 
         except Exception as e:
