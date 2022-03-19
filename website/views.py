@@ -33,6 +33,8 @@ import psycopg2
 
 from collections import Counter
 
+from .process_questions_generate_graphs import *
+
 
 def index(request):
     return HttpResponse('yo')
@@ -142,19 +144,19 @@ def get_years_ajax(request):
     '''This function gets executed when Court drop down on display/ page clicked'''
     if request.method == "GET":
         try:
-            courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+            surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
             # if any of the selected courts have an instance with year x, year x in this query set; else, not in
             # THESE ARE THE YEARS TO DISPLAY on drop down BASED ON selected courts
-            years_to_display = courts_selected.order_by('survey_year').distinct()
+            years_to_display = surveys_with_courts_selected.order_by('survey_year').distinct()
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
 
-            years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+            surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
             #survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
 
             # get unique
             #final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
-            questions_to_display = Question.objects.filter(survey__in=years_selected & courts_selected).distinct()
+            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
             #questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
         except Exception as e:
             print(e)
@@ -169,17 +171,17 @@ def get_questions_ajax(request):
     
         try:
             print(request)
-            courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+            surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
         
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
             print('made0')
             print(request.GET['years'])
-            years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+            surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
 
             print('made2')
 
-            questions_to_display = Question.objects.filter(survey__in=years_selected & courts_selected).distinct()
+            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
             print(questions_to_display[0].question_text)
 
         except Exception as e:
@@ -189,9 +191,33 @@ def get_questions_ajax(request):
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
+def get_graphs_ajax(request):
+    if request.method == "GET":
+        print("in graphs")
+        question_1_str = json.loads(request.GET['question_1'])
+        question_1_selected = Question.objects.filter(question_text=question_1_str)
+        question_1_selected_unique = question_1_selected[0]
+        print(question_1_selected_unique)
+
+        allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
+        data = {"graph_type":v for v in allowable_graph_types}
+        print(data)
+        return JsonResponse([data], safe=False)
+
 def process_generate(request):
     if request.method == "GET":
-        print("IN BENNETT BOKEH")
+        question_1_str = json.loads(request.GET['question_1'])
+        question_1_selected = Question.objects.filter(question_text=question_1_str)
+        question_1_selected_unique = question_1_selected[0]
+        print(question_1_selected_unique)
+
+        allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
+
+        for q in question_1_selected:
+            pass
+
+        question_1_selected_unique.response_set.all().values('choice_text')
+        
      
        #create a plot
         plot = figure(plot_width=400, plot_height=400)

@@ -80,7 +80,8 @@
         </div>
       </div>
 
-      <!-- Drop down for question 1-->
+
+      <!-- Drop down for question 2-->
       <div class="four">
         <div class="form-group">
           <label for="inputStatus">Question 2</label>
@@ -91,7 +92,22 @@
         </div>
       </div>
 
+
+      <!-- Drop down for chart type -->
       <div class="five">
+        <div class="form-group">
+          <label for="inputStatus">Year </label>
+          <select id="chart-dropdown" name="chart-dropdown" class="form-control-sm custom-select" method="get" multiple>
+            <option selected disabled>Choose chart type</option>
+
+          </select>
+        
+        </div>
+      </div>
+
+
+
+      <div class="six">
         <button id="gen-button" name="generate-graph" class="gen-button">View Graph</button>
       </div>
     </div>
@@ -125,7 +141,7 @@
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
           $('select[name=question-dropdown-1]').selectpicker();
-          $('select[name=question-dropdown-1]').selectpicker();
+          $('select[name=question-dropdown-2]').selectpicker();
 
           $.ajax({                       // initialize an AJAX request
               type: "get",
@@ -138,6 +154,7 @@
               success: function (data) {   // `data` is from `get_topics_ajax` view function
                   let html_data_years = '<option value="">---------</option>';
                   let html_data_questions = '<option data-tokens="" value="">---------</option>';
+                  console.log(data);
                   data.forEach(function (data) {
                       if (data.hasOwnProperty('survey_year')) {
                         html_data_years += `<option value="${data.survey_year}">${JSON.stringify(data.survey_year)}</option>`
@@ -149,7 +166,8 @@
                   $('select[name=year-dropdown]').html(html_data_years); // replace the contents of the year input with the data that came from the server
                   $('select[name=question-dropdown-1]').html(html_data_questions); // likewise for questions
                   $('select[name=question-dropdown-2]').html(html_data_questions);
-                  $('.selectpicker').selectpicker('refresh'); // because the questions dropdown is searchable (selectpicker) we have to refresh it
+                  $('select[name=question-dropdown-1]').selectpicker('refresh');
+                  $('select[name=question-dropdown-2]').selectpicker('refresh'); // because the questions dropdown is searchable (selectpicker) we have to refresh it
 
               }
 
@@ -160,6 +178,8 @@
   <script >
     // whenever year-dropdown is changed (i.e. clicked), execute this
     $('select[name=year-dropdown]').change(function () {
+          $('select[name=question-dropdown-1]').selectpicker();
+          $('select[name=question-dropdown-2]').selectpicker();
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
           $.ajax({                       // initialize an AJAX request
@@ -172,20 +192,63 @@
               },
               success: function (data) {   // `data` is from `get_topics_ajax` view function
                   let html_data_questions = '<option data-tokens="" value="">---------</option>';
+                  console.log(data);
                   data.forEach(function (data) {
 
                       if (data.hasOwnProperty('question_text')) {
-                        html_data_questions += `<option data-tokens="${JSON.stringify(data.question_text)}" >${JSON.stringify(data.question_text)}</option>`
+                        html_data_questions += `<option data-tokens="${JSON.stringify(data.question_text)} value="${data.question_text}"" >${JSON.stringify(data.question_text)}</option>`
                       }
                   });
                   $('select[name=question-dropdown-1]').html(html_data_questions);
+                  $('select[name=question-dropdown-1]').selectpicker('refresh');
                   $('select[name=question-dropdown-2]').html(html_data_questions);
+                  $('select[name=question-dropdown-2]').selectpicker('refresh');
 
               }
             
           });
         
-        $('.selectpicker').selectpicker('refresh');
+        
+        //
+      });
+  </script>
+
+  <script >
+    // whenever question-dropdown-1 is changed (i.e. clicked), execute this
+    $('select[name=question-dropdown-1]').change(function () {
+          const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
+          const year_s = $('select[name=year-dropdown]').val();
+          const question_1 = $('select[name=question-dropdown-1').val();
+          const question_2 = $('select[name=question-dropdown-2').val();
+          $.ajax({                       // initialize an AJAX request
+              type: "get",
+              url: '{% url "website:get_graphs_ajax" %}',
+              data: {
+                  'courts': JSON.stringify(court_s),
+                  'years': JSON.stringify(year_s),
+                  'question_1': JSON.stringify(question_1),
+                  'question_2': JSON.stringify(question_2)
+                  //'csrfmiddlewaretoken':$('input[name=csrfmiddlewaretoken]').val(),
+              },
+              success: function (data) {   // `data` is from `get_topics_ajax` view function
+                  console.log("in success function");
+                  console.log(data);
+
+                  let html_data_graphs = '<option value="">---------</option>';
+                  data.forEach(function (data) {
+                    console.log(data.graph_type);
+                    html_data_graphs += `<option value="${JSON.stringify(data.graph_type)}">${data.graph_type}</option>`
+
+                  });
+                  $('select[name=chart-dropdown]').html(html_data_graphs);
+
+
+              }
+            
+          });
+        
+        
+        //
       });
   </script>
 
@@ -196,7 +259,7 @@
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
       const question_1 = $('select[name=question-dropdown-1').val();
-      const question_2 = $('select[name=question-dropdown-1').val();
+      const question_2 = $('select[name=question-dropdown-2').val();
       console.log("in click function");
       $.ajax({
         type: "get",

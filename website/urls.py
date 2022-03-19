@@ -12,6 +12,7 @@ urlpatterns = [
     path('survey-dashboard/', views.survey_dashboard, name='survey_dashboard'),
     path('get-questions-ajax/', views.get_questions_ajax, name="get_questions_ajax"),
     path('get-years-ajax/', views.get_years_ajax, name="get_years_ajax"),
+    path('get-graphs-ajax/', views.get_graphs_ajax, name="get_graphs_ajax"),
     path('bennett-bokeh/', views.bennett_bokeh, name="bennett_bokeh"),
     path('process-generate/', views.process_generate, name="process_generate"),
     #path('', views.index, name='index'),

@@ -44,11 +44,13 @@
   grid-row: 5;
   padding-left: 20px;
   padding-right: 20px;
-  padding-top: 15px;
 }
 .six {
   grid-column: 1;
   grid-row: 6;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 15px;
 }
 
 input, select {
