@@ -132,11 +132,11 @@ def pretrial(request):
 def afford_bond(request):
     pass
 
-def display(request):
+def survey_dashboard(request):
     # this shouldnt be hard coded
     years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
-    return render(request, 'website/display.html', context)
+    return render(request, 'website/survey_dashboard.html', context)
 
 def get_years_ajax(request):
     '''This function gets executed when Court drop down on display/ page clicked'''
@@ -197,6 +197,22 @@ def get_questions_ajax(request):
             print("ERROR")
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
+
+def process_generate(request):
+    if request.method == "GET":
+        print("IN BENNETT BOKEH")
+     
+       #create a plot
+        plot = figure(plot_width=400, plot_height=400)
+     
+       # add a circle renderer with a size, color, and alpha
+     
+        plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
+     
+        script, div = components(plot)
+     
+        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
+        return JsonResponse({'script': script, 'div': div})
 
 
 

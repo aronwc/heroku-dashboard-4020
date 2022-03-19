@@ -7,12 +7,9 @@
 
 
 
-
-
-
 <head>
     
-    <title>Dashboard</title>
+    <title>Survey Dashboard</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -28,7 +25,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
 
-    <link rel="stylesheet" type="text/css" href="{% static 'website/css/display.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'website/css/survey_dashboard.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/base_template.css' %}">
 
 
@@ -72,18 +69,29 @@
         </div>
       </div>
 
-      <!-- Drop down for question -->
+      <!-- Drop down for question 1-->
       <div class="three">
         <div class="form-group">
-          <label for="inputStatus">Question </label>
-          <select id="question-dropdown" class="selectpicker" name="question-dropdown" data-show-subtext="true" data-live-search="true">
+          <label for="inputStatus">Question 1</label>
+          <select id="question-dropdown-1" class="selectpicker" name="question-dropdown-1" data-show-subtext="true" data-live-search="true">
             <option data-tokens="Choose a question" selected disabled>Choose a question</option>
           </select>
         
         </div>
       </div>
 
+      <!-- Drop down for question 1-->
       <div class="four">
+        <div class="form-group">
+          <label for="inputStatus">Question 2</label>
+          <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
+            <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
+          </select>
+        
+        </div>
+      </div>
+
+      <div class="five">
         <button id="gen-button" name="generate-graph" class="gen-button">View Graph</button>
       </div>
     </div>
@@ -116,7 +124,8 @@
     $('select[name=court-dropdown]').change(function () {
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
-          $('select[name=question-dropdown]').selectpicker();
+          $('select[name=question-dropdown-1]').selectpicker();
+          $('select[name=question-dropdown-1]').selectpicker();
 
           $.ajax({                       // initialize an AJAX request
               type: "get",
@@ -138,7 +147,8 @@
                       }
                   });
                   $('select[name=year-dropdown]').html(html_data_years); // replace the contents of the year input with the data that came from the server
-                  $('select[name=question-dropdown]').html(html_data_questions); // likewise for questions
+                  $('select[name=question-dropdown-1]').html(html_data_questions); // likewise for questions
+                  $('select[name=question-dropdown-2]').html(html_data_questions);
                   $('.selectpicker').selectpicker('refresh'); // because the questions dropdown is searchable (selectpicker) we have to refresh it
 
               }
@@ -168,9 +178,8 @@
                         html_data_questions += `<option data-tokens="${JSON.stringify(data.question_text)}" >${JSON.stringify(data.question_text)}</option>`
                       }
                   });
-                  $('select[name=question-dropdown]').html(html_data_questions);
-
-                  
+                  $('select[name=question-dropdown-1]').html(html_data_questions);
+                  $('select[name=question-dropdown-2]').html(html_data_questions);
 
               }
             
@@ -184,12 +193,20 @@
     document.getElementById("gen-button").onclick = function() {genButtonClickFunction()};
 
     function genButtonClickFunction() {
-      let html = `<h1>CLICKED</h1>`;
-      $('div[name=bokeh-div]').html(html);
+      const court_s = $('select[name=court-dropdown]').val();  
+      const year_s = $('select[name=year-dropdown]').val();
+      const question_1 = $('select[name=question-dropdown-1').val();
+      const question_2 = $('select[name=question-dropdown-1').val();
       console.log("in click function");
       $.ajax({
         type: "get",
-        url: '{% url "website:bennett_bokeh" %}',
+        url: '{% url "website:process_generate" %}',
+        data: {
+          'courts': JSON.stringify(court_s),
+          'years': JSON.stringify(year_s),
+          'question_1': JSON.stringify(question_1),
+          'question_2': JSON.stringify(question_2)
+        },
         success: function(result) {
           var bokeh_data = result;
           $('div[name=bokeh-div]').html(bokeh_data.div);
