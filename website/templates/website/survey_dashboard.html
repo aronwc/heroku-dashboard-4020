@@ -96,7 +96,7 @@
       <!-- Drop down for chart type -->
       <div class="five">
         <div class="form-group">
-          <label for="inputStatus">Year </label>
+          <label for="inputStatus">Chart Type </label>
           <select id="chart-dropdown" name="chart-dropdown" class="form-control-sm custom-select" method="get" multiple>
             <option selected disabled>Choose chart type</option>
 
@@ -260,6 +260,7 @@
       const year_s = $('select[name=year-dropdown]').val();
       const question_1 = $('select[name=question-dropdown-1').val();
       const question_2 = $('select[name=question-dropdown-2').val();
+      const chart_type = $('select[name=chart-dropdown').val();
       console.log("in click function");
       $.ajax({
         type: "get",
@@ -268,7 +269,8 @@
           'courts': JSON.stringify(court_s),
           'years': JSON.stringify(year_s),
           'question_1': JSON.stringify(question_1),
-          'question_2': JSON.stringify(question_2)
+          'question_2': JSON.stringify(question_2),
+          'chart_type': JSON.stringify(chart_type)
         },
         success: function(result) {
           var bokeh_data = result;

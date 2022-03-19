@@ -200,9 +200,10 @@ def get_graphs_ajax(request):
         print(question_1_selected_unique)
 
         allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
-        data = {"graph_type":v for v in allowable_graph_types}
+        print(allowable_graph_types)
+        data = [{"graph_type":str(v)} for v in allowable_graph_types]
         print(data)
-        return JsonResponse([data], safe=False)
+        return JsonResponse(data, safe=False)
 
 def process_generate(request):
     if request.method == "GET":
@@ -211,22 +212,11 @@ def process_generate(request):
         question_1_selected_unique = question_1_selected[0]
         print(question_1_selected_unique)
 
-        allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
+        graph_type = json.loads(request.GET['chart_type'])
 
-        for q in question_1_selected:
-            pass
+        ''' I NEED CODE RIGHT HERE THAT MAPS SELECTED GRAPH_TYPE TO A CLASS RATHER THAN JUST DOING BARCHART LIKE BELOW'''
 
-        question_1_selected_unique.response_set.all().values('choice_text')
-        
-     
-       #create a plot
-        plot = figure(plot_width=400, plot_height=400)
-     
-       # add a circle renderer with a size, color, and alpha
-     
-        plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
-     
-        script, div = components(plot)
+        script, div = BarChart.generate(question_1_selected)
      
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})
