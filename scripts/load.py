@@ -1,6 +1,13 @@
-<<<<<<< HEAD
 '''
 File to initially load data from csv's into models
+
+'''
+'''
+CLEAN QUESTIONS BEFORE ADDING TO DATABASE
+	- CLEAN QUESTION_TEXT
+	- NEW COLUMN FOR CLUSTERS
+
+maybe new columns for ethnicity/race, judge
 
 '''
 

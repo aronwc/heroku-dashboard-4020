@@ -1,13 +1,14 @@
-{% extends "./base.html" %}
+{% extends "./base_template.html" %}
 
 {% load static %}
+<html>
 {% block content %}
 <!DOCTYPE html>
 
 
 
 
-<html>
+
 
 <head>
     
@@ -27,74 +28,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
 
+    <link rel="stylesheet" type="text/css" href="{% static 'website/css/display.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'website/css/base_template.css' %}">
 
-  </head>
 
-<style>
 
-.wrapper {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-auto-rows: minmax(100px, auto);
-}
-.dropdownbg {
-  background-color: rgb(250, 227, 99);
-  grid-column-start: 1;
-  grid-row-start: 1;
-  grid-row-end: 8;
-}
-.one {
-  grid-column: 1;
-  grid-row: 1;
-  padding-top: 30px;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-.two {
-  grid-column: 1;
-  grid-row: 2;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-.three {
-  grid-column: 1;
-  grid-row: 3;
-  padding-left: 20px;
-  padding-right: 20px;
-}
-.four {
-  grid-column: 1;
-  grid-row: 4;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 15px;
-}
-.gen-button {
-  background-color: rgb(15, 47, 111);
-  color: white;
-  padding: 12px 20px;
-}
-.five {
-  grid-column: 1;
-  grid-row: 5;
-}
-.six {
-  grid-column: 1;
-  grid-row: 6;
-}
-
-input, select {
-    display: inline-block;
-    width: 10em;
-}
-label {
-    display: inline-block;
-    width: 10em;
-    color: rgb(15, 47, 111);
-    text-align:center;
-}
-
-</style> 
+</head>
 
 
 <body>
@@ -156,12 +95,16 @@ label {
 
 
   </div>
+
+
 </body>
 
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.4.2.min.js"></script>
+
+
 
  
 
@@ -263,7 +206,6 @@ label {
   {% endblock javascript %}
 
 
-
+ {% endblock %}
 </html>
 
- {% endblock %}
