@@ -90,7 +90,7 @@ DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
-        'NAME': 'cwnola_bennett',
+        'NAME': 'cwn_dashboard',
         'USER': 'bennett',
         'PASSWORD': 'django_tut_you_cant_guess123',
 

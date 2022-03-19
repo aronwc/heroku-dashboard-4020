@@ -143,21 +143,19 @@ def get_years_ajax(request):
     if request.method == "GET":
         try:
             courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-            # get all survey ids that have court id in courts_selected
-            survey_ids_list_from_courts_selected = [s.survey_id for s in list(courts_selected)]
             # if any of the selected courts have an instance with year x, year x in this query set; else, not in
             # THESE ARE THE YEARS TO DISPLAY on drop down BASED ON selected courts
-            years_to_display = Survey.objects.filter(survey_id__in=survey_ids_list_from_courts_selected).order_by('survey_year').distinct()
+            years_to_display = courts_selected.order_by('survey_year').distinct()
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
 
             years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
+            #survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
 
             # get unique
-            final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
-
-            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
+            #final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
+            questions_to_display = Question.objects.filter(survey__in=years_selected & courts_selected).distinct()
+            #questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
         except Exception as e:
             print(e)
             print("ERROR")
@@ -172,23 +170,16 @@ def get_questions_ajax(request):
         try:
             print(request)
             courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-            # get all survey ids that have court id in courts_selected
-            survey_ids_list_from_courts_selected = [s.survey_id for s in list(courts_selected)]
-
+        
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
             print('made0')
             print(request.GET['years'])
             years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            print('made1')
-            survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
+
             print('made2')
 
-            # get unique
-            final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
-            print('made3')
-
-            questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
+            questions_to_display = Question.objects.filter(survey__in=years_selected & courts_selected).distinct()
             print(questions_to_display[0].question_text)
 
         except Exception as e:
