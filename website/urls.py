@@ -6,7 +6,7 @@ app_name = 'website'
 urlpatterns = [
 
 
-    path('', views.index, name='index'),
+    path('', views.survey_dashboard, name='survey_dashboard'),
     path("graph/", views.plot, name="graph"),
     path('pretrial/', views.pretrial, name='pretrial'),
     path('survey-dashboard/', views.survey_dashboard, name='survey_dashboard'),
@@ -20,7 +20,6 @@ urlpatterns = [
     path("firsttest", views.plot, name="dashboard"),
     path("test", views.test, name="dashboard"),
     path("dockets", views.psql, name="Query"),
-    path('dockets-dashboard/', views.dockets_dashboard, name='dockets_dashboard'),
 
     path("pretrial", views.pretrial, name='pretrial')
 
