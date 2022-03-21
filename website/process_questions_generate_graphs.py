@@ -4,7 +4,7 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 import requests
-from bokeh.palettes import Spectral6, Category20c
+from bokeh.palettes import Spectral6, Category20c, Magma, Inferno, Plasma, Viridis
 from bokeh.transform import factor_cmap, cumsum
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
@@ -24,17 +24,18 @@ class BarChart:
 			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
-		print(counter)
+		#print(counter)
 
 		choices = list(counter.keys())
 		counts = list(counter.values())
+		choices_len = len(choices)
 
-		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Spectral6))
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color = Viridis[choices_len]))
 
-		p = figure(x_range=choices, y_range=(0,9), height=250, title=str(question_query_set[0]),
-		           toolbar_location=None, tools="")
+		p = figure(x_range=choices, height=250, title=str(question_query_set[0]),
+		           toolbar_location=None, tools="hover", tooltips="@choices=@counts")
 
-		p.vbar(x='choices', top='counts', width=0.9, color='color', legend_field="choices", source=source)
+		p.vbar(x='choices', top='counts', width=0.9, color = 'color', legend_field="choices", source=source)
 
 		p.xgrid.grid_line_color = None
 		p.legend.orientation = "horizontal"
