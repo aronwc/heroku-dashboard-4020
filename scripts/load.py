@@ -25,7 +25,7 @@ def run():
 	# Question.objects.all().delete()
 	# ResponseOptions.objects.all().delete()
 	# Survey.objects.all().delete()
-	#DocketCharge.objects.all().delete()
+	DocketCharge.objects.all().delete()
 	DocketProceeding.objects.all().delete()
 
 
@@ -37,7 +37,7 @@ def run():
 
 	#surveys_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_surveys.csv', encoding='latin1')
 
-	#all_dockets_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+	all_dockets_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
 	all_proceedings_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
 
@@ -104,17 +104,17 @@ def run():
 	# print("Done ResponseOptions {}".format('\n'*3))
 
 	
-	# print("Beginning Dockets")
+	print("Beginning Dockets")
 
-	# for index, row in all_dockets_df.iterrows():
-	# 	print(list(row)[5])
-	# 	fields = list(row)
-	# 	correct_date = datetime.strptime(fields[7], "%m/%d/%Y")
-	# 	tz_aware_date = pytz.timezone('US/Central').localize(correct_date) # best practice to have timezone aware dates
-	# 	DocketCharge.objects.create(mag_num=fields[0], defendant=fields[1], judge=fields[2], 
-	# 							count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
-	# 							date=tz_aware_date)
-	# print("Finished Dockets")
+	for index, row in all_dockets_df.iterrows():
+		print(list(row)[5])
+		fields = list(row)
+		correct_date = datetime.strptime(fields[7], "%m/%d/%Y")
+		tz_aware_date = pytz.timezone('US/Central').localize(correct_date) # best practice to have timezone aware dates
+		DocketCharge.objects.create(mag_num=fields[0], defendant=fields[1], judge=fields[2], 
+								count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
+								date=tz_aware_date)
+	print("Finished Dockets")
 	# print("Beginning Proceedings")
 	# for index, row in all_proceedings_df.iterrows():
 	# 	print(list(row)[0], list(row)[1])
