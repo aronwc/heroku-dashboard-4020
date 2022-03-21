@@ -20,11 +20,20 @@ from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFor
 from bokeh.palettes import Spectral6, Category20c
 from bokeh.transform import factor_cmap, cumsum
 
+from bokeh.models import ColumnDataSource, HoverTool
+from bokeh.plotting import figure
+from bokeh.sampledata.autompg import autompg_clean as df
+from bokeh.transform import factor_cmap
+
 from django.http import JsonResponse
 import json
 import pandas as pd
 import numpy as np
 import psycopg2
+
+from collections import Counter
+
+from .process_questions_generate_graphs import *
 
 
 def index(request):
@@ -91,6 +100,22 @@ def plot(request):
 
     return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
+def bennett_bokeh(request):
+    if request.method == "GET":
+        print("IN BENNETT BOKEH")
+     
+       #create a plot
+        plot = figure(plot_width=400, plot_height=400)
+     
+       # add a circle renderer with a size, color, and alpha
+     
+        plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
+     
+        script, div = components(plot)
+     
+        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
+        return JsonResponse({'script': script, 'div': div})
+
 # do pie chart here with bokeh
 def pretrial(request):
     print('made')
@@ -109,30 +134,94 @@ def pretrial(request):
 def afford_bond(request):
     pass
 
-def display(request):
+def survey_dashboard(request):
     # this shouldnt be hard coded
     years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
-    return render(request, 'website/display.html', context)
+    return render(request, 'website/survey_dashboard.html', context)
 
-def get_topics_ajax(request):
+def get_years_ajax(request):
+    '''This function gets executed when Court drop down on display/ page clicked'''
+    if request.method == "GET":
+        try:
+            surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+            # if any of the selected courts have an instance with year x, year x in this query set; else, not in
+            # THESE ARE THE YEARS TO DISPLAY on drop down BASED ON selected courts
+            years_to_display = surveys_with_courts_selected.order_by('survey_year').distinct()
+            # these are the years that have been/are selected
+            # this might need to be changed to survey start date
+
+            surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+            #survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
+
+            # get unique
+            #final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
+            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
+            #questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
+        except Exception as e:
+            print(e)
+            print("ERROR")
+            return HttpResponse('yo')
+        return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_text')), safe=False)
+
+
+def get_questions_ajax(request):
+    '''This function gets executed when Year drop down on display/ page clicked'''
     if request.method == "GET":
     
         try:
+            print(request)
+            surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+        
+            # these are the years that have been/are selected
+            # this might need to be changed to survey start date
+            print('made0')
+            print(request.GET['years'])
+            surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
 
-            # get a QuerySet returning all entries of Survey table that have court.id = to selected court
-            court = Survey.objects.filter(court_id=json.loads(request.GET['court_id']))
+            print('made2')
 
+            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
+            print(questions_to_display[0].question_text)
 
-            survey_ids_list = [s.survey_id for s in list(court)]
-
-            questions = Question.objects.filter(survey_id__in=survey_ids_list)
-            #print(list(questions.values('question_text')))
-
-        except Exception:
+        except Exception as e:
             #data['error_message'] = 'error'
-            return HttpResponse(yo)
-        return JsonResponse(list(questions.values('question_text')), safe=False)
+            print(e)
+            print("ERROR")
+            return HttpResponse('yo')
+        return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
+
+def get_graphs_ajax(request):
+    if request.method == "GET":
+        print("in graphs")
+        question_1_str = json.loads(request.GET['question_1'])
+        question_1_selected = Question.objects.filter(question_text=question_1_str)
+        question_1_selected_unique = question_1_selected[0]
+        print(question_1_selected_unique)
+
+        allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
+        print(allowable_graph_types)
+        data = [{"graph_type":str(v)} for v in allowable_graph_types]
+        print(data)
+        return JsonResponse(data, safe=False)
+
+def process_generate(request):
+    if request.method == "GET":
+        question_1_str = json.loads(request.GET['question_1'])
+        question_1_selected = Question.objects.filter(question_text=question_1_str)
+        question_1_selected_unique = question_1_selected[0]
+        print(question_1_selected_unique)
+
+        graph_type = json.loads(request.GET['chart_type'])
+
+        ''' I NEED CODE RIGHT HERE THAT MAPS SELECTED GRAPH_TYPE TO A CLASS RATHER THAN JUST DOING BARCHART LIKE BELOW'''
+
+        script, div = BarChart.generate(question_1_selected)
+     
+        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
+        return JsonResponse({'script': script, 'div': div})
+
+
 
 def psql(request):
     

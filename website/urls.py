@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 app_name = 'website'
 urlpatterns = [
@@ -8,16 +9,12 @@ urlpatterns = [
     path('', views.index, name='index'),
     path("graph/", views.plot, name="graph"),
     path('pretrial/', views.pretrial, name='pretrial'),
-    path('display/', views.display, name='display'),
-    path('get-topics-ajax/', views.get_topics_ajax, name="get_topics_ajax"),
-
-    # path('', views.index, name='index'),
-    # path("graph/", views.plot, name="graph"),
-    # path('pretrial/', views.pretrial, name='pretrial'),
-    # path('display/', views.display, name='display'),
-    # path('get-topics-ajax/', views.get_topics_ajax, name="get_topics_ajax"),
-
-
+    path('survey-dashboard/', views.survey_dashboard, name='survey_dashboard'),
+    path('get-questions-ajax/', views.get_questions_ajax, name="get_questions_ajax"),
+    path('get-years-ajax/', views.get_years_ajax, name="get_years_ajax"),
+    path('get-graphs-ajax/', views.get_graphs_ajax, name="get_graphs_ajax"),
+    path('bennett-bokeh/', views.bennett_bokeh, name="bennett_bokeh"),
+    path('process-generate/', views.process_generate, name="process_generate"),
     #path('', views.index, name='index'),
     path("firsttest", views.plot, name="dashboard"),
     path("test", views.test, name="dashboard"),
@@ -28,3 +25,5 @@ urlpatterns = [
     #path("upload-csv/", views.psql, name="responses_test"),
 
 ]
+
+urlpatterns += staticfiles_urlpatterns()
