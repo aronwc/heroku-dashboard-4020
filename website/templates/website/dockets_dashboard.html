@@ -1,0 +1,65 @@
+{% extends "./base_template.html" %}
+
+{% load static %}
+<html>
+{% block content %}
+<!DOCTYPE html>
+
+
+
+<head>
+    
+    <title>Survey Dashboard</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-2.4.2.min.css"rel="stylesheet" type="text/css">
+    <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.4.2.min.css" rel="stylesheet" type="text/css">
+    
+    <link rel="stylesheet "type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+
+
+    <link rel="stylesheet" type="text/css" href="{% static 'website/css/survey_dashboard.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'website/css/base_template.css' %}">
+
+
+
+</head>
+
+
+<body>
+  {% csrf_token %}
+
+  <div class="wrapper">
+
+
+
+  </div>
+
+
+</body>
+
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.4.2.min.js"></script>
+
+
+
+ 
+
+  {% block javascript %}
+  <!-- <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script> -->
+
+
+  {% endblock javascript %}
+
+
+ {% endblock %}
+</html>
