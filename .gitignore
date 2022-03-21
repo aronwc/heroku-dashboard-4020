@@ -9,4 +9,5 @@ getting-started/*
 .env
 
 scripts/data
+gettingstarted/settings.py
 
