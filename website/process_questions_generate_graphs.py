@@ -3,20 +3,12 @@ from website.models import Response, Question, ResponseOptions, Survey
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6
-from bokeh.transform import factor_cmap
-#from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
-from bokeh.plotting import figure, output_file, show
-from bokeh.embed import components
-from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6, Category20c
 from bokeh.transform import factor_cmap, cumsum
-
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
-from bokeh.transform import factor_cmap
 
 class BarChart:
 	''' 
