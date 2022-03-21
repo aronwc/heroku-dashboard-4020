@@ -140,6 +140,10 @@ def survey_dashboard(request):
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
     return render(request, 'website/survey_dashboard.html', context)
 
+def dockets_dashboard(request):
+    context = dict()
+    return render(request, 'website/dockets_dashboard.html', context)
+
 def get_years_ajax(request):
     '''This function gets executed when Court drop down on display/ page clicked'''
     if request.method == "GET":
