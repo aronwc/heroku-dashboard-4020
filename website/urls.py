@@ -18,7 +18,7 @@ urlpatterns = [
     #path('', views.index, name='index'),
     path("firsttest", views.plot, name="dashboard"),
     path("test", views.test, name="dashboard"),
-    path("", views.psql, name="Query"),
+    path("dockets", views.psql, name="Query"),
 
     path("pretrial", views.pretrial, name='pretrial')
 
