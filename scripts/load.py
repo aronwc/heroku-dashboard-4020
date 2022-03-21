@@ -41,6 +41,14 @@ def run():
 
 	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
 
+
+	'''
+	
+	Use question_nlp.py to perform NLP for cleaning and similairty generation
+
+
+	'''
+
 	# SURVEYS
 	# --------
 	# WORKS

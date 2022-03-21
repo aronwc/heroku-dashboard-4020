@@ -199,9 +199,9 @@ def get_graphs_ajax(request):
     if request.method == "GET":
         print("in graphs")
         question_1_str = json.loads(request.GET['question_1'])
+        print(question_1_str)
         question_1_selected = Question.objects.filter(question_text=question_1_str)
-        question_1_selected_unique = question_1_selected[0]
-        print(question_1_selected_unique)
+        print(question_1_selected)
 
         allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
         print(allowable_graph_types)
