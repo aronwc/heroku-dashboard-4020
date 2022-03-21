@@ -31,7 +31,7 @@ def index(request):
 # Create your views here.
 def test(request):
     #return HttpResponse('Hello from Python!')
-    return render(request, "test.html")
+    return render(request, "website/test.html")
 
 def plot(request):
 
