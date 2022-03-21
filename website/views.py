@@ -213,7 +213,11 @@ def process_generate(request):
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})
 
-
+def dockets_dashboard(request):
+    # this shouldnt be hard coded
+    years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
+    context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
+    return render(request, 'website/dockets_dashboard.html', context)
 
 def psql(request):
     

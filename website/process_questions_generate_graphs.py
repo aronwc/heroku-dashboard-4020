@@ -9,6 +9,8 @@ from bokeh.transform import factor_cmap, cumsum
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
+from math import pi
+import pandas as pd
 
 class BarChart:
 	''' 
@@ -28,14 +30,13 @@ class BarChart:
 
 		choices = list(counter.keys())
 		counts = list(counter.values())
-		choices_len = len(choices)
 
-		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color = Viridis[choices_len]))
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color = Viridis[len(choices)]))
 
 		p = figure(x_range=choices, height=250, title=str(question_query_set[0]),
 		           toolbar_location=None, tools="hover", tooltips="@choices=@counts")
 
-		p.vbar(x='choices', top='counts', width=0.9, color = 'color', legend_field="choices", source=source)
+		p.vbar(x='choices', top='counts', width=0.9, color = 'color', source=source) #legend_field="choices"
 
 		p.xgrid.grid_line_color = None
 		p.legend.orientation = "horizontal"
@@ -48,6 +49,33 @@ class BarChart:
 		return "bar"
 
 class PieChart:
+	@classmethod
+	def generate(cls, question_query_set):
+		all_responses = list()
+		for q in question_query_set:
+			all_responses += [r.choice_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_text')
+		counter = Counter(all_responses)
+		#print(counter)
+
+		choices = list(counter.keys())
+		counts = list(counter.values())
+		choices_len = len(choices)
+		
+		plot2 = figure(height=350, title="What is the defendant's pretrial risk score?", 
+		toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
+
+		plot2.wedge(x=0, y=1, radius=0.4,
+		start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'), 
+		line_color="white", fill_color=Viridis[len(choices)], legend_field="possible_responses")
+
+		plot2.axis.axis_label = None
+		plot2.axis.visible = False
+		plot2.grid.grid_line_color = None
+
+		script1, div1 = components(plot2)
+
+		return components(plot2)
 
 	def __str__(self):
 		return "pie"

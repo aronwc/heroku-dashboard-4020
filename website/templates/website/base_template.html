@@ -185,7 +185,10 @@
     <body>
 
 		<div class="header">
-		  <a href="#default" class="logo"><img src="{% static 'website/images/cwnlogo.png' %}" alt="Court Watch Nola Logo"></a>
+		  {% comment %} <a href="#default" class="logo"><img src="{% static 'website/images/cwnlogo.png' %}" alt="Court Watch Nola Logo"></a> {% endcomment %}
+		  <a id="logo" href="https://www.courtwatchnola.org" data-supplied-ml-starting-dark="false" data-supplied-ml-starting="false" data-supplied-ml="false" >
+			<img class="stnd skip-lazy default-logo dark-version" width="120" height="160" alt="Court Watch NOLA" src="https://www.courtwatchnola.org/wp-content/uploads/2021/12/CWN_Primary_BL1x.png" srcset="https://www.courtwatchnola.org/wp-content/uploads/2021/12/CWN_Primary_BL1x.png 1x, https://www.courtwatchnola.org/wp-content/uploads/2021/12/CWN_Primary_BL2x@2x.png 2x" />
+		</a>
 		  <div class="header-right">
 		    <a class="active" href="{% url 'website:survey_dashboard' %}">Survey Dashboard</a>
 		    <a href="{% url 'website:dockets_dashboard' %}">Dockets Dashboard</a>

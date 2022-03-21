@@ -20,6 +20,7 @@ urlpatterns = [
     path("firsttest", views.plot, name="dashboard"),
     path("test", views.test, name="dashboard"),
     path("dockets", views.psql, name="Query"),
+    path('dockets-dashboard/', views.dockets_dashboard, name='dockets_dashboard'),
 
     path("pretrial", views.pretrial, name='pretrial')
 
