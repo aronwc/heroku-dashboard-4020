@@ -21,17 +21,17 @@ from website.models import Response, Question, ResponseOptions, Survey, DocketCh
 def run():
 
 	# delete all initial data
-	#Response.objects.all().delete()
-	#Question.objects.all().delete()
-	#ResponseOptions.objects.all().delete()
-	#Survey.objects.all().delete()
+	Response.objects.all().delete()
+	Question.objects.all().delete()
+	ResponseOptions.objects.all().delete()
+	Survey.objects.all().delete()
 	#DocketCharge.objects.all().delete()
 	#DocketProceeding.objects.all().delete()
 
 
 	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
 
-	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.csv', encoding='latin1', index_col=0)
+	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.with_clusters.csv', encoding='latin1')
 
 	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
 
@@ -65,6 +65,8 @@ def run():
 							survey_part_id=fields[7], survey_observation_level=fields[8],
 							observer_type=fields[9], court_id=fields[10], survey_notes=fields[11])
 	print("Done Surveys {}".format('\n'*3))
+
+
 	print("Beginning Questions")
 	# QUESTIONS
 	# ----------
@@ -73,8 +75,11 @@ def run():
 	for index, row in questions_df.iterrows():
 		fields = [x if type(x) != float else 0 for x in list(row)]
 		Question.objects.create(question_id=fields[0], question_text=fields[1], question_type=fields[2], 
-								question_subtype=fields[3], survey=Survey.objects.get(survey_id=fields[4]))
+								question_subtype=fields[3], survey=Survey.objects.get(survey_id=fields[4]),
+								cluster_id=fields[5])
 	print("Done Questions {}".format('\n'*3))
+
+
 	print("Beginning Responses")
 	# RESPONSES
 	# ----------
@@ -111,8 +116,10 @@ def run():
 
 	print("Done ResponseOptions {}".format('\n'*3))
 
-	'''
 
+
+
+	'''
 	for index, row in all_dockets_df.iterrows():
 		fields = list(row)
 		correct_date = datetime.strptime(fields[7], "%m/%d/%Y")

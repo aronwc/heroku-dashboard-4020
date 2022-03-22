@@ -28,6 +28,9 @@ class BarChart:
 	@classmethod
 	def generate(cls, question_query_set):
 		all_responses = list()
+		print('question_query_set in BarChart.generate: {}'.format(question_query_set))
+		print()
+		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
 			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')

@@ -27,6 +27,7 @@ class Question(models.Model):
 	question_type = models.CharField(max_length=30)
 	question_subtype = models.CharField(max_length=30)
 	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0) # Survey to Question = One to Many
+	cluster_id = models.IntegerField(default=-1)
 	def __str__(self):
 		return str(self.question_text)
 
