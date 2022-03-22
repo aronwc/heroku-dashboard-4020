@@ -4,26 +4,14 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
-import requests
-from website.models import Response, Question, ResponseOptions, Survey 
-from bokeh.plotting import figure, output_file, show
-from bokeh.embed import components
-from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6
-from bokeh.transform import factor_cmap
-#from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
+from website.models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
-from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
+from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker, HoverTool
 from bokeh.palettes import Spectral6, Category20c
 from bokeh.transform import factor_cmap, cumsum
-
-from bokeh.models import ColumnDataSource, HoverTool
-from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
-from bokeh.transform import factor_cmap
 
 from django.http import JsonResponse
 import json
@@ -44,7 +32,7 @@ def index(request):
 # Create your views here.
 def test(request):
     #return HttpResponse('Hello from Python!')
-    return render(request, "test.html")
+    return render(request, "website/test.html")
 
 def plot(request):
 
@@ -99,7 +87,7 @@ def plot(request):
     script1, div1 = components(plot)
     script2, div2 = components(plot2)
 
-    return render(request, 'pages/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
+    return render(request, 'website/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
 def bennett_bokeh(request):
     if request.method == "GET":
@@ -242,7 +230,11 @@ def process_generate(request):
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})
 
-
+def dockets_dashboard(request):
+    # this shouldnt be hard coded
+    years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
+    context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
+    return render(request, 'website/dockets_dashboard.html', context)
 
 def psql(request):
     
@@ -312,7 +304,7 @@ def psql(request):
     script,div = components(plot)
 
     #return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
-    return render(request, 'pages/responses_test.html')
+    return render(request, 'website/responses_test.html')
 
 # do pie chart here with bokeh
 def pretrial(request):
@@ -320,7 +312,7 @@ def pretrial(request):
     #print("list is ", good_qs_list)
     good_qs_ids = [q.question_id for q in list(good_qs_list)]
     #print("id is ", good_qs_ids)
-    good_responses_list = list(Response_new.objects.filter(question_id__in=good_qs_ids))
+    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
     output = ', '.join([r.response_text for r in good_responses_list])
     possible_responses = [ '0', '1', '2', '3', '4', '5' ]
 
@@ -364,7 +356,7 @@ def pretrial(request):
 
     script1, div1 = components(plot2)
 
-    return render(request, 'pages/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
+    return render(request, 'website/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
 
 
 # pie chart with bokeh

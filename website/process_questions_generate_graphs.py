@@ -3,20 +3,14 @@ from website.models import Response, Question, ResponseOptions, Survey
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6
-from bokeh.transform import factor_cmap
-#from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
-from bokeh.plotting import figure, output_file, show
-from bokeh.embed import components
-from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6, Category20c
+from bokeh.palettes import Spectral6, Category20c, Magma, Inferno, Plasma, Viridis
 from bokeh.transform import factor_cmap, cumsum
-
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
-from bokeh.transform import factor_cmap
+from math import pi
+import pandas as pd
 
 class BarChart:
 	''' 
@@ -58,6 +52,33 @@ class BarChart:
 		return "bar"
 
 class PieChart:
+	@classmethod
+	def generate(cls, question_query_set):
+		all_responses = list()
+		for q in question_query_set:
+			all_responses += [r.choice_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_text')
+		counter = Counter(all_responses)
+		#print(counter)
+
+		choices = list(counter.keys())
+		counts = list(counter.values())
+		choices_len = len(choices)
+		
+		plot2 = figure(height=350, title="What is the defendant's pretrial risk score?", 
+		toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
+
+		plot2.wedge(x=0, y=1, radius=0.4,
+		start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'), 
+		line_color="white", fill_color=Viridis[len(choices)], legend_field="possible_responses")
+
+		plot2.axis.axis_label = None
+		plot2.axis.visible = False
+		plot2.grid.grid_line_color = None
+
+		script1, div1 = components(plot2)
+
+		return components(plot2)
 
 	def __str__(self):
 		return "pie"
@@ -81,6 +102,7 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 	}
 
 	return question_type_subtype_graph_type_mapping[question_type_subtype_tuple]
+
 
 
 
