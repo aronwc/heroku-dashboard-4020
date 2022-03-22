@@ -22,6 +22,7 @@ import psycopg2
 from collections import Counter
 
 from .process_questions_generate_graphs import *
+from .question_id_mappings import *
 
 
 def index(request):
@@ -185,30 +186,46 @@ def get_questions_ajax(request):
 
 def get_graphs_ajax(request):
     if request.method == "GET":
+
         print("in graphs")
         question_1_str = json.loads(request.GET['question_1'])
+        print(question_1_str)
         question_1_selected = Question.objects.filter(question_text=question_1_str)
-        question_1_selected_unique = question_1_selected[0]
-        print(question_1_selected_unique)
+        print(question_1_selected)
 
-        allowable_graph_types = determine_valid_graph_types((question_1_selected_unique.question_type, question_1_selected_unique.question_subtype))
+        allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
         print(allowable_graph_types)
         data = [{"graph_type":str(v)} for v in allowable_graph_types]
         print(data)
         return JsonResponse(data, safe=False)
+    
 
 def process_generate(request):
     if request.method == "GET":
-        question_1_str = json.loads(request.GET['question_1'])
-        question_1_selected = Question.objects.filter(question_text=question_1_str)
-        question_1_selected_unique = question_1_selected[0]
-        print(question_1_selected_unique)
+        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+
+        # get the id of the first question in the database with an exact text match to the selected one
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_text=json.loads(request.GET['question_1']))[0].cluster_id
+        
+        qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
+        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
+
+        print('len qs1: {}'.format(len(qs1)))
+        print('len qs2: {}'.format(len(qs2)))
+
+        # get all questions that are meaning-identical
+        all_similar_questions_query_set = (qs1 & qs2)
+
+        print('len all_similar_questions_query_set: {}'.format(len(all_similar_questions_query_set)))
+        #question_1_selected_unique = question_1_selected[0]
+        #rint(question_1_selected_unique)
 
         graph_type = json.loads(request.GET['chart_type'])
 
         ''' I NEED CODE RIGHT HERE THAT MAPS SELECTED GRAPH_TYPE TO A CLASS RATHER THAN JUST DOING BARCHART LIKE BELOW'''
 
-        script, div = BarChart.generate(question_1_selected)
+        script, div = BarChart.generate(all_similar_questions_query_set)
      
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})

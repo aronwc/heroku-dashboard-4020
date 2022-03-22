@@ -22,21 +22,24 @@ class BarChart:
 	@classmethod
 	def generate(cls, question_query_set):
 		all_responses = list()
+		print('question_query_set in BarChart.generate: {}'.format(question_query_set))
+		print()
+		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
 			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
-		#print(counter)
+		print(counter)
 
 		choices = list(counter.keys())
 		counts = list(counter.values())
 
-		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color = Viridis[len(choices)]))
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Spectral6))
 
-		p = figure(x_range=choices, height=250, title=str(question_query_set[0]),
-		           toolbar_location=None, tools="hover", tooltips="@choices=@counts")
+		p = figure(x_range=choices, y_range=(0,9), height=250, title=str(question_query_set[0]),
+		           toolbar_location=None, tools="")
 
-		p.vbar(x='choices', top='counts', width=0.9, color = 'color', source=source) #legend_field="choices"
+		p.vbar(x='choices', top='counts', width=0.9, color='color', legend_field="choices", source=source)
 
 		p.xgrid.grid_line_color = None
 		p.legend.orientation = "horizontal"
@@ -99,6 +102,7 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 	}
 
 	return question_type_subtype_graph_type_mapping[question_type_subtype_tuple]
+
 
 
 
