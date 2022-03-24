@@ -21,12 +21,12 @@ from website.models import Response, Question, ResponseOptions, Survey, DocketCh
 def run():
 
 	# delete all initial data
-	Response.objects.all().delete()
-	Question.objects.all().delete()
-	ResponseOptions.objects.all().delete()
-	Survey.objects.all().delete()
+	#Response.objects.all().delete()
+	#Question.objects.all().delete()
+	#ResponseOptions.objects.all().delete()
+	#Survey.objects.all().delete()
 	#DocketCharge.objects.all().delete()
-	#DocketProceeding.objects.all().delete()
+	DocketProceeding.objects.all().delete()
 
 
 	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
@@ -39,7 +39,7 @@ def run():
 
 	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
-	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
+	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
 
 
 	'''
@@ -49,6 +49,7 @@ def run():
 
 	'''
 
+	'''
 	# SURVEYS
 	# --------
 	# WORKS
@@ -116,10 +117,10 @@ def run():
 
 	print("Done ResponseOptions {}".format('\n'*3))
 
+	
 
+	print("Beginning DocketCharges")
 
-
-	'''
 	for index, row in all_dockets_df.iterrows():
 		fields = list(row)
 		correct_date = datetime.strptime(fields[7], "%m/%d/%Y")
@@ -127,12 +128,22 @@ def run():
 		DocketCharge.objects.create(mag_num=fields[0], defendant=fields[1], judge=fields[2], 
 								count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
 								date=tz_aware_date)
-	
+	print("Done DocketCharges")
+	'''
+	print("Beginning DocketProceeding")
 	for index, row in all_proceedings_df.iterrows():
 		fields = list(row)
 		correct_date = datetime.strptime(fields[1], "%m/%d/%Y")
 		tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
-		DocketProceeding.objects.create(mag_num=DocketCharge.objects.get(mag_num=fields[0]), date=tz_aware_date, judge=fields[2], text=fields[3])
-	'''
+
+
+
+		docket_proceeding = DocketProceeding(mag_num=fields[0], date=tz_aware_date, 
+											judge=fields[2], text=fields[3], bond_set_for=fields[4])
+		docket_proceeding.save()
+		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=fields[0]))
+
+	print("Done DocketProceeding")
+
 	
 	
