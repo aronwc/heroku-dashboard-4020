@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "website",
     "whitenoise.runserver_nostatic",
-    "django_extensions"
+    "django_extensions",
+    "django.contrib.postgres"
 
 ]
 
