@@ -181,9 +181,7 @@
 
           });
       });
-  </script>
 
-  <script >
     // whenever year-dropdown is changed (i.e. clicked), execute this
     $('select[name=year-dropdown]').change(function () {
           $('select[name=question-dropdown-1]').selectpicker();
@@ -219,9 +217,7 @@
         
         //
       });
-  </script>
 
-  <script >
     // whenever question-dropdown-1 is changed (i.e. clicked), execute this
     $('select[name=question-dropdown-1]').change(function () {
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
@@ -257,11 +253,9 @@
         
         //
       });
-  </script>
 
-  <script>
     document.getElementById("gen-button").onclick = function() {genButtonClickFunction()};
-
+    let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
     function genButtonClickFunction() {
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
@@ -280,6 +274,18 @@
           'chart_type': JSON.stringify(chart_type)
         },
         success: function(result) {
+          console.log("IN SUCCESS OF GENBUTTON");
+          function deleteElements(value, index, array) {
+            value.remove(); // remove element from HTML of page
+          }
+          console.log(total_clicks_view_graph_button);
+          if (total_clicks_view_graph_button > 0) {
+            console.log("IN SUCESS OF GENBUTTON1");
+            created_elements.forEach(deleteElements);
+            console.log("IN SUCESS OF GENBUTTON1.5");
+          }
+          total_clicks_view_graph_button += 1;
+          console.log("IN SUCCESS OF GENBUTTON2");
           var bokeh_data = result;
           console.log("success1");
           $('div[name=bokeh-div]').html(bokeh_data.div);
@@ -365,6 +371,12 @@
           modify_graph_button.class = "modify-btn";
           modify_graph_button.onclick = function() {modifyButtonClickFunction()};
           modify_graph_button.innerHTML = "Modify Graph";
+
+          window.created_elements = [stack_court_label, stack_court_input, stack_year_label, 
+                                    stack_year_input, stack_none_label, stack_none_input,
+                                    group_court_label, group_court_input, group_year_label, 
+                                    group_year_input, group_none_label, group_none_input,
+                                    modify_graph_button];
 
           document.getElementById("bar-char-controls-div").appendChild(stack_court_label);
           document.getElementById("bar-char-controls-div").appendChild(stack_court_input);

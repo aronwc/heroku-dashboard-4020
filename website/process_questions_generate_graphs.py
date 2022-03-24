@@ -10,7 +10,7 @@ import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8
+from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10
 from bokeh.transform import factor_cmap, cumsum
 
 from bokeh.models import ColumnDataSource, HoverTool
@@ -71,20 +71,20 @@ class BarChart:
 		print(df)
 		print()
 		print()
-		pivot = pd.pivot_table(df, values=['count'], index=['choice_text'], columns=['survey__court_id'])
+		#pivot = pd.pivot_table(df, values=['count'], index=['choice_text'], columns=['survey__court_id'])
 		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_text'])
 		print(pivot1)
 		print()
 		print(pivot1.index)
 		print(list(pivot1.columns))
 		pivot1.columns = [t[1] for t in list(pivot1.columns)]
-		pivot.columns = ['magistrate', 'municipal']
+		#pivot.columns = ['magistrate', 'municipal']
 		stackable_list = list(pivot1.columns) # we want the columns from here before we reset_index
 		print()
 		print(pivot1)
 		print()
-		pivot.reset_index(level=['choice_text'], inplace=True)
-		pivot.fillna(0, inplace=True)
+		#pivot.reset_index(level=['choice_text'], inplace=True)
+		#pivot.fillna(0, inplace=True)
 		pivot1.reset_index(level=[survey_attribute], inplace=True)
 		pivot1.fillna(0, inplace=True)
 		print()
@@ -95,13 +95,15 @@ class BarChart:
 		data = dict()
 		for c in pivot1.columns:
 			data[c] = pivot1[c].tolist()
-		surveys = data['survey__court_id']
+		data[survey_attribute] = list(map(str, data[survey_attribute])) # cast stack input to string, in case int
+		surveys = data[survey_attribute]
+		print(data)
 
-		p = figure(x_range=surveys, y_range=(0,pivot1[stackable_list].sum(1).max() * 1.05), height=700, title="Responses by court",
-					toolbar_location='right', tools="hover", tooltips="$name @survey__court_id: @$name")
+		p = figure(x_range=surveys, y_range=(0, pivot1[stackable_list].sum(1).max() * 1.05), height=700, title="Responses by {}".format(stack_input),
+					toolbar_location='right', tools="hover", tooltips="$name @{}: @$name".format(survey_attribute))
 
 		p.vbar_stack(stackable_list, x=survey_attribute, width=0.4,
-					color=Spectral8, source=data, legend_label=stackable_list)
+					color=Spectral10[:len(stackable_list)], source=data, legend_label=stackable_list)
 
 		'''
 		data = dict()
