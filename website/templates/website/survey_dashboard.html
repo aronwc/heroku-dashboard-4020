@@ -110,11 +110,19 @@
       <div class="six">
         <button id="gen-button" name="generate-graph" class="gen-button">View Graph</button>
       </div>
+
+
+    </div>
+
+    <div id="bar-char-controls-div" class="bar-chart-controls">
+
     </div>
 
     <div id="bokeh-div" class="bokeh-div" name="bokeh-div">
 
     </div>
+
+    
 
 
 
@@ -242,7 +250,6 @@
                   });
                   $('select[name=chart-dropdown]').html(html_data_graphs);
 
-
               }
             
           });
@@ -274,12 +281,156 @@
         },
         success: function(result) {
           var bokeh_data = result;
+          console.log("success1");
           $('div[name=bokeh-div]').html(bokeh_data.div);
           $("head").append(bokeh_data.script);
+          
+          let court_btn = document.createElement("button");
+          court_btn.id = "court-btn";
+          court_btn.name = "court-btn";
+          court_btn.class = "court-btn";
+          court_btn.onclick = function() {courtButtonClickFunction()};
+          court_btn.innerHTML = "Stack by Court";
+
+          let year_btn = document.createElement("button");
+          year_btn.id = "year-btn";
+          year_btn.name = "year-btn";
+          year_btn.class = "year-btn";
+          year_btn.onclick = function() {yearButtonClickFunction()};
+          year_btn.innerHTML = "Stack by Year";
+
+          // create HTML elements for Stack_by radio select
+          let stack_court_input = document.createElement("input");
+          stack_court_input.type = "radio";
+          stack_court_input.id = "stack-court-radio";
+          stack_court_input.name = "stack";
+          stack_court_input.value = "court";
+          let stack_court_label = document.createElement("label");
+          stack_court_label.for = "stack-court-radio";
+          stack_court_label.innerHTML = "Court";
+
+          let stack_year_input = document.createElement("input");
+          stack_year_input.type = "radio";
+          stack_year_input.id = "stack-year-radio";
+          stack_year_input.name = "stack";
+          stack_year_input.value = "year";
+          let stack_year_label = document.createElement("label");
+          stack_year_label.for = "stack-year-radio";
+          stack_year_label.innerHTML = "Year";
+
+          let stack_none_input = document.createElement("input");
+          stack_none_input.type = "radio";
+          stack_none_input.id = "stack-none-radio";
+          stack_none_input.name = "stack";
+          stack_none_input.value = "none";
+          stack_none_input.checked = "checked";
+          let stack_none_label = document.createElement("label");
+          stack_none_label.for = "stack-none-radio";
+          stack_none_label.innerHTML = "None";
+
+           // create HTML elements for Group_by radio select
+          let group_court_input = document.createElement("input");
+          group_court_input.type = "radio";
+          group_court_input.id = "group-court-radio";
+          group_court_input.name = "group";
+          group_court_input.value = "court";
+          let group_court_label = document.createElement("label");
+          group_court_label.for = "group-court-radio";
+          group_court_label.innerHTML = "Court";
+
+          let group_year_input = document.createElement("input");
+          group_year_input.type = "radio";
+          group_year_input.id = "group-year-radio";
+          group_year_input.name = "group";
+          group_year_input.value = "year";
+          let group_year_label = document.createElement("label");
+          group_year_label.for = "group-year-radio";
+          group_year_label.innerHTML = "Year";
+
+          let group_none_input = document.createElement("input");
+          group_none_input.type = "radio";
+          group_none_input.id = "group-none-radio";
+          group_none_input.name = "group";
+          group_none_input.value = "none";
+          group_none_input.checked = "checked";
+          group_none_input.checked = "checked";
+          let group_none_label = document.createElement("label");
+          group_none_label.for = "group-none-radio";
+          group_none_label.innerHTML = "None";
+
+          // add elements to page
+          let modify_graph_button = document.createElement("button");
+          modify_graph_button.id = "modify-btn";
+          modify_graph_button.name = "modify-btn";
+          modify_graph_button.class = "modify-btn";
+          modify_graph_button.onclick = function() {modifyButtonClickFunction()};
+          modify_graph_button.innerHTML = "Modify Graph";
+
+          document.getElementById("bar-char-controls-div").appendChild(stack_court_label);
+          document.getElementById("bar-char-controls-div").appendChild(stack_court_input);
+
+          document.getElementById("bar-char-controls-div").appendChild(stack_year_label);
+          document.getElementById("bar-char-controls-div").appendChild(stack_year_input);
+
+          document.getElementById("bar-char-controls-div").appendChild(stack_none_label);
+          document.getElementById("bar-char-controls-div").appendChild(stack_none_input);
+          
+          document.getElementById("bar-char-controls-div").appendChild(group_court_label);
+          document.getElementById("bar-char-controls-div").appendChild(group_court_input);
+          
+          document.getElementById("bar-char-controls-div").appendChild(group_year_label);
+          document.getElementById("bar-char-controls-div").appendChild(group_year_input);
+
+          document.getElementById("bar-char-controls-div").appendChild(group_none_label);
+          document.getElementById("bar-char-controls-div").appendChild(group_none_input);
+          
+          document.getElementById("bar-char-controls-div").appendChild(modify_graph_button);
+
+
+          //document.getElementById("bar-char-controls-div").appendChild(court_btn);
+          //document.getElementById("bar-char-controls-div").appendChild(year_btn);
+          //button_html += `<button>${"Stack by Year"}</button>`;
+          console.log("success2");
+          // this code needs to incorporate what chart type selected because controls will differ
+          console.log("finished click function");
         }
 
       });
+      // we add the court button function here because we want to use the drop down values from
+      // when "View Graph" button was clicked (they mightve been changed without button being clicked)
+      function modifyButtonClickFunction() {
+        let stack_input = document.querySelector('input[name="stack"]:checked').value;
+        let group_input = document.querySelector('input[name="group"]:checked').value;
+        if (stack_input == group_input) {
+          if (stack_input == "none") {
+            alert("You haven't selected any attributes for stacking or grouping");
+            return false;
+          }
+          alert("Cannot stack and group by same attribute!");
+          return false;
 
+        }
+        $.ajax({
+          type: "get",
+          url: '{% url "website:stack_group_bar_chart" %}',
+          data: {
+            'courts': JSON.stringify(court_s),
+            'years': JSON.stringify(year_s),
+            'question_1': JSON.stringify(question_1),
+            'question_2': JSON.stringify(question_2),
+            'chart_type': JSON.stringify(chart_type),
+            'stack_input': JSON.stringify(stack_input),
+            'group_input': JSON.stringify(group_input)
+          },
+          success: function(result) {
+            console.log("in stack success");
+            var bokeh_data = result;
+            console.log("success1");
+            $('div[name=bokeh-div]').html(bokeh_data.div);
+            $("head").append(bokeh_data.script);
+          }
+        });
+      }
 
     }
 

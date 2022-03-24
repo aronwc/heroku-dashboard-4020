@@ -4,6 +4,9 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
+from django.db.models import Q
+from django.db.models import Count
+from django.views.generic import ListView
 from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 import requests
 from website.models import Response, Question, ResponseOptions, Survey 
@@ -141,9 +144,7 @@ def survey_dashboard(request):
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
     return render(request, 'website/survey_dashboard.html', context)
 
-def dockets_dashboard(request):
-    context = dict()
-    return render(request, 'website/dockets_dashboard.html', context)
+
 
 def get_years_ajax(request):
     '''This function gets executed when Court drop down on display/ page clicked'''
@@ -157,10 +158,6 @@ def get_years_ajax(request):
             # this might need to be changed to survey start date
 
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            #survey_ids_list_from_years_selected = [s.survey_id for s in list(courts_selected)]
-
-            # get unique
-            #final_filtered_survey_ids = list(set(survey_ids_list_from_courts_selected + survey_ids_list_from_years_selected))
             questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
             #questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
         except Exception as e:
@@ -175,40 +172,26 @@ def get_questions_ajax(request):
     if request.method == "GET":
     
         try:
-            print(request)
             surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-        
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
-            print('made0')
-            print(request.GET['years'])
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-
-            print('made2')
-
             questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
-            print(questions_to_display[0].question_text)
-
         except Exception as e:
-            #data['error_message'] = 'error'
-            print(e)
-            print("ERROR")
+
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
 def get_graphs_ajax(request):
     if request.method == "GET":
 
-        print("in graphs")
         question_1_str = json.loads(request.GET['question_1'])
-        print(question_1_str)
+
         question_1_selected = Question.objects.filter(question_text=question_1_str)
-        print(question_1_selected)
+
 
         allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
-        print(allowable_graph_types)
         data = [{"graph_type":str(v)} for v in allowable_graph_types]
-        print(data)
         return JsonResponse(data, safe=False)
     
 
@@ -222,9 +205,6 @@ def process_generate(request):
         
         qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
-
-        print('len qs1: {}'.format(len(qs1)))
-        print('len qs2: {}'.format(len(qs2)))
 
         # get all questions that are meaning-identical
         all_similar_questions_query_set = (qs1 & qs2)
@@ -241,6 +221,63 @@ def process_generate(request):
      
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})
+
+def stack_group_bar_chart(request):
+    if request.method == "GET":
+        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+
+        # get the id of the first question in the database with an exact text match to the selected one
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_text=json.loads(request.GET['question_1']))[0].cluster_id
+        
+        qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
+        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
+
+        # get all questions that are meaning-identical
+        all_similar_questions_query_set = (qs1 & qs2)
+
+        stack_input = json.loads(request.GET['stack_input'])
+        group_input = json.loads(request.GET['group_input'])
+        print(stack_input)
+        print(group_input)
+        script, div = BarChart.generate_stacked(all_similar_questions_query_set, stack_input)
+
+        return JsonResponse({'script': script, 'div': div})
+
+
+def dockets_dashboard(request):
+    ''' 'Pass in context of all DocketCharges, filtered by -mag_num '''
+    context = dict()
+    return render(request, 'website/dockets_dashboard.html', context)
+
+def get_docket_charge_by_mag_num(request):
+    pass
+
+class SearchResultsList(ListView):
+    ''' multiple inputs <input> given as comma separated values '''
+    model = DocketCharge
+    context_object_name = "docketcharges"
+    template_name = "website/dockets_dashboard.html"
+    def get_queryset(self):
+        print('request:{}a'.format(self.request.GET.get("mag_num")))
+        mag_num = int(self.request.GET.get("mag_num"))
+
+        print(mag_num)
+        mag_num_query = Q(mag_num=mag_num)
+        return DocketCharge.objects.filter(mag_num_query)
+        
+        Q_objects = list()
+        if judge != '':
+            Q_objects.append(Q(judge__in=judges))
+        if charges != '':
+            Q_objects.append(Q(charge__in=charges))
+        if time_range != '':
+            Q_objects.append(Q(date__range=(start_date, end_date))) # inclusive
+        if bond__range != '':
+            Q_objects.append(Q(bond__range=(min_bond, max_bond)))
+
+
+        return DocketCharge.objects.filter(*Q_objects)
 
 
 

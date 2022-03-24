@@ -25,7 +25,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
 
 
-    <link rel="stylesheet" type="text/css" href="{% static 'website/css/survey_dashboard.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'website/css/dockets_dashboard.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/base_template.css' %}">
 
 
@@ -37,6 +37,24 @@
   {% csrf_token %}
 
   <div class="wrapper">
+    <div class="formbg">
+
+      <div class="one">
+        <form action="{% url 'website:get_docket_charge_by_mag_num' %}" method="get">
+          <input
+            type="search"
+            name="mag_num"
+            placeholder="Search dockets by mag number"
+            class="form-control"
+          />
+        </form>
+      </div>
+
+
+    </div>
+
+    {% include "./search_results.html" %} 
+
 
 
 
