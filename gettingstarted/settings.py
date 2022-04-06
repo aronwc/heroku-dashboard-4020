@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "website",
     "whitenoise.runserver_nostatic",
-    "django_extensions"
+    "django_extensions",
+    "django.contrib.postgres"
 
 ]
 
@@ -93,6 +94,16 @@ DATABASES = {
         'NAME': 'website',
         'USER': 'django',
         'PASSWORD': 'Tulane4010',
+
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    "bk_local": {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+
+        'NAME': 'cwn_dashboard',
+        'USER': 'bennett',
+        'PASSWORD': 'django_tut_you_cant_guess123',
 
         'HOST': 'localhost',
         'PORT': '5432',

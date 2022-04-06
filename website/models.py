@@ -77,9 +77,10 @@ class DocketCharge(models.Model):
 
 
 class DocketProceeding(models.Model):
-	mag_num = models.ForeignKey(DocketCharge, on_delete=models.CASCADE) # One DocketCharge has many Proceedings, while one Proceeding has one DocketCharge
+	mag_num = models.IntegerField() # One DocketCharge has many Proceedings, while one Proceeding has one DocketCharge
 	date = models.DateTimeField('date of court session')
 	judge = models.CharField(max_length=20) # real max is 10
 	text = models.CharField(max_length=5000) # real max is 3695, will need to handle potential case of exceeding 5000 in future dockets
-	
+	bond_set_for = models.FloatField(blank=True, null=True) 
+	docket_charges = models.ManyToManyField(DocketCharge)
 
