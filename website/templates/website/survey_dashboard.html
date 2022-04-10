@@ -39,7 +39,8 @@
 
   <div class="wrapper">
 
-    <div class="dropdownbg">
+    <div class="panel1">
+
 
       <!-- Drop down for court -->
       <div class="one">
@@ -81,18 +82,6 @@
       </div>
 
 
-      <!-- Drop down for question 2-->
-      <div class="four">
-        <div class="form-group">
-          <label for="inputStatus">Question 2</label>
-          <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
-            <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
-          </select>
-        
-        </div>
-      </div>
-
-
       <!-- Drop down for chart type -->
       <div class="five">
         <div class="form-group">
@@ -111,6 +100,36 @@
         <button id="gen-button" name="generate-graph" class="gen-button">View Graph</button>
       </div>
 
+
+    </div>
+    
+    <div class="panel2">
+
+      <!-- Drop down for question 2-->
+      <div class="four" id="single-choice-vertical-1">
+        <div class="form-group">
+          <label for="inputStatus">Question 2 (Optional)</label>
+          <p id="question-2-description"></p>
+          <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
+            <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
+          </select>
+        
+        </div>
+      </div>
+
+      <div class="four" id="open-ended-essay-1">
+        <div class="form-group">
+          <label for="inputStatus">Word/Phrase</label>
+          <p id="open-ended-essay-1-description"></p>
+          <input
+            type="text"
+            name="mag_num"
+            placeholder="Enter word/phrase to analyze in responses"
+            class="form-control"
+          />
+        
+        </div>
+      </div>
 
     </div>
 
@@ -144,6 +163,11 @@
   <!-- <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script> -->
 
   <script >
+
+    // hide all elements on second panel, show them conditionally after question 1 selected
+    document.getElementById("single-choice-vertical-1").style.display = "none";
+    document.getElementById("open-ended-essay-1").style.display = "none";
+
     // whenever court-dropdown is changed (i.e. clicked), execute this
     $('select[name=court-dropdown]').change(function () {
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
@@ -220,13 +244,17 @@
 
     // whenever question-dropdown-1 is changed (i.e. clicked), execute this
     $('select[name=question-dropdown-1]').change(function () {
+          // MAKE SURE TO DELETE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
+
+
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
           const question_1 = $('select[name=question-dropdown-1').val();
           const question_2 = $('select[name=question-dropdown-2').val();
           $.ajax({                       // initialize an AJAX request
               type: "get",
-              url: '{% url "website:get_graphs_ajax" %}',
+              url: '{% url "website:generate_panel_2_options" %}',
+
               data: {
                   'courts': JSON.stringify(court_s),
                   'years': JSON.stringify(year_s),
@@ -239,12 +267,46 @@
                   console.log(data);
 
                   let html_data_graphs = '<option value="">---------</option>';
-                  data.forEach(function (data) {
-                    console.log(data.graph_type);
-                    html_data_graphs += `<option value="${JSON.stringify(data.graph_type)}">${data.graph_type}</option>`
 
-                  });
+                  //data.forEach(function (data) {
+                    //console.log(data.graph_type);
+                    //html_data_graphs += `<option value="${JSON.stringify(data.graph_type)}">${data.graph_type}</option>`
+
+                  //});
                   $('select[name=chart-dropdown]').html(html_data_graphs);
+                  console.log(data.question_type);
+                  console.log(data.question_subtype);
+                  // WRITE CONDITIONS FOR ALL TUPLES HERE, SHOWING ELEMENTS ACCORDINGLY
+                  if (data.question_type == "single_choice" && data.question_subtype == "vertical") {
+                    document.getElementById("single-choice-vertical-1").style.display = "block";
+                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts";
+                  } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
+                      document.getElementById("open-ended-essay-1").style.display = "block";
+                  } else if (data.question_type == "open_ended" && data.question_subtype == "single") { // DONE
+
+                  } else if (data.question_type == "multiple_choice" && data.question_subtype == "vertical") { // DONE
+
+                  } else if (data.question_type == "open_ended" && data.question_subtype == "numerical") { // DONE
+
+                  } else if (data.question_type == "single_choice" && data.question_subtype == "vertical_two_col") {
+
+                  } else if (data.question_type == "open_ended" && data.question_subtype == "multi") { // DONE
+
+                  } else if (data.question_type == "matrix" && data.question_subtype == "single") { // DONE
+
+                  } else if (data.question_type == "matrix" && data.question_subtype == "rating") { // DONE
+
+                  } else if (data.question_type == "datetime" && data.question_subtype == "time_only") { // DONE
+
+                  } else if (data.question_type == "single_choice" && data.question_subtype == "menu") { // DONE
+
+                  } else if (data.question_type == "datetime" && data.question_subtype == "date_only") { // DONE
+
+                  } else {
+                    alert("Question type, subtype combination not recognized");
+                    return false;
+                  }
+
 
               }
             
