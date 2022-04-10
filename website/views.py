@@ -172,17 +172,30 @@ def get_questions_ajax(request):
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
-def get_graphs_ajax(request):
+def generate_panel_2_options(request):
     if request.method == "GET":
+        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_text=json.loads(request.GET['question_1']))[0].cluster_id
+        qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
+        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
 
-        question_1_str = json.loads(request.GET['question_1'])
-
-        question_1_selected = Question.objects.filter(question_text=question_1_str)
-
-
-        allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
-        data = [{"graph_type":str(v)} for v in allowable_graph_types]
+        # get all questions that are meaning-identical
+        all_similar_questions_query_set = (qs1 & qs2)
+        df = pd.DataFrame(all_similar_questions_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
+        q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
+        data = {'question_type': q_type, 'question_subtype': q_subtype}
         return JsonResponse(data, safe=False)
+
+def get_graphs_ajax(request):
+    question_1_str = json.loads(request.GET['question_1'])
+
+    question_1_selected = Question.objects.filter(question_text=question_1_str)
+
+
+    allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
+    data = [{"graph_type":str(v)} for v in allowable_graph_types]
+    return JsonResponse(data, safe=False)
     
 
 def process_generate(request):

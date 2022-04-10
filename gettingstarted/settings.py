@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import django_heroku
 import dj_database_url
+from os import environ
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -109,6 +110,10 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+# set environment variable of database with 'export DJANGO_DATABASE='bk_local''
+default_database = environ.get('DJANGO_DATABASE', 'default')
+DATABASES['default'] = DATABASES[default_database]
 
 #db_from_env = dj_database_url.config(conn_max_age=600)
 #DATABASES['default']=(db_from_env)
