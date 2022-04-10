@@ -41,6 +41,7 @@
 
     <div class="panel1">
 
+
       <!-- Drop down for court -->
       <div class="one">
         <div class="form-group">
@@ -81,7 +82,6 @@
       </div>
 
 
-
       <!-- Drop down for chart type -->
       <div class="five">
         <div class="form-group">
@@ -102,7 +102,7 @@
 
 
     </div>
-
+    
     <div class="panel2">
 
       <!-- Drop down for question 2-->
@@ -163,6 +163,7 @@
   <!-- <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script> -->
 
   <script >
+
     // hide all elements on second panel, show them conditionally after question 1 selected
     document.getElementById("single-choice-vertical-1").style.display = "none";
     document.getElementById("open-ended-essay-1").style.display = "none";
@@ -245,6 +246,7 @@
     $('select[name=question-dropdown-1]').change(function () {
           // MAKE SURE TO DELETE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
 
+
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
           const question_1 = $('select[name=question-dropdown-1').val();
@@ -252,6 +254,7 @@
           $.ajax({                       // initialize an AJAX request
               type: "get",
               url: '{% url "website:generate_panel_2_options" %}',
+
               data: {
                   'courts': JSON.stringify(court_s),
                   'years': JSON.stringify(year_s),
@@ -264,6 +267,7 @@
                   console.log(data);
 
                   let html_data_graphs = '<option value="">---------</option>';
+
                   //data.forEach(function (data) {
                     //console.log(data.graph_type);
                     //html_data_graphs += `<option value="${JSON.stringify(data.graph_type)}">${data.graph_type}</option>`
@@ -302,6 +306,7 @@
                     alert("Question type, subtype combination not recognized");
                     return false;
                   }
+
 
               }
             

@@ -134,8 +134,6 @@ def survey_dashboard(request):
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
     return render(request, 'website/survey_dashboard.html', context)
 
-
-
 def get_years_ajax(request):
     '''This function gets executed when Court drop down on display/ page clicked'''
     if request.method == "GET":
@@ -171,6 +169,7 @@ def get_questions_ajax(request):
 
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
+
 
 def generate_panel_2_options(request):
     if request.method == "GET":
@@ -239,6 +238,7 @@ def stack_group_bar_chart(request):
 
         # get all questions that are meaning-identical
         all_similar_questions_query_set = (qs1 & qs2)
+
 
         stack_input = json.loads(request.GET['stack_input'])
         group_input = json.loads(request.GET['group_input'])

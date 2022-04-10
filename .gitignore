@@ -8,6 +8,7 @@ getting-started/*
 */secret.py
 .env
 
-scripts/data
+
+scripts/data/
 settings.py
 
