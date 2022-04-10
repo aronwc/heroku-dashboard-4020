@@ -13,6 +13,7 @@ urlpatterns = [
     path('dockets-dashboard/', views.dockets_dashboard, name='dockets_dashboard'),
     path('get-questions-ajax/', views.get_questions_ajax, name="get_questions_ajax"),
     path('get-years-ajax/', views.get_years_ajax, name="get_years_ajax"),
+    path('generate-panel-2-options/', views.generate_panel_2_options, name="generate_panel_2_options"),
     path('get-graphs-ajax/', views.get_graphs_ajax, name="get_graphs_ajax"),
     path('bennett-bokeh/', views.bennett_bokeh, name="bennett_bokeh"),
     path('process-generate/', views.process_generate, name="process_generate"),
