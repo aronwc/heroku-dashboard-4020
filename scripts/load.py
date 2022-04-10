@@ -29,17 +29,30 @@ def run():
 	DocketProceeding.objects.all().delete()
 
 
-	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
+	# responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
 
-	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.with_clusters.csv', encoding='latin1')
+	# questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.with_clusters.csv', encoding='latin1')
 
-	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
+	# response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
 
-	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
+	# surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
 
-	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+	# all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
-	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
+	# all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
+
+	responses_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
+
+	questions_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_questions_with_clusters.csv', encoding='latin1')
+
+	response_options_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_response_options.csv', encoding='latin1', index_col=0)
+
+	surveys_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_surveys.csv', encoding='latin1')
+
+	all_dockets_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+
+	all_proceedings_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
+
 
 
 	'''
@@ -132,18 +145,17 @@ def run():
 	'''
 	print("Beginning DocketProceeding")
 	for index, row in all_proceedings_df.iterrows():
+		print(index)
 		fields = list(row)
-		correct_date = datetime.strptime(fields[1], "%m/%d/%Y")
+		print(fields[0])
+		correct_date = datetime.strptime(fields[0], "%m/%d/%Y")
 		tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
 
 
 
-		docket_proceeding = DocketProceeding(mag_num=fields[0], date=tz_aware_date, 
-											judge=fields[2], text=fields[3], bond_set_for=fields[4])
+		docket_proceeding = DocketProceeding(mag_num=index, date=tz_aware_date, 
+											judge=fields[1], text=fields[2], bond_set_for=fields[3])
 		docket_proceeding.save()
-		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=fields[0]))
+		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=index))
 
 	print("Done DocketProceeding")
-
-	
-	
