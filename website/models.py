@@ -53,7 +53,7 @@ class Response(models.Model):
 
 class ResponseOptions(models.Model):
 	response_option_id = models.CharField(max_length=40)
-	survey_id = models.BigIntegerField()
+	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0)
 	row_id = models.BigIntegerField()
 	row_text = models.CharField(max_length=300)
 	choice_id = models.BigIntegerField()

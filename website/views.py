@@ -29,6 +29,7 @@ from collections import Counter
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
+chart_mappings = {'bar': BarChart(), 'pie': PieChart()}
 
 def index(request):
     return HttpResponse('yo')
@@ -186,6 +187,7 @@ def generate_panel_2_options(request):
         df = pd.DataFrame(all_similar_questions_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
         q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
         data = {'question_type': q_type, 'question_subtype': q_subtype}
+        data['graphs'] = get_graphs_ajax(request)
         return JsonResponse(data, safe=False)
 
 def get_graphs_ajax(request):
@@ -196,7 +198,7 @@ def get_graphs_ajax(request):
 
     allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
     data = [{"graph_type":str(v)} for v in allowable_graph_types]
-    return JsonResponse(data, safe=False)
+    return data
     
 
 def process_generate(request):
@@ -217,11 +219,12 @@ def process_generate(request):
         #question_1_selected_unique = question_1_selected[0]
         #rint(question_1_selected_unique)
 
-        graph_type = json.loads(request.GET['chart_type'])
+        graph_type = str(json.loads(request.GET['chart_type'])[0])
+        print(graph_type)
 
         ''' I NEED CODE RIGHT HERE THAT MAPS SELECTED GRAPH_TYPE TO A CLASS RATHER THAN JUST DOING BARCHART LIKE BELOW'''
 
-        script, div = BarChart.generate(all_similar_questions_query_set)
+        script, div = chart_mappings[graph_type].generate(all_similar_questions_query_set)
      
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})

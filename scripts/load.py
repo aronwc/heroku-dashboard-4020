@@ -23,10 +23,10 @@ def run():
 	# delete all initial data
 	#Response.objects.all().delete()
 	#Question.objects.all().delete()
-	#ResponseOptions.objects.all().delete()
+	ResponseOptions.objects.all().delete()
 	#Survey.objects.all().delete()
 	#DocketCharge.objects.all().delete()
-	DocketProceeding.objects.all().delete()
+	#DocketProceeding.objects.all().delete()
 
 
 	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
@@ -129,7 +129,7 @@ def run():
 								count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
 								date=tz_aware_date)
 	print("Done DocketCharges")
-	'''
+	
 	print("Beginning DocketProceeding")
 	for index, row in all_proceedings_df.iterrows():
 		fields = list(row)
@@ -144,6 +144,7 @@ def run():
 		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=fields[0]))
 
 	print("Done DocketProceeding")
+	'''
 
 	
 	
