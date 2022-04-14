@@ -24,7 +24,8 @@ urlpatterns = [
     path("test", views.test, name="dashboard"),
     path("dockets", views.psql, name="Query"),
 
-    path("pretrial", views.pretrial, name='pretrial')
+    path("pretrial", views.pretrial, name='pretrial'),
+    path('accounts/login/?next=', views.my_view, name="login"),
 
     #path("upload-csv/", views.psql, name="responses_test"),
 

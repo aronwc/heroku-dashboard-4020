@@ -1,15 +1,16 @@
 
 from math import pi
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-
-from django.db.models import Q
-from django.db.models import Count
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q, Count
 from django.views.generic import ListView
+from django.contrib.auth import authenticate, login, logout
 from .models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
-
+from django.conf import settings
 import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
@@ -29,16 +30,17 @@ from collections import Counter
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
-
+@login_required
 def index(request):
     return HttpResponse('yo')
 
-
+@login_required
 # Create your views here.
 def test(request):
     #return HttpResponse('Hello from Python!')
     return render(request, "website/test.html")
 
+@login_required
 def plot(request):
 
     courts = ["Criminal District", "Magistrate", "Municipal"]
@@ -94,6 +96,7 @@ def plot(request):
 
     return render(request, 'website/base.html', {'script1':script1, 'div1':div1, 'script2':script2, 'div2':div2})
 
+@login_required
 def bennett_bokeh(request):
     if request.method == "GET":
         print("IN BENNETT BOKEH")
@@ -110,6 +113,7 @@ def bennett_bokeh(request):
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})
 
+@login_required
 # do pie chart here with bokeh
 def pretrial(request):
     print('made')
@@ -124,10 +128,12 @@ def pretrial(request):
 
     return HttpResponse(output)
 
+@login_required
 # pie chart with bokeh
 def afford_bond(request):
     pass
 
+@login_required
 def survey_dashboard(request):
     # this shouldnt be hard coded
     years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
@@ -135,7 +141,7 @@ def survey_dashboard(request):
     return render(request, 'website/survey_dashboard.html', context)
 
 
-
+@login_required
 def get_years_ajax(request):
     '''This function gets executed when Court drop down on display/ page clicked'''
     if request.method == "GET":
@@ -156,7 +162,7 @@ def get_years_ajax(request):
             return HttpResponse('yo')
         return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_text')), safe=False)
 
-
+@login_required
 def get_questions_ajax(request):
     '''This function gets executed when Year drop down on display/ page clicked'''
     if request.method == "GET":
@@ -172,7 +178,7 @@ def get_questions_ajax(request):
             return HttpResponse('yo')
         return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
-
+@login_required
 def generate_panel_2_options(request):
     if request.method == "GET":
         surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
@@ -188,6 +194,7 @@ def generate_panel_2_options(request):
         data = {'question_type': q_type, 'question_subtype': q_subtype}
         return JsonResponse(data, safe=False)
 
+@login_required
 def get_graphs_ajax(request):
     question_1_str = json.loads(request.GET['question_1'])
 
@@ -198,7 +205,7 @@ def get_graphs_ajax(request):
     data = [{"graph_type":str(v)} for v in allowable_graph_types]
     return JsonResponse(data, safe=False)
     
-
+@login_required
 def process_generate(request):
     if request.method == "GET":
         surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
@@ -226,7 +233,7 @@ def process_generate(request):
         #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
         return JsonResponse({'script': script, 'div': div})
 
-
+@login_required
 def stack_group_bar_chart(request):
     if request.method == "GET":
         surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
@@ -250,12 +257,13 @@ def stack_group_bar_chart(request):
 
         return JsonResponse({'script': script, 'div': div})
 
-
+@login_required
 def dockets_dashboard(request):
     ''' 'Pass in context of all DocketCharges, filtered by -mag_num '''
     context = dict()
     return render(request, 'website/dockets_dashboard.html', context)
 
+@login_required
 def get_docket_charge_by_mag_num(request):
     pass
 
@@ -286,7 +294,7 @@ class SearchResultsList(ListView):
         return DocketCharge.objects.filter(*Q_objects)
 
 
-
+@login_required
 def psql(request):
     
     #Number of Case Appearances Observed Bar Graph
@@ -357,6 +365,7 @@ def psql(request):
     #return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
     return render(request, 'website/responses_test.html')
 
+@login_required
 # do pie chart here with bokeh
 def pretrial(request):
     good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
@@ -409,7 +418,27 @@ def pretrial(request):
 
     return render(request, 'website/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
 
-
+@login_required
 # pie chart with bokeh
 def afford_bond(request):
     pass
+
+class LoginView(LoginRequiredMixin):
+    template_name = 'login.html'
+    print("this is the loginview")
+
+def my_view(request):
+    print("this is myview")
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        # Redirect to a success page.
+        ...
+    if not request.user.is_authenticated:
+        return render(request, 'myapp/login_error.html')
+
+def logout_view(request):
+    logout(request)
+    

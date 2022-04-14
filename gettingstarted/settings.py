@@ -161,3 +161,4 @@ MEDIA_URL = '/media/'
 
 
 django_heroku.settings(locals())
+LOGIN_REDIRECT_URL = '/' 
