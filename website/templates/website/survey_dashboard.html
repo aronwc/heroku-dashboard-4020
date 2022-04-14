@@ -8,6 +8,7 @@
 
 
 <head>
+    
     <title>Survey Dashboard</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -26,6 +27,9 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/survey_dashboard.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/base_template.css' %}">
+
+
+
 </head>
 
 
@@ -78,6 +82,47 @@
       </div>
 
 
+
+
+
+      
+
+
+    </div>
+    
+    <div class="panel2">
+
+      <div id="single-choice-vertical-1">
+        <!-- Drop down for question 2-->
+        <div class="four">
+          <div class="form-group">
+            <label for="inputStatus">Question 2 (Optional)</label>
+            <p id="question-2-description"></p>
+            <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
+              <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
+            </select>
+          
+          </div>
+        </div>
+      </div>
+
+
+      <div id="open-ended-essay-1">
+        <div class="four">
+          <div class="form-group">
+            <label for="inputStatus">Word/Phrase</label>
+            <p id="open-ended-essay-1-description"></p>
+            <input
+              type="text"
+              name="mag_num"
+              placeholder="Enter word/phrase to analyze in responses"
+              class="form-control"
+            />
+          
+          </div>
+        </div>
+      </div>
+
       <!-- Drop down for chart type -->
       <div class="five">
         <div class="form-group">
@@ -90,41 +135,8 @@
         </div>
       </div>
 
-
-
       <div class="six">
         <button id="gen-button" name="generate-graph" class="gen-button">View Graph</button>
-      </div>
-
-
-    </div>
-    
-    <div class="panel2">
-
-      <!-- Drop down for question 2-->
-      <div class="four" id="single-choice-vertical-1">
-        <div class="form-group">
-          <label for="inputStatus">Question 2 (Optional)</label>
-          <p id="question-2-description"></p>
-          <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
-            <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
-          </select>
-        
-        </div>
-      </div>
-
-      <div class="four" id="open-ended-essay-1">
-        <div class="form-group">
-          <label for="inputStatus">Word/Phrase</label>
-          <p id="open-ended-essay-1-description"></p>
-          <input
-            type="text"
-            name="mag_num"
-            placeholder="Enter word/phrase to analyze in responses"
-            class="form-control"
-          />
-        
-        </div>
       </div>
 
     </div>
@@ -222,7 +234,7 @@
                   data.forEach(function (data) {
 
                       if (data.hasOwnProperty('question_text')) {
-                        html_data_questions += `<option data-tokens="${JSON.stringify(data.question_text)} value="${data.question_text}"" >${JSON.stringify(data.question_text)}</option>`
+                        html_data_questions += `<option data-tokens="${JSON.stringify(data.question_text)} value="${data.question_text}"" >${JSON.stringify(data.question_text)}</option>`;
                       }
                   });
                   $('select[name=question-dropdown-1]').html(html_data_questions);
@@ -264,11 +276,11 @@
 
                   let html_data_graphs = '<option value="">---------</option>';
 
-                  //data.forEach(function (data) {
+                  data.graphs.forEach(function (data) {
                     //console.log(data.graph_type);
-                    //html_data_graphs += `<option value="${JSON.stringify(data.graph_type)}">${data.graph_type}</option>`
+                    html_data_graphs += `<option data-tokens="${JSON.stringify(data.graph_type)} value="${data.graph_type}"" >${data.graph_type}</option>`;
 
-                  //});
+                  });
                   $('select[name=chart-dropdown]').html(html_data_graphs);
                   console.log(data.question_type);
                   console.log(data.question_subtype);
@@ -321,6 +333,7 @@
       const question_2 = $('select[name=question-dropdown-2').val();
       const chart_type = $('select[name=chart-dropdown').val();
       console.log("in click function");
+      console.log(chart_type);
       $.ajax({
         type: "get",
         url: '{% url "website:process_generate" %}',
@@ -338,123 +351,130 @@
           }
           console.log(total_clicks_view_graph_button);
           if (total_clicks_view_graph_button > 0) {
-            console.log("IN SUCESS OF GENBUTTON1");
             created_elements.forEach(deleteElements);
-            console.log("IN SUCESS OF GENBUTTON1.5");
           }
+
           total_clicks_view_graph_button += 1;
           console.log("IN SUCCESS OF GENBUTTON2");
           var bokeh_data = result;
           console.log("success1");
           $('div[name=bokeh-div]').html(bokeh_data.div);
           $("head").append(bokeh_data.script);
-          
-          let court_btn = document.createElement("button");
-          court_btn.id = "court-btn";
-          court_btn.name = "court-btn";
-          court_btn.class = "court-btn";
-          court_btn.onclick = function() {courtButtonClickFunction()};
-          court_btn.innerHTML = "Stack by Court";
 
-          let year_btn = document.createElement("button");
-          year_btn.id = "year-btn";
-          year_btn.name = "year-btn";
-          year_btn.class = "year-btn";
-          year_btn.onclick = function() {yearButtonClickFunction()};
-          year_btn.innerHTML = "Stack by Year";
+          if (chart_type == "bar") {
 
-          // create HTML elements for Stack_by radio select
-          let stack_court_input = document.createElement("input");
-          stack_court_input.type = "radio";
-          stack_court_input.id = "stack-court-radio";
-          stack_court_input.name = "stack";
-          stack_court_input.value = "court";
-          let stack_court_label = document.createElement("label");
-          stack_court_label.for = "stack-court-radio";
-          stack_court_label.innerHTML = "Court";
+            // create HTML elements for Stack_by radio select
+            let stack_label = document.createElement("label");
+            stack_label.innerHTML = "Attribute to Stack by:";
+            stack_label.classList.add("stack-label");
 
-          let stack_year_input = document.createElement("input");
-          stack_year_input.type = "radio";
-          stack_year_input.id = "stack-year-radio";
-          stack_year_input.name = "stack";
-          stack_year_input.value = "year";
-          let stack_year_label = document.createElement("label");
-          stack_year_label.for = "stack-year-radio";
-          stack_year_label.innerHTML = "Year";
+            let stack_court_input = document.createElement("input");
+            stack_court_input.type = "radio";
+            stack_court_input.id = "stack-court-radio";
+            stack_court_input.name = "stack";
+            stack_court_input.value = "court";
+            let stack_court_label = document.createElement("label");
+            stack_court_label.for = "stack-court-radio";
+            stack_court_label.innerHTML = "Court";
+            stack_court_input.classList.add("stack-court-input");
 
-          let stack_none_input = document.createElement("input");
-          stack_none_input.type = "radio";
-          stack_none_input.id = "stack-none-radio";
-          stack_none_input.name = "stack";
-          stack_none_input.value = "none";
-          stack_none_input.checked = "checked";
-          let stack_none_label = document.createElement("label");
-          stack_none_label.for = "stack-none-radio";
-          stack_none_label.innerHTML = "None";
+            let stack_year_input = document.createElement("input");
+            stack_year_input.type = "radio";
+            stack_year_input.id = "stack-year-radio";
+            stack_year_input.name = "stack";
+            stack_year_input.value = "year";
+            let stack_year_label = document.createElement("label");
+            stack_year_label.for = "stack-year-radio";
+            stack_year_label.innerHTML = "Year";
+            stack_year_input.classList.add("stack-year-input");
 
-           // create HTML elements for Group_by radio select
-          let group_court_input = document.createElement("input");
-          group_court_input.type = "radio";
-          group_court_input.id = "group-court-radio";
-          group_court_input.name = "group";
-          group_court_input.value = "court";
-          let group_court_label = document.createElement("label");
-          group_court_label.for = "group-court-radio";
-          group_court_label.innerHTML = "Court";
+            let stack_none_input = document.createElement("input");
+            stack_none_input.type = "radio";
+            stack_none_input.id = "stack-none-radio";
+            stack_none_input.name = "stack";
+            stack_none_input.value = "none";
+            stack_none_input.checked = "checked";
+            let stack_none_label = document.createElement("label");
+            stack_none_label.for = "stack-none-radio";
+            stack_none_label.innerHTML = "None";
+            stack_none_input.classList.add("stack-none-input");
 
-          let group_year_input = document.createElement("input");
-          group_year_input.type = "radio";
-          group_year_input.id = "group-year-radio";
-          group_year_input.name = "group";
-          group_year_input.value = "year";
-          let group_year_label = document.createElement("label");
-          group_year_label.for = "group-year-radio";
-          group_year_label.innerHTML = "Year";
+             // create HTML elements for Group_by radio select
+            let group_label = document.createElement("label");
+            group_label.innerHTML = "Attribute to Group by:"
+            group_label.classList.add("group-label");
 
-          let group_none_input = document.createElement("input");
-          group_none_input.type = "radio";
-          group_none_input.id = "group-none-radio";
-          group_none_input.name = "group";
-          group_none_input.value = "none";
-          group_none_input.checked = "checked";
-          group_none_input.checked = "checked";
-          let group_none_label = document.createElement("label");
-          group_none_label.for = "group-none-radio";
-          group_none_label.innerHTML = "None";
+            let group_court_input = document.createElement("input");
+            group_court_input.type = "radio";
+            group_court_input.id = "group-court-radio";
+            group_court_input.name = "group";
+            group_court_input.value = "court";
+            let group_court_label = document.createElement("label");
+            group_court_label.for = "group-court-radio";
+            group_court_label.innerHTML = "Court";
+            group_court_input.classList.add("group-court-input");
 
-          // add elements to page
-          let modify_graph_button = document.createElement("button");
-          modify_graph_button.id = "modify-btn";
-          modify_graph_button.name = "modify-btn";
-          modify_graph_button.class = "modify-btn";
-          modify_graph_button.onclick = function() {modifyButtonClickFunction()};
-          modify_graph_button.innerHTML = "Modify Graph";
+            let group_year_input = document.createElement("input");
+            group_year_input.type = "radio";
+            group_year_input.id = "group-year-radio";
+            group_year_input.name = "group";
+            group_year_input.value = "year";
+            let group_year_label = document.createElement("label");
+            group_year_label.for = "group-year-radio";
+            group_year_label.innerHTML = "Year";
+            group_year_input.classList.add("group-year-input");
 
-          window.created_elements = [stack_court_label, stack_court_input, stack_year_label, 
-                                    stack_year_input, stack_none_label, stack_none_input,
-                                    group_court_label, group_court_input, group_year_label, 
-                                    group_year_input, group_none_label, group_none_input,
-                                    modify_graph_button];
+            let group_none_input = document.createElement("input");
+            group_none_input.type = "radio";
+            group_none_input.id = "group-none-radio";
+            group_none_input.name = "group";
+            group_none_input.value = "none";
+            group_none_input.checked = "checked";
+            group_none_input.checked = "checked";
+            let group_none_label = document.createElement("label");
+            group_none_label.for = "group-none-radio";
+            group_none_label.innerHTML = "None";
+            group_none_input.classList.add("group-none-input");
 
-          document.getElementById("bar-char-controls-div").appendChild(stack_court_label);
-          document.getElementById("bar-char-controls-div").appendChild(stack_court_input);
+            // add elements to page
+            let modify_graph_button = document.createElement("button");
+            modify_graph_button.id = "modify-btn";
+            modify_graph_button.name = "modify-btn";
+            modify_graph_button.class = "modify-btn";
+            modify_graph_button.onclick = function() {modifyButtonClickFunction()};
+            modify_graph_button.innerHTML = "Modify Graph";
 
-          document.getElementById("bar-char-controls-div").appendChild(stack_year_label);
-          document.getElementById("bar-char-controls-div").appendChild(stack_year_input);
+            window.created_elements = [stack_label, group_label, stack_court_label, stack_court_input, stack_year_label, 
+                                      stack_year_input, stack_none_label, stack_none_input,
+                                      group_court_label, group_court_input, group_year_label, 
+                                      group_year_input, group_none_label, group_none_input,
+                                      modify_graph_button];
 
-          document.getElementById("bar-char-controls-div").appendChild(stack_none_label);
-          document.getElementById("bar-char-controls-div").appendChild(stack_none_input);
-          
-          document.getElementById("bar-char-controls-div").appendChild(group_court_label);
-          document.getElementById("bar-char-controls-div").appendChild(group_court_input);
-          
-          document.getElementById("bar-char-controls-div").appendChild(group_year_label);
-          document.getElementById("bar-char-controls-div").appendChild(group_year_input);
+            document.getElementById("bar-char-controls-div").appendChild(stack_label);
+            document.getElementById("bar-char-controls-div").appendChild(stack_court_label);
+            document.getElementById("bar-char-controls-div").appendChild(stack_court_input);
 
-          document.getElementById("bar-char-controls-div").appendChild(group_none_label);
-          document.getElementById("bar-char-controls-div").appendChild(group_none_input);
-          
-          document.getElementById("bar-char-controls-div").appendChild(modify_graph_button);
+            document.getElementById("bar-char-controls-div").appendChild(stack_year_label);
+            document.getElementById("bar-char-controls-div").appendChild(stack_year_input);
+
+            document.getElementById("bar-char-controls-div").appendChild(stack_none_label);
+            document.getElementById("bar-char-controls-div").appendChild(stack_none_input);
+            
+            document.getElementById("bar-char-controls-div").appendChild(group_label);
+            document.getElementById("bar-char-controls-div").appendChild(group_court_label);
+            document.getElementById("bar-char-controls-div").appendChild(group_court_input);
+            
+            document.getElementById("bar-char-controls-div").appendChild(group_year_label);
+            document.getElementById("bar-char-controls-div").appendChild(group_year_input);
+
+            document.getElementById("bar-char-controls-div").appendChild(group_none_label);
+            document.getElementById("bar-char-controls-div").appendChild(group_none_input);
+            
+            document.getElementById("bar-char-controls-div").appendChild(modify_graph_button);
+
+          } else {
+            window.created_elements = [];
+          }
 
 
           //document.getElementById("bar-char-controls-div").appendChild(court_btn);
@@ -511,5 +531,3 @@
 
  {% endblock %}
 </html>
-
-

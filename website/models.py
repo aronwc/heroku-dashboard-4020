@@ -27,6 +27,7 @@ class Question(models.Model):
 	question_type = models.CharField(max_length=30)
 	question_subtype = models.CharField(max_length=30)
 	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0) # Survey to Question = One to Many
+	question_clean_text = models.CharField(max_length=600, default='')
 	cluster_id = models.IntegerField(default=-1)
 	def __str__(self):
 		return str(self.question_text)
@@ -45,6 +46,7 @@ class Response(models.Model):
 	choice_id = models.BigIntegerField()
 	other_id = models.BigIntegerField()
 	choice_text = models.CharField(max_length=200) # max is 195 in given data
+	choice_clean_text = models.CharField(max_length=200, default='')
 	question = models.ForeignKey(Question, on_delete=models.CASCADE, default=0) # One Question has many Response(s) and one Response has many Question(s)
 	def __str__(self):
 		return str(self.response_text)
@@ -53,7 +55,7 @@ class Response(models.Model):
 
 class ResponseOptions(models.Model):
 	response_option_id = models.CharField(max_length=40)
-	survey_id = models.BigIntegerField()
+	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0)
 	row_id = models.BigIntegerField()
 	row_text = models.CharField(max_length=300)
 	choice_id = models.BigIntegerField()

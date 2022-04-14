@@ -21,38 +21,25 @@ from website.models import Response, Question, ResponseOptions, Survey, DocketCh
 def run():
 
 	# delete all initial data
-	#Response.objects.all().delete()
-	#Question.objects.all().delete()
-	#ResponseOptions.objects.all().delete()
-	#Survey.objects.all().delete()
-	#DocketCharge.objects.all().delete()
+	Response.objects.all().delete()
+	Question.objects.all().delete()
+	ResponseOptions.objects.all().delete()
+	Survey.objects.all().delete()
+	DocketCharge.objects.all().delete()
 	DocketProceeding.objects.all().delete()
 
 
-	# responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
+	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1', index_col=0)
 
-	# questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.with_clusters.csv', encoding='latin1')
+	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.cleaned.with_clusters.csv', encoding='latin1')
 
-	# response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.response.options.csv', encoding='latin1', index_col=0)
+	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_response_options.csv', encoding='latin1', index_col=0)
 
-	# surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
+	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
 
-	# all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
-	# all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
-
-	responses_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/responses_cleaned_1.csv', encoding='latin1', index_col=0)
-
-	questions_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_questions_with_clusters.csv', encoding='latin1')
-
-	response_options_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_response_options.csv', encoding='latin1', index_col=0)
-
-	surveys_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_surveys.csv', encoding='latin1')
-
-	all_dockets_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
-
-	all_proceedings_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
-
+	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
 
 
 	'''
@@ -62,7 +49,7 @@ def run():
 
 	'''
 
-	'''
+
 	# SURVEYS
 	# --------
 	# WORKS
@@ -81,6 +68,7 @@ def run():
 	print("Done Surveys {}".format('\n'*3))
 
 
+
 	print("Beginning Questions")
 	# QUESTIONS
 	# ----------
@@ -90,10 +78,10 @@ def run():
 		fields = [x if type(x) != float else 0 for x in list(row)]
 		Question.objects.create(question_id=fields[0], question_text=fields[1], question_type=fields[2], 
 								question_subtype=fields[3], survey=Survey.objects.get(survey_id=fields[4]),
-								cluster_id=fields[5])
+								question_clean_text=fields[5], cluster_id=fields[6])
 	print("Done Questions {}".format('\n'*3))
 
-
+	
 	print("Beginning Responses")
 	# RESPONSES
 	# ----------
@@ -110,10 +98,13 @@ def run():
 		fields[8] = str(fields[8])[:200]
 		r = Response.objects.create(survey=Survey.objects.get(survey_id=fields[0]), collector_id=fields[1], responder_id=fields[2],
 								question=Question.objects.get(question_id=fields[4]), response_text=fields[3], 
-								row_id=fields[5], choice_id=fields[6], other_id=fields[7], choice_text=fields[8])
+								row_id=fields[5], choice_id=fields[6], other_id=fields[7], choice_text=fields[8],
+								choice_clean_text=str(fields[9]))
 	
 	
 	print("Done Responses {}".format('\n'*3))
+
+
 	print("Beginning ResponseOptions")
 	# RESPONSE_OPTIONS
 	# ----------------
@@ -123,7 +114,7 @@ def run():
 		#print(type(list(row)[3]))
 		fields = [x if type(x) != float else 0 for x in list(row)]
 		# unpack an iterable with '*'
-		ResponseOptions.objects.create(response_option_id=fields[0], survey_id=fields[1], question=Question.objects.get(question_id=fields[2]), 
+		ResponseOptions.objects.create(response_option_id=fields[0], survey=Survey.objects.get(survey_id=fields[1]), question=Question.objects.get(question_id=fields[2]), 
 										row_id=fields[3], row_text=fields[4], choice_id=fields[5], 
 										response_option_text=fields[6])
 
@@ -131,6 +122,7 @@ def run():
 	print("Done ResponseOptions {}".format('\n'*3))
 
 	
+
 
 	print("Beginning DocketCharges")
 
@@ -142,20 +134,18 @@ def run():
 								count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
 								date=tz_aware_date)
 	print("Done DocketCharges")
-	'''
+	
 	print("Beginning DocketProceeding")
 	for index, row in all_proceedings_df.iterrows():
-		print(index)
 		fields = list(row)
-		print(fields[0])
-		correct_date = datetime.strptime(fields[0], "%m/%d/%Y")
+		correct_date = datetime.strptime(fields[1], "%m/%d/%Y")
 		tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
 
 
 
-		docket_proceeding = DocketProceeding(mag_num=index, date=tz_aware_date, 
-											judge=fields[1], text=fields[2], bond_set_for=fields[3])
+		docket_proceeding = DocketProceeding(mag_num=fields[0], date=tz_aware_date, 
+											judge=fields[2], text=fields[3], bond_set_for=fields[4])
 		docket_proceeding.save()
-		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=index))
+		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=fields[0]))
 
 	print("Done DocketProceeding")

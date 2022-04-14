@@ -8,7 +8,7 @@ import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10
+from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Category20c
 
 from bokeh.transform import factor_cmap, cumsum
 from bokeh.models import ColumnDataSource, HoverTool
@@ -140,18 +140,17 @@ class PieChart:
 			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
-		#print(counter)
+		print(counter)
 
-		choices = list(counter.keys())
-		counts = list(counter.values())
-		choices_len = len(choices)
-		
-		plot2 = figure(height=350, title="What is the defendant's pretrial risk score?", 
+		data = pd.Series(counter).reset_index(name="value").rename(columns={'index': 'response'})
+		data['angle'] = data['value']/data['value'].sum() * 2*math.pi
+		data['color'] = Category20c[len(counter)]
+		plot2 = figure(height=350, title=str(question_query_set[0]), 
 		toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
 
 		plot2.wedge(x=0, y=1, radius=0.4,
-		start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'), 
-		line_color="white", fill_color=Viridis[len(choices)], legend_field="possible_responses")
+        start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+        line_color="white", fill_color='color', legend_field='response', source=data)
 
 		plot2.axis.axis_label = None
 		plot2.axis.visible = False
@@ -183,8 +182,3 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 	}
 
 	return question_type_subtype_graph_type_mapping[question_type_subtype_tuple]
-
-
-
-
-
