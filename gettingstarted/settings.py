@@ -28,9 +28,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = "CHANGE_ME!!!! (P.S. the SECRET_KEY environment variable will be used, if set, instead)."
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True 
+DEBUG = False
 
-ALLOWED_HOSTS = ['*',]
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'heroku-dashboard-4020.herokuapp.com']
 
 
 # Application definition
@@ -91,7 +91,6 @@ DATABASES = {
     },
     "default": {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-
         'NAME': 'website',
         'USER': 'django',
         'PASSWORD': 'Tulane4010',
@@ -112,10 +111,11 @@ DATABASES = {
 }
 
 # set environment variable of database with 'export DJANGO_DATABASE='bk_local''
-default_database = environ.get('DJANGO_DATABASE', 'default')
-DATABASES['default'] = DATABASES[default_database]
+# default_database = environ.get('DJANGO_DATABASE', 'default')
+# DATABASES['default'] = DATABASES[default_database]
 
-
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators

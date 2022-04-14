@@ -182,8 +182,3 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 	}
 
 	return question_type_subtype_graph_type_mapping[question_type_subtype_tuple]
-
-
-
-
-

@@ -149,7 +149,3 @@ def run():
 		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=fields[0]))
 
 	print("Done DocketProceeding")
-
-
-	
-	
