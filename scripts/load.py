@@ -138,13 +138,16 @@ def run():
 	print("Beginning DocketProceeding")
 	for index, row in all_proceedings_df.iterrows():
 		fields = list(row)
+		if type(fields[5]) == float:
+			fields[5] = ''
 		correct_date = datetime.strptime(fields[1], "%m/%d/%Y")
 		tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
 
 
 
 		docket_proceeding = DocketProceeding(mag_num=fields[0], date=tz_aware_date, 
-											judge=fields[2], text=fields[3], bond_set_for=fields[4])
+											judge=fields[2], text=fields[3], bond_set_for=fields[4],
+											mag_section=fields[5])
 		docket_proceeding.save()
 		docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=fields[0]))
 
