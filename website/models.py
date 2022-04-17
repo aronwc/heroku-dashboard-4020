@@ -85,5 +85,5 @@ class DocketProceeding(models.Model):
 	text = models.CharField(max_length=5000) # real max is 3695, will need to handle potential case of exceeding 5000 in future dockets
 	bond_set_for = models.FloatField(blank=True, null=True) 
 	docket_charges = models.ManyToManyField(DocketCharge)
-	mag_section = models.CharField(max_length=2, default='')
+	mag_section = models.CharField(max_length=3, default='')
 

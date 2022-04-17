@@ -1,6 +1,7 @@
 from django.urls import path, include
 
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 #from django.views.generic.base import RedirectView 
 
 admin.autodiscover()
@@ -19,4 +20,5 @@ urlpatterns = [
     path("", include('website.urls')),
     #path("", lambda x: HttpResponseRedirect('/admin/')),
     path("admin/", admin.site.urls),
+    #path('accounts/login/', auth_views.LoginView.my_view(), name="login"),
 ]

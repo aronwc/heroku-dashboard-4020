@@ -163,7 +163,6 @@ class PieChart:
 	def __str__(self):
 		return "pie"
 
-
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''
 	question_type_subtype_graph_type_mapping = {

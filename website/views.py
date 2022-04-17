@@ -6,6 +6,7 @@ from django.template import loader
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.db.models import Q, Count
 from django.views.generic import ListView
 from django.contrib.auth import authenticate, login, logout
@@ -427,21 +428,32 @@ def pretrial(request):
 def afford_bond(request):
     pass
 
-class LoginView(LoginRequiredMixin):
-    template_name = 'login.html'
+class LoginView(LoginView):
+    template_name = 'error_login.html'
     print("this is the loginview")
+    def my_view(request):
+        print("this is myview")
+        if not request.user.is_authenticated:
+            return render(request, 'myapp/error_login.html')
+    # login_url = '/admin'
+    # redirect_field_name = 'redirect_to'
 
-def my_view(request):
-    print("this is myview")
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-        # Redirect to a success page.
-        ...
-    if not request.user.is_authenticated:
-        return render(request, 'myapp/login_error.html')
+# def my_view(request):
+#     print("this is myview")
+#     username = request.POST['username']
+#     password = request.POST['password']
+#     user = authenticate(request, username=username, password=password)
+#     if user is not None:
+#         login(request, user)
+#         # Redirect to a success page.
+#         ...
+#     if not request.user.is_authenticated:
+#         return render(request, 'myapp/login_error.html')
+
+# def my_view(request):
+#         print("this is myview")
+#         if not request.user.is_authenticated:
+#             return render(request, 'myapp/error_login.html')
 
 def logout_view(request):
     logout(request)
