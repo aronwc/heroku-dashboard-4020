@@ -9,13 +9,15 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Category20c
-
-from bokeh.transform import factor_cmap, cumsum
+from bokeh.models.widgets import DataTable, TableColumn
+from bokeh.transform import factor_cmap, cumsum, jitter 
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
-
+from bokeh.sampledata.commits import data as comdata
+from bokeh.io import show, output_file
 from bokeh.transform import factor_cmap
+from bokeh.layouts import widgetbox
 import math
 import pandas as pd
 import numpy as np
@@ -37,7 +39,7 @@ class BarChart:
 		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
-			#q.response_set.all().values('choice_text')
+			#q.response_set.all().values('choice_clean_text')
 		counter = Counter(all_responses)
 		print(counter)
 
@@ -66,12 +68,12 @@ class BarChart:
 		elif stack_input == 'year':
 			survey_attribute = 'survey__survey_year'
 
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_text')))
 
 		print(df)
 		print()
 		print()
-		#pivot = pd.pivot_table(df, values=['count'], index=['choice_text'], columns=['survey__court_id'])
+		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
 		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
 		print(pivot1)
 		print()
@@ -83,7 +85,7 @@ class BarChart:
 		print()
 		print(pivot1)
 		print()
-		#pivot.reset_index(level=['choice_text'], inplace=True)
+		#pivot.reset_index(level=['choice_clean_text'], inplace=True)
 		#pivot.fillna(0, inplace=True)
 		pivot1.reset_index(level=[survey_attribute], inplace=True)
 		pivot1.fillna(0, inplace=True)
@@ -109,12 +111,12 @@ class BarChart:
 		data = dict()
 		for c in pivot.columns:
 			data[c] = pivot[c].tolist()
-		choices = data['choice_text']
+		choices = data['choice_clean_text']
 
 		p = figure(x_range=choices, y_range=(0,300), height=500, title="Responses by court",
-					toolbar_location='right', tools="hover", tooltips="$name @choice_text: @$name")
+					toolbar_location='right', tools="hover", tooltips="$name @choice_clean_text: @$name")
 
-		p.vbar_stack(['magistrate', 'municipal'], x='choice_text', width=0.9,
+		p.vbar_stack(['magistrate', 'municipal'], x='choice_clean_text', width=0.9,
 					color=["#c9d9d3", "#718dbf"], source=data, legend_label=['magistrate', 'municipal'])
 		'''
 		p.y_range.start = 0
@@ -127,8 +129,6 @@ class BarChart:
 		p.xaxis.major_label_orientation = -math.pi/3
 		return components(p)
 
-
-
 	def __str__(self):
 		return "bar"
 
@@ -138,7 +138,7 @@ class PieChart:
 		all_responses = list()
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
-			#q.response_set.all().values('choice_text')
+			#q.response_set.all().values('choice_clean_text')
 		counter = Counter(all_responses)
 		print(counter)
 
@@ -162,6 +162,105 @@ class PieChart:
 
 	def __str__(self):
 		return "pie"
+
+class ScatterPlot(): #can be used for categorical variables with continuous values; eg time
+	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
+	@classmethod
+	def generate(cls, question_query_set):
+		all_responses = list()
+		for q in question_query_set:
+			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_clean_text')
+		print(all_responses)
+		counter = Counter(all_responses)
+		print(counter)
+		print("question_query_set: ", question_query_set)
+		print("commit dataframe: ", comdata)
+
+		choices = list(all_responses.keys())
+		counts = list(all_responses.values())
+		DAYS = ['Sun', 'Sat', 'Fri']
+		# choices = [1, 2, 3, 4, 5]
+		# counts = [7, 5, 3, 6, 4]
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
+		# data = pd.Series(counter).reset_index(name="value").rename(columns={"index": "response"})
+		plot = figure(x_range = counts, y_range=choices, height=300, title=str(question_query_set[0]),
+		 toolbar_location=None, tools="hover", sizing_mode="stretch_width")
+
+		plot.circle(x="choice", y=jitter("count", width=0.6, range=plot.y_range), source=comdata, alpha=0.3)
+
+		# plot2 = figure(title=str(question_query_set[0]), tools="hover")
+		# plot2.xaxis.axis_label = "x-axis"
+		# plot2.yaxis.axis_label = "y-axis"
+		# plot2.scatter(choices, counts)
+
+		script1, div1 = components(plot)
+
+		return components(plot)
+
+	def __str__(self):
+		return "scatter"
+
+class HeatMap():
+	@classmethod
+	def generate(cls, question_query_set):
+		return
+
+	def __str__(self):
+		return "heatmap"
+
+class BoxPlot():
+	@classmethod
+	def generate(cls, question_query_set):
+		return 
+
+	def __str__(self):
+		return "boxplot"
+
+class LineGraph():
+	@classmethod
+	def generate(cls, question_query_set):
+		return 
+
+	def __str__(self):
+		return "line"
+
+class Table():
+	@classmethod
+	def generate(cls, question_query_set):
+		#output_file("survey_dashboard.html")
+		all_responses = list()
+		for q in question_query_set:
+			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+
+		counter = Counter(all_responses)
+		print(counter)
+
+		choices = list(counter.keys())
+		counts = list(counter.values())
+
+		print("choices: ", choices)
+		print("counts: ", counts)
+
+		print("choices: ", choices)
+		print("counts: ", counts)
+		# choices = [1, 2, 3, 4, 5]
+		# counts = [7, 5, 3, 6, 4]
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
+
+		columns = [
+			TableColumn(field=choices, title="Choices"),
+			TableColumn(field=counts, title="Counts"),
+		]
+
+		data_table = DataTable(source=source, columns=columns, width=400, height=280)
+
+		#show(data_table)
+		return components(data_table)
+
+	def __str__(self):
+		return "table"
+		
 
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''

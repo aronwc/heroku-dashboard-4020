@@ -162,6 +162,8 @@
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js"></script>
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js"></script>
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-2.4.2.min.js"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-x.y.z.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-x.y.z.min.js" crossorigin="anonymous"></script>
 
 
 
@@ -199,8 +201,8 @@
                       if (data.hasOwnProperty('survey_year')) {
                         html_data_years += `<option value="${data.survey_year}">${JSON.stringify(data.survey_year)}</option>`
                       }
-                      if (data.hasOwnProperty('question_text')) {
-                        html_data_questions += `<option data-tokens="${data.question_text}" value="${data.question_text}">${JSON.stringify(data.question_text)}</option>`
+                      if (data.hasOwnProperty('question_clean_text')) {
+                        html_data_questions += `<option data-tokens="${data.question_clean_text}" value="${data.question_clean_text}">${JSON.stringify(data.question_clean_text)}</option>`
                       }
                   });
                   $('select[name=year-dropdown]').html(html_data_years); // replace the contents of the year input with the data that came from the server
@@ -233,8 +235,8 @@
                   console.log(data);
                   data.forEach(function (data) {
 
-                      if (data.hasOwnProperty('question_text')) {
-                        html_data_questions += `<option data-tokens="${JSON.stringify(data.question_text)} value="${data.question_text}"" >${JSON.stringify(data.question_text)}</option>`;
+                      if (data.hasOwnProperty('question_clean_text')) {
+                        html_data_questions += `<option data-tokens="${JSON.stringify(data.question_clean_text)} value="${data.question_clean_text}"" >${JSON.stringify(data.question_clean_text)}</option>`;
                       }
                   });
                   $('select[name=question-dropdown-1]').html(html_data_questions);

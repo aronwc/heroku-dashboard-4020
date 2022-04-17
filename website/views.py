@@ -120,7 +120,7 @@ def bennett_bokeh(request):
 # do pie chart here with bokeh
 def pretrial(request):
     print('made')
-    good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
+    good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
 
     good_qs_ids = [q.question_id for q in list(good_qs_list)]
 
@@ -163,7 +163,7 @@ def get_years_ajax(request):
             print(e)
             print("ERROR")
             return HttpResponse('yo')
-        return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_text')), safe=False)
+        return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_clean_text')), safe=False)
 
 @login_required
 def get_questions_ajax(request):
@@ -186,7 +186,7 @@ def generate_panel_2_options(request):
     if request.method == "GET":
         surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
         surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_text=json.loads(request.GET['question_1']))[0].cluster_id
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
 
@@ -202,11 +202,12 @@ def generate_panel_2_options(request):
 def get_graphs_ajax(request):
     question_1_str = json.loads(request.GET['question_1'])
 
-    question_1_selected = Question.objects.filter(question_text=question_1_str)
+    question_1_selected = Question.objects.filter(question_clean_text=question_1_str)
 
 
     allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
     data = [{"graph_type":str(v)} for v in allowable_graph_types]
+    print("data is: ", data)
     return data
     
 @login_required
@@ -216,7 +217,7 @@ def process_generate(request):
         surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
 
         # get the id of the first question in the database with an exact text match to the selected one
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_text=json.loads(request.GET['question_1']))[0].cluster_id
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         
         qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
@@ -245,7 +246,7 @@ def stack_group_bar_chart(request):
         surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
 
         # get the id of the first question in the database with an exact text match to the selected one
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_text=json.loads(request.GET['question_1']))[0].cluster_id
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         
         qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
@@ -373,7 +374,7 @@ def psql(request):
 @login_required
 # do pie chart here with bokeh
 def pretrial(request):
-    good_qs_list = Question.objects.filter(question_text__contains='What is the defendant\x92s pretrial risk score?')
+    good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
     #print("list is ", good_qs_list)
     good_qs_ids = [q.question_id for q in list(good_qs_list)]
     #print("id is ", good_qs_ids)
