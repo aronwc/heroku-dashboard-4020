@@ -179,7 +179,7 @@ def get_questions_ajax(request):
         except Exception as e:
 
             return HttpResponse('yo')
-        return JsonResponse(list(questions_to_display.values('question_clean_text')), safe=False)
+        return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
 @login_required
 def generate_panel_2_options(request):

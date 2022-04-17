@@ -36,7 +36,7 @@ class BarChart:
 		print()
 		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
-			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
 		print(counter)
@@ -66,13 +66,13 @@ class BarChart:
 		elif stack_input == 'year':
 			survey_attribute = 'survey__survey_year'
 
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_text').annotate(count=Count('choice_text')))
 
 		print(df)
 		print()
 		print()
 		#pivot = pd.pivot_table(df, values=['count'], index=['choice_text'], columns=['survey__court_id'])
-		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
+		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_text'])
 		print(pivot1)
 		print()
 		print(pivot1.index)
@@ -137,7 +137,7 @@ class PieChart:
 	def generate(cls, question_query_set):
 		all_responses = list()
 		for q in question_query_set:
-			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
 		print(counter)
