@@ -38,8 +38,8 @@ class BarChart:
 		print()
 		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
-			all_responses += [r.choice_text for r in q.response_set.all()]
-			#q.response_set.all().values('choice_text')
+			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_clean_text')
 		counter = Counter(all_responses)
 		print(counter)
 
@@ -68,13 +68,13 @@ class BarChart:
 		elif stack_input == 'year':
 			survey_attribute = 'survey__survey_year'
 
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_text').annotate(count=Count('choice_text')))
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_text')))
 
 		print(df)
 		print()
 		print()
-		#pivot = pd.pivot_table(df, values=['count'], index=['choice_text'], columns=['survey__court_id'])
-		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_text'])
+		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
+		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
 		print(pivot1)
 		print()
 		print(pivot1.index)
@@ -85,7 +85,7 @@ class BarChart:
 		print()
 		print(pivot1)
 		print()
-		#pivot.reset_index(level=['choice_text'], inplace=True)
+		#pivot.reset_index(level=['choice_clean_text'], inplace=True)
 		#pivot.fillna(0, inplace=True)
 		pivot1.reset_index(level=[survey_attribute], inplace=True)
 		pivot1.fillna(0, inplace=True)
@@ -111,12 +111,12 @@ class BarChart:
 		data = dict()
 		for c in pivot.columns:
 			data[c] = pivot[c].tolist()
-		choices = data['choice_text']
+		choices = data['choice_clean_text']
 
 		p = figure(x_range=choices, y_range=(0,300), height=500, title="Responses by court",
-					toolbar_location='right', tools="hover", tooltips="$name @choice_text: @$name")
+					toolbar_location='right', tools="hover", tooltips="$name @choice_clean_text: @$name")
 
-		p.vbar_stack(['magistrate', 'municipal'], x='choice_text', width=0.9,
+		p.vbar_stack(['magistrate', 'municipal'], x='choice_clean_text', width=0.9,
 					color=["#c9d9d3", "#718dbf"], source=data, legend_label=['magistrate', 'municipal'])
 		'''
 		p.y_range.start = 0
@@ -137,8 +137,8 @@ class PieChart:
 	def generate(cls, question_query_set):
 		all_responses = list()
 		for q in question_query_set:
-			all_responses += [r.choice_text for r in q.response_set.all()]
-			#q.response_set.all().values('choice_text')
+			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_clean_text')
 		counter = Counter(all_responses)
 		print(counter)
 
@@ -169,8 +169,8 @@ class ScatterPlot(): #can be used for categorical variables with continuous valu
 	def generate(cls, question_query_set):
 		all_responses = list()
 		for q in question_query_set:
-			all_responses += [r.choice_text for r in q.response_set.all()]
-			#q.response_set.all().values('choice_text')
+			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_clean_text')
 		print(all_responses)
 		counter = Counter(all_responses)
 		print(counter)
@@ -231,7 +231,7 @@ class Table():
 		#output_file("survey_dashboard.html")
 		all_responses = list()
 		for q in question_query_set:
-			all_responses += [r.choice_text for r in q.response_set.all()]
+			all_responses += [r.choice_clean_text for r in q.response_set.all()]
 
 		counter = Counter(all_responses)
 		print(counter)
