@@ -10,10 +10,11 @@ from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Category20c
 
-from bokeh.transform import factor_cmap, cumsum
+from bokeh.transform import factor_cmap, cumsum, jitter 
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
+from bokeh.sampledata.commits import data as comdata
 
 from bokeh.transform import factor_cmap
 import math
@@ -36,7 +37,7 @@ class BarChart:
 		print()
 		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
-			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
 		print(counter)
@@ -66,13 +67,13 @@ class BarChart:
 		elif stack_input == 'year':
 			survey_attribute = 'survey__survey_year'
 
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_text').annotate(count=Count('choice_text')))
 
 		print(df)
 		print()
 		print()
 		#pivot = pd.pivot_table(df, values=['count'], index=['choice_text'], columns=['survey__court_id'])
-		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
+		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_text'])
 		print(pivot1)
 		print()
 		print(pivot1.index)
@@ -137,7 +138,7 @@ class PieChart:
 	def generate(cls, question_query_set):
 		all_responses = list()
 		for q in question_query_set:
-			all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
 		counter = Counter(all_responses)
 		print(counter)
@@ -162,6 +163,68 @@ class PieChart:
 
 	def __str__(self):
 		return "pie"
+
+class ScatterPlot(): #can be used for categorical variables with continuous values
+	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
+	@classmethod
+	def generate(cls, question_query_set):
+		all_responses = list()
+		for q in question_query_set:
+			all_responses += [r.choice_text for r in q.response_set.all()]
+			#q.response_set.all().values('choice_text')
+		counter = Counter(all_responses)
+		print(counter)
+		print("question_query_set: ", question_query_set)
+		print("commit dataframe: ", comdata)
+
+		choices = list(counter.keys())
+		counts = list(counter.values())
+		DAYS = ['Sun', 'Sat', 'Fri']
+		# choices = [1, 2, 3, 4, 5]
+		# counts = [7, 5, 3, 6, 4]
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
+		# data = pd.Series(counter).reset_index(name="value").rename(columns={"index": "response"})
+		plot = figure(x_range = counts, y_range=choices, height=300, title=str(question_query_set[0]),
+		 toolbar_location=None, tools="hover", sizing_mode="stretch_width")
+
+		plot.circle(x="choice", y=jitter("count", width=0.6, range=plot.y_range), source=comdata, alpha=0.3)
+
+		# plot2 = figure(title=str(question_query_set[0]), tools="hover")
+		# plot2.xaxis.axis_label = "x-axis"
+		# plot2.yaxis.axis_label = "y-axis"
+		# plot2.scatter(choices, counts)
+
+		script1, div1 = components(plot)
+
+		return components(plot)
+
+	def __str__(self):
+		return "scatter"
+
+class HeatMap():
+	@classmethod
+	def generate(cls, question_query_set):
+		return
+
+	def __str__(self):
+		return "heatmap"
+
+class BoxPlot():
+	@classmethod
+	def generate(cls, question_query_set):
+		return 
+
+	def __str__(self):
+		return "boxplot"
+
+class LineGraph():
+	@classmethod
+	def generate(cls, question_query_set):
+		return 
+
+	def __str__(self):
+		return "line"
+		
 
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''

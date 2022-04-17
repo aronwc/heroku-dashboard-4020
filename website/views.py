@@ -179,7 +179,7 @@ def get_questions_ajax(request):
         except Exception as e:
 
             return HttpResponse('yo')
-        return JsonResponse(list(questions_to_display.values('question_clean_text')), safe=False)
+        return JsonResponse(list(questions_to_display.values('question_text')), safe=False)
 
 @login_required
 def generate_panel_2_options(request):
@@ -207,6 +207,7 @@ def get_graphs_ajax(request):
 
     allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
     data = [{"graph_type":str(v)} for v in allowable_graph_types]
+    print("data is: ", data)
     return data
     
 @login_required
