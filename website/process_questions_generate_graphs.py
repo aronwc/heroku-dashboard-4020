@@ -9,14 +9,15 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Category20c
-
+from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.transform import factor_cmap, cumsum, jitter 
 from bokeh.models import ColumnDataSource, HoverTool
 from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
 from bokeh.sampledata.commits import data as comdata
-
+from bokeh.io import show, output_file
 from bokeh.transform import factor_cmap
+from bokeh.layouts import widgetbox
 import math
 import pandas as pd
 import numpy as np
@@ -128,8 +129,6 @@ class BarChart:
 		p.xaxis.major_label_orientation = -math.pi/3
 		return components(p)
 
-
-
 	def __str__(self):
 		return "bar"
 
@@ -164,7 +163,7 @@ class PieChart:
 	def __str__(self):
 		return "pie"
 
-class ScatterPlot(): #can be used for categorical variables with continuous values
+class ScatterPlot(): #can be used for categorical variables with continuous values; eg time
 	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
 	@classmethod
 	def generate(cls, question_query_set):
@@ -172,13 +171,14 @@ class ScatterPlot(): #can be used for categorical variables with continuous valu
 		for q in question_query_set:
 			all_responses += [r.choice_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_text')
+		print(all_responses)
 		counter = Counter(all_responses)
 		print(counter)
 		print("question_query_set: ", question_query_set)
 		print("commit dataframe: ", comdata)
 
-		choices = list(counter.keys())
-		counts = list(counter.values())
+		choices = list(all_responses.keys())
+		counts = list(all_responses.values())
 		DAYS = ['Sun', 'Sat', 'Fri']
 		# choices = [1, 2, 3, 4, 5]
 		# counts = [7, 5, 3, 6, 4]
@@ -224,6 +224,42 @@ class LineGraph():
 
 	def __str__(self):
 		return "line"
+
+class Table():
+	@classmethod
+	def generate(cls, question_query_set):
+		#output_file("survey_dashboard.html")
+		all_responses = list()
+		for q in question_query_set:
+			all_responses += [r.choice_text for r in q.response_set.all()]
+
+		counter = Counter(all_responses)
+		print(counter)
+
+		choices = list(counter.keys())
+		counts = list(counter.values())
+
+		print("choices: ", choices)
+		print("counts: ", counts)
+
+		print("choices: ", choices)
+		print("counts: ", counts)
+		# choices = [1, 2, 3, 4, 5]
+		# counts = [7, 5, 3, 6, 4]
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
+
+		columns = [
+			TableColumn(field=choices, title="Choices"),
+			TableColumn(field=counts, title="Counts"),
+		]
+
+		data_table = DataTable(source=source, columns=columns, width=400, height=280)
+
+		#show(data_table)
+		return components(data_table)
+
+	def __str__(self):
+		return "table"
 		
 
 def determine_valid_graph_types(question_type_subtype_tuple):
