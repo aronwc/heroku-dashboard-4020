@@ -11,3 +11,5 @@ getting-started/*
 scripts/data/
 settings.py
 
+gettingstarted/settings.py
+

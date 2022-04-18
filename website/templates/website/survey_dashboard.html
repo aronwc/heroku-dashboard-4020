@@ -370,6 +370,9 @@
             stack_label.innerHTML = "Attribute to Stack by:";
             stack_label.classList.add("stack-label");
 
+            let stack_court = document.createElement("div");
+            stack_court.id = "stack-court-div";
+            stack_court.classList.add("stack-court-div");
             let stack_court_input = document.createElement("input");
             stack_court_input.type = "radio";
             stack_court_input.id = "stack-court-radio";
@@ -379,7 +382,12 @@
             stack_court_label.for = "stack-court-radio";
             stack_court_label.innerHTML = "Court";
             stack_court_input.classList.add("stack-court-input");
+            
 
+
+            let stack_year = document.createElement("div");
+            stack_year.id = "stack-year-div";
+            stack_year.classList.add("stack-year-div");
             let stack_year_input = document.createElement("input");
             stack_year_input.type = "radio";
             stack_year_input.id = "stack-year-radio";
@@ -390,6 +398,9 @@
             stack_year_label.innerHTML = "Year";
             stack_year_input.classList.add("stack-year-input");
 
+            let stack_none = document.createElement("div");
+            stack_none.id = "stack-none-div";
+            stack_none.classList.add("stack-none-div");
             let stack_none_input = document.createElement("input");
             stack_none_input.type = "radio";
             stack_none_input.id = "stack-none-radio";
@@ -406,6 +417,9 @@
             group_label.innerHTML = "Attribute to Group by:"
             group_label.classList.add("group-label");
 
+            let group_court = document.createElement("div");
+            group_court.id = "group-court-div";
+            group_court.classList.add("group-court-div");
             let group_court_input = document.createElement("input");
             group_court_input.type = "radio";
             group_court_input.id = "group-court-radio";
@@ -416,6 +430,9 @@
             group_court_label.innerHTML = "Court";
             group_court_input.classList.add("group-court-input");
 
+            let group_year = document.createElement("div");
+            group_year.id = "group-year-div";
+            group_year.classList.add("group-year-div");
             let group_year_input = document.createElement("input");
             group_year_input.type = "radio";
             group_year_input.id = "group-year-radio";
@@ -426,6 +443,9 @@
             group_year_label.innerHTML = "Year";
             group_year_input.classList.add("group-year-input");
 
+            let group_none = document.createElement("div");
+            group_none.id = "group-none-div";
+            group_none.classList.add("group-none-div");
             let group_none_input = document.createElement("input");
             group_none_input.type = "radio";
             group_none_input.id = "group-none-radio";
@@ -442,7 +462,7 @@
             let modify_graph_button = document.createElement("button");
             modify_graph_button.id = "modify-btn";
             modify_graph_button.name = "modify-btn";
-            modify_graph_button.class = "modify-btn";
+            modify_graph_button.classList.add("modify-btn");
             modify_graph_button.onclick = function() {modifyButtonClickFunction()};
             modify_graph_button.innerHTML = "Modify Graph";
 
@@ -453,24 +473,30 @@
                                       modify_graph_button];
 
             document.getElementById("bar-char-controls-div").appendChild(stack_label);
-            document.getElementById("bar-char-controls-div").appendChild(stack_court_label);
-            document.getElementById("bar-char-controls-div").appendChild(stack_court_input);
+            document.getElementById("bar-char-controls-div").appendChild(stack_court);
+            document.getElementById("stack-court-div").appendChild(stack_court_label);
+            document.getElementById("stack-court-div").appendChild(stack_court_input);
 
-            document.getElementById("bar-char-controls-div").appendChild(stack_year_label);
-            document.getElementById("bar-char-controls-div").appendChild(stack_year_input);
+            document.getElementById("bar-char-controls-div").appendChild(stack_year);
+            document.getElementById("stack-year-div").appendChild(stack_year_label);
+            document.getElementById("stack-year-div").appendChild(stack_year_input);
 
-            document.getElementById("bar-char-controls-div").appendChild(stack_none_label);
-            document.getElementById("bar-char-controls-div").appendChild(stack_none_input);
+            document.getElementById("bar-char-controls-div").appendChild(stack_none);
+            document.getElementById("stack-none-div").appendChild(stack_none_label);
+            document.getElementById("stack-none-div").appendChild(stack_none_input);
             
             document.getElementById("bar-char-controls-div").appendChild(group_label);
-            document.getElementById("bar-char-controls-div").appendChild(group_court_label);
-            document.getElementById("bar-char-controls-div").appendChild(group_court_input);
-            
-            document.getElementById("bar-char-controls-div").appendChild(group_year_label);
-            document.getElementById("bar-char-controls-div").appendChild(group_year_input);
+            document.getElementById("bar-char-controls-div").appendChild(group_court);
+            document.getElementById("group-court-div").appendChild(group_court_label);
+            document.getElementById("group-court-div").appendChild(group_court_input);
 
-            document.getElementById("bar-char-controls-div").appendChild(group_none_label);
-            document.getElementById("bar-char-controls-div").appendChild(group_none_input);
+            document.getElementById("bar-char-controls-div").appendChild(group_year);
+            document.getElementById("group-year-div").appendChild(group_year_label);
+            document.getElementById("group-year-div").appendChild(group_year_input);
+
+            document.getElementById("bar-char-controls-div").appendChild(group_none);
+            document.getElementById("group-none-div").appendChild(group_none_label);
+            document.getElementById("group-none-div").appendChild(group_none_input);
             
             document.getElementById("bar-char-controls-div").appendChild(modify_graph_button);
 
