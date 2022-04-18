@@ -259,7 +259,7 @@ def stack_group_bar_chart(request):
         group_input = json.loads(request.GET['group_input'])
         print(stack_input)
         print(group_input)
-        script, div = BarChart.generate_stacked(all_similar_questions_query_set, stack_input)
+        script, div = BarChart.generate_grouped(all_similar_questions_query_set, group_input)
 
         return JsonResponse({'script': script, 'div': div})
 

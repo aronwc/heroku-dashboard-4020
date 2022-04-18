@@ -70,29 +70,18 @@ class BarChart:
 
 		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_text')))
 
-		print(df)
-		print()
-		print()
 		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
 		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
-		print(pivot1)
-		print()
-		print(pivot1.index)
-		print(list(pivot1.columns))
+
 		pivot1.columns = [t[1] for t in list(pivot1.columns)]
 		#pivot.columns = ['magistrate', 'municipal']
 		stackable_list = list(pivot1.columns) # we want the columns from here before we reset_index
-		print()
-		print(pivot1)
-		print()
+		print(stackable_list)
+
 		#pivot.reset_index(level=['choice_clean_text'], inplace=True)
 		#pivot.fillna(0, inplace=True)
 		pivot1.reset_index(level=[survey_attribute], inplace=True)
 		pivot1.fillna(0, inplace=True)
-		print()
-		print(pivot1)
-		print()
-		print(pivot1[stackable_list].sum(1).max())
 
 		data = dict()
 		for c in pivot1.columns:
@@ -128,6 +117,50 @@ class BarChart:
 		p.legend.orientation = "vertical"
 		p.xaxis.major_label_orientation = -math.pi/3
 		return components(p)
+
+	@classmethod
+	def generate_grouped(cls, question_query_set, group_input):
+		if group_input == 'court':
+			survey_attribute = 'survey__court_id'
+		elif group_input == 'year':
+			survey_attribute = 'survey__survey_year'
+
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_text')))
+
+		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
+		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
+
+		pivot1.columns = [t[1] for t in list(pivot1.columns)]
+		#pivot.columns = ['magistrate', 'municipal']
+		responses_list = list(pivot1.columns) # we want the columns from here before we reset_index
+
+		#pivot.reset_index(level=['choice_clean_text'], inplace=True)
+		#pivot.fillna(0, inplace=True)
+		pivot1.reset_index(level=[survey_attribute], inplace=True)
+		pivot1.fillna(0, inplace=True)
+
+		data = dict()
+		for c in pivot1.columns:
+			data[c] = pivot1[c].tolist()
+		data[survey_attribute] = list(map(str, data[survey_attribute])) # cast stack input to string, in case int
+		surveys = data[survey_attribute]
+
+		x = [ (year, response) for year in data[survey_attribute] for response in responses_list]
+		counts = sum(zip(*[data[r] for r in responses_list]), ())
+
+		source = ColumnDataSource(data=dict(x=x, counts=counts))
+
+		p = figure(x_range=FactorRange(*x),  y_range=(0, pivot1[responses_list].sum(1).max() * 1.05), height=700, title="Responses by {}".format(group_input),
+					toolbar_location=None, tools="")
+
+		p.vbar(x='x', top='counts', width=0.9, source=source)
+
+		p.y_range.start = 0
+		p.x_range.range_padding = 0.1
+		p.xaxis.major_label_orientation = 1
+		p.xgrid.grid_line_color = None
+		return components(p)
+
 
 	def __str__(self):
 		return "bar"
