@@ -48,7 +48,7 @@ class BarChart:
 
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Spectral6))
 
-		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=str(question_query_set[0]),
+		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=str(question_query_set[0].question_clean_text),
 		           toolbar_location=None, tools="")
 
 		p.vbar(x='choices', top='counts', width=0.9, color='color', source=source)
@@ -145,7 +145,7 @@ class PieChart:
 		data = pd.Series(counter).reset_index(name="value").rename(columns={'index': 'response'})
 		data['angle'] = data['value']/data['value'].sum() * 2*math.pi
 		data['color'] = Category20c[len(counter)]
-		plot2 = figure(height=350, title=str(question_query_set[0]), 
+		plot2 = figure(height=350, title=str(question_query_set[0].question_clean_text), 
 		toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
 
 		plot2.wedge(x=0, y=1, radius=0.4,
