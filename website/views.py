@@ -232,12 +232,11 @@ def process_generate(request):
         graph_type = str(json.loads(request.GET['chart_type'])[0])
         print(graph_type)
 
-        ''' I NEED CODE RIGHT HERE THAT MAPS SELECTED GRAPH_TYPE TO A CLASS RATHER THAN JUST DOING BARCHART LIKE BELOW'''
+        returned = chart_mappings[graph_type].generate(all_similar_questions_query_set)
+        script, div = returned[0]
+        table_html = returned[1].to_html()
 
-        script, div = chart_mappings[graph_type].generate(all_similar_questions_query_set)
-     
-        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
-        return JsonResponse({'script': script, 'div': div})
+        return JsonResponse({'script': script, 'div': div, 'table_html': table_html})
 
 @login_required
 def stack_group_bar_chart(request):
@@ -257,11 +256,18 @@ def stack_group_bar_chart(request):
 
         stack_input = json.loads(request.GET['stack_input'])
         group_input = json.loads(request.GET['group_input'])
-        print(stack_input)
-        print(group_input)
-        script, div = BarChart.generate_grouped(all_similar_questions_query_set, group_input)
 
-        return JsonResponse({'script': script, 'div': div})
+        if stack_input != 'none' and group_input == 'none':
+            returned = StackedBarChart.generate(all_similar_questions_query_set, stack_input)
+        elif stack_input == 'none' and group_input != 'none':
+            returned = GroupedBarChart.generate(all_similar_questions_query_set, group_input)
+        else:
+            returned = StackedGroupedBarChart.generate(all_similar_questions_query_set, stack_input, group_input)
+        script, div = returned[0]
+        table_html = returned[1].to_html()
+
+
+        return JsonResponse({'script': script, 'div': div, 'table_html': table_html})
 
 @login_required
 def dockets_dashboard(request):

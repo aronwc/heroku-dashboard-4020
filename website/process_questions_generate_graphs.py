@@ -8,7 +8,7 @@ import requests
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
 from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
-from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Category20c
+from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Viridis256
 from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.transform import factor_cmap, cumsum, jitter 
 from bokeh.models import ColumnDataSource, HoverTool
@@ -23,6 +23,8 @@ import pandas as pd
 import numpy as np
 from django.db.models import Count
 
+import itertools as it
+
 
 class BarChart:
 	''' 
@@ -34,9 +36,6 @@ class BarChart:
 	@classmethod
 	def generate(cls, question_query_set):
 		all_responses = list()
-		print('question_query_set in BarChart.generate: {}'.format(question_query_set))
-		print()
-		print([q.question_id for q in question_query_set])
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
 			#q.response_set.all().values('choice_clean_text')
@@ -46,7 +45,10 @@ class BarChart:
 		choices = list(counter.keys())
 		counts = list(counter.values())
 
-		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Spectral6))
+		df = pd.DataFrame.from_dict(counter, orient='index').reset_index()
+		df.rename(columns={'index': 'Choice Text', 0: 'Total'}, inplace=True)
+	
+		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Viridis256[0:256:256 // len(choices)][:len(choices)]))
 
 		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=str(question_query_set[0].question_clean_text),
 		           toolbar_location=None, tools="")
@@ -58,17 +60,25 @@ class BarChart:
 		#p.legend.location = "top_center"
 		p.xaxis.major_label_orientation = -math.pi/3
 
-		return components(p)
+		return [components(p), df]
+
+	def __str__(self):
+		return "bar"
+
+
+class StackedBarChart:
 
 	@classmethod
-	def generate_stacked(cls, question_query_set, stack_input):
+	def generate(cls, question_query_set, stack_input):
 		# show_fiture=False, return_html=True
 		if stack_input == 'court':
 			survey_attribute = 'survey__court_id'
 		elif stack_input == 'year':
 			survey_attribute = 'survey__survey_year'
 
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_text')))
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
+		#df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		#df1 = pd.DataFrame(Response.objects.filter(question__in=question_query_set_2).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
 
 		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
 		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
@@ -94,20 +104,8 @@ class BarChart:
 					toolbar_location='right', tools="hover", tooltips="$name @{}: @$name".format(survey_attribute))
 
 		p.vbar_stack(stackable_list, x=survey_attribute, width=0.4,
-					color=Spectral10[:len(stackable_list)], source=data, legend_label=stackable_list)
+					color=Viridis256[0:256:256 // len(stackable_list)][:len(stackable_list)], source=data, legend_label=stackable_list)
 
-		'''
-		data = dict()
-		for c in pivot.columns:
-			data[c] = pivot[c].tolist()
-		choices = data['choice_clean_text']
-
-		p = figure(x_range=choices, y_range=(0,300), height=500, title="Responses by court",
-					toolbar_location='right', tools="hover", tooltips="$name @choice_clean_text: @$name")
-
-		p.vbar_stack(['magistrate', 'municipal'], x='choice_clean_text', width=0.9,
-					color=["#c9d9d3", "#718dbf"], source=data, legend_label=['magistrate', 'municipal'])
-		'''
 		p.y_range.start = 0
 		p.x_range.range_padding = 0.1
 		p.xgrid.grid_line_color = None
@@ -116,7 +114,9 @@ class BarChart:
 		p.legend.location = "top_right"
 		p.legend.orientation = "vertical"
 		p.xaxis.major_label_orientation = -math.pi/3
-		return components(p)
+		return [components(p), pivot1]
+
+class GroupedBarChart:
 
 	@classmethod
 	def generate_grouped(cls, question_query_set, group_input):
@@ -125,7 +125,7 @@ class BarChart:
 		elif group_input == 'year':
 			survey_attribute = 'survey__survey_year'
 
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_text')))
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
 
 		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
 		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
@@ -159,11 +159,37 @@ class BarChart:
 		p.x_range.range_padding = 0.1
 		p.xaxis.major_label_orientation = 1
 		p.xgrid.grid_line_color = None
-		return components(p)
+		return [components(p), pivot1]
 
+class StackedGroupedBarChart:
 
-	def __str__(self):
-		return "bar"
+	@classmethod
+	def generate(cls, question_query_set, stack_input, group_input):
+		stack_group_mappings = {'court': 'survey__court_id', 'year': 'survey__survey_year'}
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(stack_group_mappings[stack_input], stack_group_mappings[group_input], 'choice_clean_text').annotate(count=Count('choice_clean_text')))
+		pivot1 = pd.pivot_table(df, values=['count'], index=[stack_group_mappings[stack_input], stack_group_mappings[group_input]], columns=['choice_clean_text'])
+
+		factors = list(pivot1.index)
+		factors = [(str(t[0]), str(t[1])) for t in factors] # cast all elements of factors to strings
+		pivot1.columns = pivot1.columns.get_level_values(1)
+		pivot1.fillna(0, inplace=True)
+		data = {'x': factors}
+		for c in pivot1.columns:
+			data[c] = pivot1[c].tolist()
+		source = ColumnDataSource(data=data)
+		p = figure(x_range=FactorRange(*factors), y_range=(0, pivot1.sum(1).max() * 1.05), 
+			height=700)
+		p.vbar_stack(list(map(str, pivot1.columns)), x='x', width=0.9, alpha=0.5, color=Viridis256[0:256:256 // len(pivot1.columns)][:len(pivot1.columns)], 
+			source=source, legend_label=list(map(str, pivot1.columns)))
+
+		p.y_range.start = 0
+		p.x_range.range_padding = 0.1
+		p.xaxis.major_label_orientation = 1
+		p.xgrid.grid_line_color = None
+		p.legend.location = "top_right"
+		p.legend.orientation = "vertical"
+		print(pivot1.index)
+		return [components(p), pivot1]
 
 class PieChart:
 	@classmethod
@@ -174,6 +200,8 @@ class PieChart:
 			#q.response_set.all().values('choice_clean_text')
 		counter = Counter(all_responses)
 		print(counter)
+		df = pd.DataFrame.from_dict(counter, orient='index').reset_index()
+		df.rename(columns={'index': 'Choice Text', 0: 'Total'}, inplace=True)
 
 		data = pd.Series(counter).reset_index(name="value").rename(columns={'index': 'response'})
 		data['angle'] = data['value']/data['value'].sum() * 2*math.pi
@@ -191,7 +219,7 @@ class PieChart:
 
 		script1, div1 = components(plot2)
 
-		return components(plot2)
+		return [components(plot2), df]
 
 	def __str__(self):
 		return "pie"
@@ -301,7 +329,7 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 								('single_choice', 'vertical'): [BarChart(), PieChart()],
 								('open_ended', 'essay'): [],
 								('open_ended', 'single'): [],
-								('multiple_choice', 'vertical'): [],
+								('multiple_choice', 'vertical'): [BarChart(), PieChart()],
 								('open_ended', 'numerical'): [],
 								('single_choice', 'vertical_two_col'): [],
 								('open_ended', 'multi'): [],
