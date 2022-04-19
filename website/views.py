@@ -396,7 +396,7 @@ class LoginView(LoginView):
     def my_view(request):
         print("this is myview")
         if not request.user.is_authenticated:
-            return render(request, 'myapp/error_login.html')
+            return render(request, 'website/error_login.html')
     # login_url = '/admin'
     # redirect_field_name = 'redirect_to'
 
@@ -420,3 +420,6 @@ class LoginView(LoginView):
 def logout_view(request):
     logout(request)
     
+@login_required
+def about_page(request):
+    return render(request, 'website/about_page.html')
