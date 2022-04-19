@@ -7,7 +7,6 @@ urlpatterns = [
 
 
     path('', views.survey_dashboard, name='survey_dashboard'),
-    path("graph/", views.plot, name="graph"),
     path('pretrial/', views.pretrial, name='pretrial'),
     path('survey-dashboard/', views.survey_dashboard, name='survey_dashboard'),
     path('dockets-dashboard/', views.dockets_dashboard, name='dockets_dashboard'),
@@ -20,11 +19,7 @@ urlpatterns = [
     path('stack-group-bar-chart/', views.stack_group_bar_chart, name="stack_group_bar_chart"),
     path('get-docket-charge-by-mag-num/', views.SearchResultsList.as_view(), name="get_docket_charge_by_mag_num"),
     #path('', views.index, name='index'),
-    path("firsttest", views.plot, name="dashboard"),
-    path("test", views.test, name="dashboard"),
-    path("dockets", views.psql, name="Query"),
-
-    path("pretrial", views.pretrial, name='pretrial'),
+    path("dockets", views.psql, name="dockets_query"),
     #path("upload-csv/", views.psql, name="responses_test"),
 
 ]

@@ -1,4 +1,4 @@
-{% extends "./base_template.html" %}
+{% extends "./base_dockets.html" %}
 
 {% load static %}
 <html>
@@ -9,7 +9,7 @@
 
 <head>
     
-    <title>Survey Dashboard</title>
+    <title>Dockets Dashboard</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -36,7 +36,7 @@
 <body>
   {% csrf_token %}
 
-  <div class="wrapper">
+  {% comment %} <div class="wrapper">
     <div class="formbg">
 
       <div class="one">
@@ -58,7 +58,24 @@
 
 
 
-  </div>
+  </div> {% endcomment %}
+  <div id="pivotContainer"></div>
+        <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
+
+        <script>
+            var pivot = new Flexmonster({
+                container: "pivotContainer",
+                componentFolder: "https://cdn.flexmonster.com/",
+                toolbar: true,
+                report: {
+                    dataSource: {
+                        type: "api",
+                        url: "http://localhost:9500",
+                        index: "dockets"
+                    }
+                }
+            });
+        </script>
 
 
 </body>
