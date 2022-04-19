@@ -106,6 +106,20 @@
         </div>
       </div>
 
+      <div id="multiple-choice-vertical-1">
+        <!-- Drop down for question 2-->
+        <div class="four">
+          <div class="form-group">
+            <label for="inputStatus">Question 2 (Optional)</label>
+            <p id="question-2-description"></p>
+            <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
+              <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
+            </select>
+          
+          </div>
+        </div>
+      </div>
+
 
       <div id="open-ended-essay-1">
         <div class="four">
@@ -149,6 +163,16 @@
 
     </div>
 
+    <div id="raw-data-div" class="raw-data-div" name="raw-data-div">
+      
+    </div>
+
+    <div id="download-btn-div" class="download-btn-div">
+      <button id="download-btn" type="button">
+            Download Table
+      </button>
+    </div>
+
     
 
 
@@ -176,7 +200,36 @@
 
     // hide all elements on second panel, show them conditionally after question 1 selected
     document.getElementById("single-choice-vertical-1").style.display = "none";
+    document.getElementById("multiple-choice-vertical-1").style.display = "none";
     document.getElementById("open-ended-essay-1").style.display = "none";
+    document.getElementById("download-btn").style.display = "none";
+     
+        
+
+    function downloadCSVFile(csv_data) {
+     
+        // Create CSV file object and feed our
+        // csv_data into it
+        CSVFile = new Blob([csv_data], { type: "text/csv" });
+     
+        // Create to temporary link to initiate
+        // download process
+        var temp_link = document.createElement('a');
+     
+        // Download csv file
+        temp_link.download = "table.csv";
+        var url = window.URL.createObjectURL(CSVFile);
+        temp_link.href = url;
+     
+        // This link should not be displayed
+        temp_link.style.display = "none";
+        document.body.appendChild(temp_link);
+     
+        // Automatically click the link to trigger download
+        temp_link.click();
+        document.body.removeChild(temp_link);
+    }
+
 
     // whenever court-dropdown is changed (i.e. clicked), execute this
     $('select[name=court-dropdown]').change(function () {
@@ -255,6 +308,10 @@
     // whenever question-dropdown-1 is changed (i.e. clicked), execute this
     $('select[name=question-dropdown-1]').change(function () {
           // MAKE SURE TO DELETE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
+          document.getElementById("single-choice-vertical-1").style.display = "none";
+          document.getElementById("multiple-choice-vertical-1").style.display = "none";
+          document.getElementById("open-ended-essay-1").style.display = "none";
+          document.getElementById("download-btn").style.display = "none";
 
 
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
@@ -276,25 +333,36 @@
                   console.log("in success function");
                   console.log(data);
 
-                  let html_data_graphs = '<option value="">---------</option>';
+                  let html_data_graphs = '<option value="" selected>---------</option>';
 
                   data.graphs.forEach(function (data) {
                     //console.log(data.graph_type);
                     html_data_graphs += `<option data-tokens="${JSON.stringify(data.graph_type)} value="${data.graph_type}"" >${data.graph_type}</option>`;
 
                   });
+
+                  let html_data_questions = '<option data-tokens="" value="">---------</option>';
+
+                  data.questions.forEach(function (data) {
+                    html_data_questions += `<option data-tokens="${JSON.stringify(data.question_clean_text)} value="${data.question_clean_text}"" >${JSON.stringify(data.question_clean_text)}</option>`;
+
+                  });
+
                   $('select[name=chart-dropdown]').html(html_data_graphs);
+                  $('select[name=question-dropdown-2]').html(html_data_questions);
+                  $('select[name=question-dropdown-2]').selectpicker('refresh');
                   console.log(data.question_type);
-                  console.log(data.question_subtype);
                   // WRITE CONDITIONS FOR ALL TUPLES HERE, SHOWING ELEMENTS ACCORDINGLY
                   if (data.question_type == "single_choice" && data.question_subtype == "vertical") {
                     document.getElementById("single-choice-vertical-1").style.display = "block";
-                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts";
+                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
                       document.getElementById("open-ended-essay-1").style.display = "block";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "single") { // DONE
 
                   } else if (data.question_type == "multiple_choice" && data.question_subtype == "vertical") { // DONE
+                    document.getElementById("multiple-choice-vertical-1").style.display = "block";
+                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
 
                   } else if (data.question_type == "open_ended" && data.question_subtype == "numerical") { // DONE
 
@@ -325,6 +393,7 @@
         
         //
       });
+
 
     document.getElementById("gen-button").onclick = function() {genButtonClickFunction()};
     let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
@@ -362,6 +431,7 @@
           console.log("success1");
           $('div[name=bokeh-div]').html(bokeh_data.div);
           $("head").append(bokeh_data.script);
+          $('div[name=raw-data-div]').html(result.table_html);
 
           if (chart_type == "bar") {
 
@@ -466,7 +536,9 @@
             modify_graph_button.onclick = function() {modifyButtonClickFunction()};
             modify_graph_button.innerHTML = "Modify Graph";
 
-            window.created_elements = [stack_label, group_label, stack_court_label, stack_court_input, stack_year_label, 
+            window.created_elements = [stack_court, stack_year, stack_none, group_court, 
+                                      group_year, group_none, stack_label, group_label, 
+                                      stack_court_label, stack_court_input, stack_year_label, 
                                       stack_year_input, stack_none_label, stack_none_input,
                                       group_court_label, group_court_input, group_year_label, 
                                       group_year_input, group_none_label, group_none_input,
@@ -511,9 +583,50 @@
           console.log("success2");
           // this code needs to incorporate what chart type selected because controls will differ
           console.log("finished click function");
+          document.getElementById("download-btn").style.display = "block";
         }
 
       });
+
+      document.getElementById("download-btn").onclick = function() {downloadButtonClickFunction()};
+
+      function downloadButtonClickFunction () {
+        // Variable to store the final csv data
+        var csv_data = [];
+
+
+        var table_div = document.getElementById("raw-data-div");
+
+
+        // Get each row data
+        var rows = table_div.getElementsByTagName('tr');
+        for (var i = 0; i < rows.length; i++) {
+     
+            // Get each column data
+            var cols = rows[i].querySelectorAll('td,th');
+     
+            // Stores each csv row data
+            var csvrow = [];
+            for (var j = 0; j < cols.length; j++) {
+     
+                // Get the text data of each cell of
+                // a row and push it to csvrow
+                csvrow.push(cols[j].innerHTML);
+            }
+     
+            // Combine each column value with comma
+            csv_data.push(csvrow.join(","));
+        }
+        // combine each row data with new line character
+        csv_data = csv_data.join('\n');
+     
+        /* We will use this function later to download
+        the data in a csv file downloadCSVFile(csv_data);
+        */
+        downloadCSVFile(csv_data);
+    
+      }
+
       // we add the court button function here because we want to use the drop down values from
       // when "View Graph" button was clicked (they mightve been changed without button being clicked)
       function modifyButtonClickFunction() {
@@ -546,6 +659,7 @@
             console.log("success1");
             $('div[name=bokeh-div]').html(bokeh_data.div);
             $("head").append(bokeh_data.script);
+            $('div[name=raw-data-div]').html(result.table_html);
           }
         });
       }
