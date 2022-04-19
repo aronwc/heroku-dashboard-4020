@@ -49,7 +49,7 @@ class BarChart:
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Spectral6))
 
 		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=str(question_query_set[0].question_clean_text),
-		           toolbar_location=None, tools="")
+		           toolbar_location=None, tools="hover", tooltips=[('Total','@value')])
 
 		p.vbar(x='choices', top='counts', width=0.9, color='color', source=source)
 
@@ -144,9 +144,11 @@ class PieChart:
 
 		data = pd.Series(counter).reset_index(name="value").rename(columns={'index': 'response'})
 		data['angle'] = data['value']/data['value'].sum() * 2*math.pi
+		data['percentage'] = (data['value']/data['value'].sum() / 100) * 360
+		print("angle of circle is ", data['percentage'])
 		data['color'] = Category20c[len(counter)]
 		plot2 = figure(height=350, title=str(question_query_set[0].question_clean_text), 
-		toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
+		toolbar_location=None, tools="hover", tooltips=[('Total','@value')], x_range=(-0.5, 1.0))
 
 		plot2.wedge(x=0, y=1, radius=0.4,
         start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
@@ -185,7 +187,7 @@ class ScatterPlot(): #can be used for categorical variables with continuous valu
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
 		# data = pd.Series(counter).reset_index(name="value").rename(columns={"index": "response"})
 		plot = figure(x_range = counts, y_range=choices, height=300, title=str(question_query_set[0]),
-		 toolbar_location=None, tools="hover", sizing_mode="stretch_width")
+		 toolbar_location=None, tools="hover", tooltips=[('Total','@value')], sizing_mode="stretch_width")
 
 		plot.circle(x="choice", y=jitter("count", width=0.6, range=plot.y_range), source=comdata, alpha=0.3)
 
@@ -225,7 +227,7 @@ class LineGraph():
 	def __str__(self):
 		return "line"
 
-class Table():
+class Counter_Table():
 	@classmethod
 	def generate(cls, question_query_set):
 		#output_file("survey_dashboard.html")
@@ -265,7 +267,7 @@ class Table():
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''
 	question_type_subtype_graph_type_mapping = {
-								('single_choice', 'vertical'): [BarChart(), PieChart()],
+								('single_choice', 'vertical'): [BarChart(), PieChart(), Counter_Table()],
 								('open_ended', 'essay'): [],
 								('open_ended', 'single'): [],
 								('multiple_choice', 'vertical'): [],
@@ -274,7 +276,7 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 								('open_ended', 'multi'): [],
 								('matrix', 'single'): [],
 								('matrix', 'rating'): [],
-								('datetime', 'time_only'): [],
+								('datetime', 'time_only'): [ScatterPlot()],
 								('single_choice', 'menu'): [],
 								('datetime', 'date_only'): []
 	}
