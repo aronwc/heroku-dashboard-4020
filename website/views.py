@@ -31,7 +31,7 @@ from collections import Counter
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
-chart_mappings = {'bar': BarChart(), 'pie': PieChart()}
+chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'two questions stacked bar': TwoQuestionsStackedBar()}
 
 @login_required
 def index(request):
@@ -157,13 +157,14 @@ def get_years_ajax(request):
             # this might need to be changed to survey start date
 
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
+            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected)
             #questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
+            questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
             print(e)
             print("ERROR")
             return HttpResponse('yo')
-        return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display.values('question_clean_text')), safe=False)
+        return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display_final.values('question_clean_text')), safe=False)
 
 @login_required
 def get_questions_ajax(request):
@@ -175,11 +176,13 @@ def get_questions_ajax(request):
             # these are the years that have been/are selected
             # this might need to be changed to survey start date
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected).distinct()
+            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected)
+            # we only want to display questions that are in a 'content set' that has responses
+            questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
 
             return HttpResponse('yo')
-        return JsonResponse(list(questions_to_display.values('question_clean_text')), safe=False)
+        return JsonResponse(list(questions_to_display_final.values('question_clean_text')), safe=False)
 
 @login_required
 def generate_panel_2_options(request):
@@ -187,7 +190,7 @@ def generate_panel_2_options(request):
         surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
         surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
         question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
-        qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
+        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
 
         # get all questions that are meaning-identical
@@ -195,7 +198,17 @@ def generate_panel_2_options(request):
         df = pd.DataFrame(all_similar_questions_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
         q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
         data = {'question_type': q_type, 'question_subtype': q_subtype}
+        data['questions'] = []
+        # for vertical subtype questions, we can pick a second vertical subtype question to compare by
+        # so we want to filter Question 2 dropdown to show only those
+        if q_subtype == "vertical":
+            qs3 = Question.objects.filter(question_subtype="vertical")
+            questions_2_to_display = (qs2 & qs3)
+            questions_2_to_display_final = questions_2_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
+            data['questions'] = list(questions_2_to_display_final.values('question_clean_text'))
+        
         data['graphs'] = get_graphs_ajax(request)
+
         return JsonResponse(data, safe=False)
 
 @login_required
@@ -219,20 +232,29 @@ def process_generate(request):
         # get the id of the first question in the database with an exact text match to the selected one
         question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         
-        qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
+        
+        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
 
         # get all questions that are meaning-identical
-        all_similar_questions_query_set = (qs1 & qs2)
+        all_similar_questions_query_set_1 = (qs1 & qs2)
+        
+        try:
+            # get the id of the first question in the database with an exact text match to the selected one
+            question_2_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_2']))[0].cluster_id
+            qs3 = Question.objects.filter(Q(cluster_id=question_2_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_2']))) # query set of all questions with matching cluster id OR clean text
+            # get all questions that are meaning-identical
+            all_similar_questions_query_set_2 = (qs3 & qs2)
+            print("len all_similar_questions_query_set_2: {}".format(len(all_similar_questions_query_set_2)))
+        except:
+            all_similar_questions_query_set_2 = ''
 
-        print('len all_similar_questions_query_set: {}'.format(len(all_similar_questions_query_set)))
-        #question_1_selected_unique = question_1_selected[0]
-        #rint(question_1_selected_unique)
+ 
 
         graph_type = str(json.loads(request.GET['chart_type'])[0])
         print(graph_type)
 
-        returned = chart_mappings[graph_type].generate(all_similar_questions_query_set)
+        returned = chart_mappings[graph_type].generate(all_similar_questions_query_set_1, question_query_set_2=all_similar_questions_query_set_2)
         script, div = returned[0]
         table_html = returned[1].to_html()
 
@@ -247,7 +269,7 @@ def stack_group_bar_chart(request):
         # get the id of the first question in the database with an exact text match to the selected one
         question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         
-        qs1 = Question.objects.filter(cluster_id=question_1_selected_first_instance_cluster_id) # query set of all questions with matching cluster id
+        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
 
         # get all questions that are meaning-identical

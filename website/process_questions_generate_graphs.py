@@ -34,7 +34,7 @@ class BarChart:
 	'''
 
 	@classmethod
-	def generate(cls, question_query_set):
+	def generate(cls, question_query_set, **kwargs):
 		all_responses = list()
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
@@ -65,11 +65,49 @@ class BarChart:
 	def __str__(self):
 		return "bar"
 
+class TwoQuestionsStackedBar:
+	@classmethod
+	def generate(cls, question_query_set, question_query_set_2, **kwargs):
+		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		df1 = pd.DataFrame(Response.objects.filter(question__in=question_query_set_2).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		print("\n" * 4)
+		print(df)
+		print("\n" * 4)
+		print(df1)
+		merged = df.merge(df1, how='outer', on='responder_id')
+		both_merged = merged[(merged['question__question_clean_text_x'].apply(lambda x: isinstance(x, str))) & (merged['question__question_clean_text_y'].apply(lambda x: isinstance(x, str)))]
+		counts_df = pd.crosstab(both_merged.choice_clean_text_x, both_merged.choice_clean_text_y)
+		stackable_list = list(counts_df.columns)
+		print("\n" * 4)
+		print(counts_df)
+		print("\n" * 4)
+		counts_df.reset_index(level=['choice_clean_text_x'], inplace=True)
+		data = dict()
+		for c in counts_df.columns:
+			data[c] = counts_df[c].tolist()
+		p = figure(x_range=data['choice_clean_text_x'], y_range=(0, counts_df[stackable_list].sum(1).max() * 1.05), height=700,
+					title="{} vs. {}".format(question_query_set[0].question_clean_text, question_query_set_2[0].question_clean_text),
+					toolbar_location='right', tools="hover", tooltips="$name @{}: @$name".format('choice_clean_text_x'))
+		p.vbar_stack(stackable_list, x='choice_clean_text_x', width=0.4,
+					color=Viridis256[0:256:256 // len(stackable_list)][:len(stackable_list)], source=data, legend_label=stackable_list)
+		p.y_range.start = 0
+		p.x_range.range_padding = 0.1
+		p.xgrid.grid_line_color = None
+		p.axis.minor_tick_line_color = None
+		p.outline_line_color = None
+		p.legend.location = "top_right"
+		p.legend.orientation = "vertical"
+		p.xaxis.major_label_orientation = -math.pi/3
+		counts_df.set_index('choice_clean_text_x', inplace=True)
+		return [components(p), counts_df]
+	def __str__(self):
+		return "two questions stacked bar"
+
 
 class StackedBarChart:
 
 	@classmethod
-	def generate(cls, question_query_set, stack_input):
+	def generate(cls, question_query_set, stack_input, **kwargs):
 		# show_fiture=False, return_html=True
 		if stack_input == 'court':
 			survey_attribute = 'survey__court_id'
@@ -92,6 +130,7 @@ class StackedBarChart:
 		#pivot.fillna(0, inplace=True)
 		pivot1.reset_index(level=[survey_attribute], inplace=True)
 		pivot1.fillna(0, inplace=True)
+		print(pivot1.columns)
 
 		data = dict()
 		for c in pivot1.columns:
@@ -116,10 +155,13 @@ class StackedBarChart:
 		p.xaxis.major_label_orientation = -math.pi/3
 		return [components(p), pivot1]
 
+	def __str__(self):
+		return "stacked bar"
+
 class GroupedBarChart:
 
 	@classmethod
-	def generate_grouped(cls, question_query_set, group_input):
+	def generate_grouped(cls, question_query_set, group_input, **kwargs):
 		if group_input == 'court':
 			survey_attribute = 'survey__court_id'
 		elif group_input == 'year':
@@ -161,10 +203,13 @@ class GroupedBarChart:
 		p.xgrid.grid_line_color = None
 		return [components(p), pivot1]
 
+	def __str__(self):
+		return "grouped bar"
+
 class StackedGroupedBarChart:
 
 	@classmethod
-	def generate(cls, question_query_set, stack_input, group_input):
+	def generate(cls, question_query_set, stack_input, group_input, **kwargs):
 		stack_group_mappings = {'court': 'survey__court_id', 'year': 'survey__survey_year'}
 		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(stack_group_mappings[stack_input], stack_group_mappings[group_input], 'choice_clean_text').annotate(count=Count('choice_clean_text')))
 		pivot1 = pd.pivot_table(df, values=['count'], index=[stack_group_mappings[stack_input], stack_group_mappings[group_input]], columns=['choice_clean_text'])
@@ -190,10 +235,12 @@ class StackedGroupedBarChart:
 		p.legend.orientation = "vertical"
 		print(pivot1.index)
 		return [components(p), pivot1]
+	def __str__(self):
+		return "stacked grouped bar"
 
 class PieChart:
 	@classmethod
-	def generate(cls, question_query_set):
+	def generate(cls, question_query_set, **kwargs):
 		all_responses = list()
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
@@ -227,7 +274,7 @@ class PieChart:
 class ScatterPlot(): #can be used for categorical variables with continuous values; eg time
 	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
 	@classmethod
-	def generate(cls, question_query_set):
+	def generate(cls, question_query_set, **kwargs):
 		all_responses = list()
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
@@ -326,10 +373,10 @@ class Table():
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''
 	question_type_subtype_graph_type_mapping = {
-								('single_choice', 'vertical'): [BarChart(), PieChart()],
+								('single_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
 								('open_ended', 'essay'): [],
 								('open_ended', 'single'): [],
-								('multiple_choice', 'vertical'): [BarChart(), PieChart()],
+								('multiple_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
 								('open_ended', 'numerical'): [],
 								('single_choice', 'vertical_two_col'): [],
 								('open_ended', 'multi'): [],

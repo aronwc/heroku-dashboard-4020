@@ -333,27 +333,36 @@
                   console.log("in success function");
                   console.log(data);
 
-                  let html_data_graphs = '<option value="">---------</option>';
+                  let html_data_graphs = '<option value="" selected>---------</option>';
 
                   data.graphs.forEach(function (data) {
                     //console.log(data.graph_type);
                     html_data_graphs += `<option data-tokens="${JSON.stringify(data.graph_type)} value="${data.graph_type}"" >${data.graph_type}</option>`;
 
                   });
+
+                  let html_data_questions = '<option data-tokens="" value="">---------</option>';
+
+                  data.questions.forEach(function (data) {
+                    html_data_questions += `<option data-tokens="${JSON.stringify(data.question_clean_text)} value="${data.question_clean_text}"" >${JSON.stringify(data.question_clean_text)}</option>`;
+
+                  });
+
                   $('select[name=chart-dropdown]').html(html_data_graphs);
+                  $('select[name=question-dropdown-2]').html(html_data_questions);
+                  $('select[name=question-dropdown-2]').selectpicker('refresh');
                   console.log(data.question_type);
-                  console.log(data.question_subtype);
                   // WRITE CONDITIONS FOR ALL TUPLES HERE, SHOWING ELEMENTS ACCORDINGLY
                   if (data.question_type == "single_choice" && data.question_subtype == "vertical") {
                     document.getElementById("single-choice-vertical-1").style.display = "block";
-                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts";
+                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
                       document.getElementById("open-ended-essay-1").style.display = "block";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "single") { // DONE
 
                   } else if (data.question_type == "multiple_choice" && data.question_subtype == "vertical") { // DONE
                     document.getElementById("multiple-choice-vertical-1").style.display = "block";
-                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts";
+                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
 
                   } else if (data.question_type == "open_ended" && data.question_subtype == "numerical") { // DONE
 
