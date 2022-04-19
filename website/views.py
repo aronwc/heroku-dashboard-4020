@@ -179,11 +179,10 @@ def process_generate(request):
             qs3 = Question.objects.filter(Q(cluster_id=question_2_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_2']))) # query set of all questions with matching cluster id OR clean text
             # get all questions that are meaning-identical
             all_similar_questions_query_set_2 = (qs3 & qs2)
+            print(json.loads(request.GET['question_2']))
             print("len all_similar_questions_query_set_2: {}".format(len(all_similar_questions_query_set_2)))
         except:
             all_similar_questions_query_set_2 = ''
-
- 
 
         graph_type = str(json.loads(request.GET['chart_type'])[0])
         print(graph_type)

@@ -92,21 +92,7 @@
     
     <div class="panel2">
 
-      <div id="single-choice-vertical-1">
-        <!-- Drop down for question 2-->
-        <div class="four">
-          <div class="form-group">
-            <label for="inputStatus">Question 2 (Optional)</label>
-            <p id="question-2-description"></p>
-            <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
-              <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
-            </select>
-          
-          </div>
-        </div>
-      </div>
-
-      <div id="multiple-choice-vertical-1">
+      <div id="vertical-1">
         <!-- Drop down for question 2-->
         <div class="four">
           <div class="form-group">
@@ -199,8 +185,7 @@
   <script >
 
     // hide all elements on second panel, show them conditionally after question 1 selected
-    document.getElementById("single-choice-vertical-1").style.display = "none";
-    document.getElementById("multiple-choice-vertical-1").style.display = "none";
+    document.getElementById("vertical-1").style.display = "none";
     document.getElementById("open-ended-essay-1").style.display = "none";
     document.getElementById("download-btn").style.display = "none";
      
@@ -308,8 +293,7 @@
     // whenever question-dropdown-1 is changed (i.e. clicked), execute this
     $('select[name=question-dropdown-1]').change(function () {
           // MAKE SURE TO DELETE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
-          document.getElementById("single-choice-vertical-1").style.display = "none";
-          document.getElementById("multiple-choice-vertical-1").style.display = "none";
+          document.getElementById("vertical-1").style.display = "none";
           document.getElementById("open-ended-essay-1").style.display = "none";
           document.getElementById("download-btn").style.display = "none";
 
@@ -354,14 +338,14 @@
                   console.log(data.question_type);
                   // WRITE CONDITIONS FOR ALL TUPLES HERE, SHOWING ELEMENTS ACCORDINGLY
                   if (data.question_type == "single_choice" && data.question_subtype == "vertical") {
-                    document.getElementById("single-choice-vertical-1").style.display = "block";
+                    document.getElementById("vertical-1").style.display = "block";
                     document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
                       document.getElementById("open-ended-essay-1").style.display = "block";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "single") { // DONE
 
                   } else if (data.question_type == "multiple_choice" && data.question_subtype == "vertical") { // DONE
-                    document.getElementById("multiple-choice-vertical-1").style.display = "block";
+                    document.getElementById("vertical-1").style.display = "block";
                     document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
 
                   } else if (data.question_type == "open_ended" && data.question_subtype == "numerical") { // DONE
@@ -401,10 +385,12 @@
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
       const question_1 = $('select[name=question-dropdown-1').val();
+      $('select[name=question-dropdown-2]').selectpicker('refresh');
       const question_2 = $('select[name=question-dropdown-2').val();
       const chart_type = $('select[name=chart-dropdown').val();
       console.log("in click function");
       console.log(chart_type);
+      console.log(question_2);
       $.ajax({
         type: "get",
         url: '{% url "website:process_generate" %}',
