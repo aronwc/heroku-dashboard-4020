@@ -1,18 +1,14 @@
 from collections import Counter
 from website.models import Response, Question, ResponseOptions, Survey 
 from bokeh.plotting import figure, output_file, show
-from bokeh.embed import components
-from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
 import requests
 
 from bokeh.plotting import figure, output_file, show
 from bokeh.embed import components
-from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker
+from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFormatter, FixedTicker, HoverTool
 from bokeh.palettes import Spectral6, Category20c, Spectral3, Spectral8, Spectral10, Viridis, Viridis256
 from bokeh.models.widgets import DataTable, TableColumn
 from bokeh.transform import factor_cmap, cumsum, jitter 
-from bokeh.models import ColumnDataSource, HoverTool
-from bokeh.plotting import figure
 from bokeh.sampledata.autompg import autompg_clean as df
 from bokeh.sampledata.commits import data as comdata
 from bokeh.io import show, output_file
@@ -273,7 +269,7 @@ class PieChart:
 	def __str__(self):
 		return "pie"
 
-class ScatterPlot(): #can be used for categorical variables with continuous values; eg time
+class ScatterPlot: #can be used for categorical variables with continuous values; eg time
 	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
 	@classmethod
 	def generate(cls, question_query_set, **kwargs):
@@ -311,31 +307,31 @@ class ScatterPlot(): #can be used for categorical variables with continuous valu
 	def __str__(self):
 		return "scatter"
 
-class HeatMap():
+class HeatMap:
 	@classmethod
-	def generate(cls, question_query_set):
+	def generate(cls, question_query_set, **kwargs):
 		return
 
 	def __str__(self):
 		return "heatmap"
 
-class BoxPlot():
+class BoxPlot:
 	@classmethod
-	def generate(cls, question_query_set):
+	def generate(cls, question_query_set, **kwargs):
 		return 
 
 	def __str__(self):
 		return "boxplot"
 
-class LineGraph():
+class LineGraph:
 	@classmethod
-	def generate(cls, question_query_set):
+	def generate(cls, question_query_set, **kwargs):
 		return 
 
 	def __str__(self):
 		return "line"
 
-class Counter_Table():
+class Counter_Table:
 	@classmethod
 	def generate(cls, question_query_set):
 		#output_file("survey_dashboard.html")
@@ -365,8 +361,11 @@ class Counter_Table():
 
 		data_table = DataTable(source=source, columns=columns, width=400, height=280)
 
+		df = pd.DataFrame.from_dict(counter, orient='index').reset_index()
+		df.rename(columns={'index': 'Choice Text', 0: 'Total'}, inplace=True)
+
 		#show(data_table)
-		return components(data_table)
+		return [components(data_table), df]
 
 	def __str__(self):
 		return "table"
@@ -375,10 +374,10 @@ class Counter_Table():
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''
 	question_type_subtype_graph_type_mapping = {
-								('single_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
+								('single_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar(), Counter_Table()],
 								('open_ended', 'essay'): [],
 								('open_ended', 'single'): [],
-								('multiple_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
+								('multiple_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar(), Counter_Table()],
 								('open_ended', 'numerical'): [],
 								('single_choice', 'vertical_two_col'): [],
 								('open_ended', 'multi'): [],

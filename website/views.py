@@ -19,7 +19,9 @@ from bokeh.models import ColumnDataSource, FactorRange, Range1d, DatetimeTickFor
 from bokeh.palettes import Spectral6, Category20c
 from bokeh.transform import factor_cmap, cumsum
 from bokeh.sampledata.autompg import autompg_clean as df
-
+from bokeh.models.widgets import DataTable, TableColumn
+from bokeh.io import show, output_file
+from bokeh.layouts import widgetbox
 from django.http import JsonResponse
 import json
 import pandas as pd
@@ -31,7 +33,7 @@ from collections import Counter
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
-chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'two questions stacked bar': TwoQuestionsStackedBar()}
+chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'two questions stacked bar': TwoQuestionsStackedBar(), 'table':Counter_Table()}
 
 @login_required
 def bennett_bokeh(request):
@@ -343,7 +345,8 @@ def pretrial(request):
     output = ', '.join([r.response_text for r in good_responses_list])
     possible_responses = [ '0', '1', '2', '3', '4', '5' ]
 
-    counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #ignore 99
+    #counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #ignore 99
+    counts = [100, 122, 413, 52, 54, 610]
     source = ColumnDataSource(dict(possible_responses=possible_responses, counts=counts))
     
     #Bar Graph
@@ -354,9 +357,9 @@ def pretrial(request):
     plot.y_range.start = 0
 
     script,div = components(plot)
-
+    print("bar components: ", components(plot))
     
-    #Pie Chart
+    # Pie Chart
     x = {
         '0':output.count('0'),
         '1':output.count('1'),
@@ -382,6 +385,26 @@ def pretrial(request):
     plot2.grid.grid_line_color = None
 
     script1, div1 = components(plot2)
+
+	# for q in question_query_set:
+	# 	all_responses += [r.choice_clean_text for r in q.response_set.all()]
+
+	# counter = Counter(all_responses)
+	# print(counter)
+    source = ColumnDataSource(data=dict(possible_responses=["yes", "no", "maybe", "possibly", "terrible", "zzz"], counts=[100, 122, 413, 52, 54, 610]))
+    columns = [
+		TableColumn(field="possible_responses", title="possible responses"),
+		TableColumn(field="counts", title="Counts"),
+	]
+    data_table = DataTable(source=source, columns=columns)
+
+	# df = pd.DataFrame.from_dict(counter, orient='index').reset_index()
+	# df.rename(columns={'index': 'Choice Text', 0: 'Total'}, inplace=True)
+    show(data_table)
+    #script1, div1 = data_table
+    print("data table components: ", data_table)
+		#show(data_table)
+	#return [components(data_table), df]
 
     return render(request, 'website/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
 
