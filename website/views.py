@@ -152,7 +152,7 @@ def generate_panel_2_options(request):
 
         return JsonResponse(data, safe=False)
 
-@login_required
+#@login_required
 def get_graphs_ajax(q_type, q_subtype):
 
     allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))

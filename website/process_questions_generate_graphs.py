@@ -68,23 +68,18 @@ class BarChart:
 
 class TwoQuestionsStackedBar:
 	@classmethod
-	def generate(cls, question_query_set, is_question, question_query_set_2, *args, **kwargs):
+	def generate(cls, question_query_set, is_question, *args, **kwargs):
 
-		print(kwargs)
-		print(question_query_set_2)
+
+		question_query_set_2 = kwargs['question_query_set_2']
 		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
 		df1 = pd.DataFrame(Response.objects.filter(question__in=question_query_set_2).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
-		print("\n" * 4)
-		print(df)
-		print("\n" * 4)
-		print(df1)
+
 		merged = df.merge(df1, how='outer', on='responder_id')
 		both_merged = merged[(merged['question__question_clean_text_x'].apply(lambda x: isinstance(x, str))) & (merged['question__question_clean_text_y'].apply(lambda x: isinstance(x, str)))]
 		counts_df = pd.crosstab(both_merged.choice_clean_text_x, both_merged.choice_clean_text_y)
 		stackable_list = list(counts_df.columns)
-		print("\n" * 4)
-		print(counts_df)
-		print("\n" * 4)
+
 		counts_df.reset_index(level=['choice_clean_text_x'], inplace=True)
 		data = dict()
 		for c in counts_df.columns:
