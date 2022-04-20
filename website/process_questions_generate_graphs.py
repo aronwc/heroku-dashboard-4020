@@ -51,7 +51,7 @@ class BarChart:
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Viridis256[0:256:256 // len(choices)][:len(choices)]))
 
 		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=str(question_query_set[0].question_clean_text),
-		           toolbar_location=None, tools="hover", tooltips=[('Total','@value')])
+		           toolbar_location=None, tools="hover", tooltips=('@choices: @counts'))
 
 		p.vbar(x='choices', top='counts', width=0.9, color='color', source=source)
 
