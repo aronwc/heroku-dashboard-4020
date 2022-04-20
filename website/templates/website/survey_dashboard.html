@@ -151,21 +151,41 @@
 
     </div>
 
-    <div id="bokeh-div" class="bokeh-div" name="bokeh-div">
+    <div id="graph-1" class="graph">
+
+      <div id="bokeh-div" class="bokeh-div" name="bokeh-div">
+
+      </div>
+
+      <div id="raw-data-div" class="raw-data-div" name="raw-data-div">
+        
+      </div>
+
+      <div id="download-btn-div" class="download-btn-div">
+        <button id="download-btn" type="button">
+              Download Table
+        </button>
+      </div>
 
     </div>
 
-    <div id="raw-data-div" class="raw-data-div" name="raw-data-div">
-      
-    </div>
+    <div id="graph-2" class="graph">
 
-    <div id="download-btn-div" class="download-btn-div">
-      <button id="download-btn" type="button">
-            Download Table
-      </button>
-    </div>
+      <div id="bokeh-div-1" class="bokeh-div" name="bokeh-div-1">
 
-    
+      </div>
+
+      <div id="raw-data-div-1" class="raw-data-div" name="raw-data-div-1">
+        
+      </div>
+
+      <div id="download-btn-div-1" class="download-btn-div" name="download-btn-div-1">
+        <button id="download-btn-1" type="button">
+              Download Table
+        </button>
+      </div>
+
+    </div>
 
 
 
@@ -195,6 +215,10 @@
     document.getElementById("matrix-single").style.display = "none";
     document.getElementById("open-ended-essay-1").style.display = "none";
     document.getElementById("download-btn").style.display = "none";
+    document.getElementById("download-btn-1").style.display = "none";
+
+    window.bokeh_divs_array = [document.getElementById("bokeh-div"), document.getElementById("bokeh-div-1")]
+    window.raw_data_divs_array = [document.getElementById("raw-data-div-1"), document.getElementById("raw-data-div-1")]
 
     function downloadCSVFile(csv_data) {
      
@@ -302,6 +326,7 @@
           document.getElementById("matrix-single").style.display = "none";
           document.getElementById("open-ended-essay-1").style.display = "none";
           document.getElementById("download-btn").style.display = "none";
+          document.getElementById("download-btn-1").style.display = "none";
 
 
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
@@ -393,23 +418,11 @@
                     return false;
                   }
 
-
               }
             
           });
         
       });
-
-    // whenever question-dropdown-1 is changed (i.e. clicked), execute this
-    $('select[name=sub-question-dropdown]').change(function () {
-      const court_s = $('select[name=court-dropdown]').val();  
-      const year_s = $('select[name=year-dropdown]').val();
-      const question_1 = $('select[name=question-dropdown-1]').val();
-      $('select[name=question-dropdown-2]').selectpicker('refresh');
-      const question_2 = $('select[name=question-dropdown-2]').val();
-      const sub_questions = $('select[name=sub-question-dropdown]').val();
-      const chart_type = $('select[name=chart-dropdown]').val();
-
 
     document.getElementById("gen-button").onclick = function() {genButtonClickFunction()};
     let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
@@ -449,9 +462,14 @@
           console.log("IN SUCCESS OF GENBUTTON2");
           var bokeh_data = result;
           console.log("success1");
-          $('div[name=bokeh-div]').html(bokeh_data.div);
-          $("head").append(bokeh_data.script);
-          $('div[name=raw-data-div]').html(result.table_html);
+          console.log(bokeh_data);
+
+          bokeh_data.div.forEach((data, index) => {
+            $(bokeh_divs_array[index]).html(data);
+            $("head").append(bokeh_data.script[index]);
+            $(raw_data_divs_array[index]).html(result.table_html[index]);
+          });
+          
 
           if (chart_type == "bar") {
 

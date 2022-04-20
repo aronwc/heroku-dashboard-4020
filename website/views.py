@@ -141,7 +141,7 @@ def generate_panel_2_options(request):
             questions_2_to_display = (qs2 & qs3)
             questions_2_to_display_final = questions_2_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
             data['questions'] = list(questions_2_to_display_final.values('question_clean_text'))
-        if q_type == 'matrix' and q_subtype == 'single':
+        elif q_type == 'matrix' and q_subtype == 'single':
             sub_questions = ResponseOptions.objects.filter(question__in=all_similar_questions_query_set)
             data['sub_questions'] = list(sub_questions.values('row_text').distinct())
         
@@ -162,6 +162,8 @@ def process_generate(request):
     if request.method == "GET":
         surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
         surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+        selected_sub_questions_text = json.loads(request.GET['sub_questions'])
+        print(selected_sub_questions_text)
 
         # get the id of the first question in the database with an exact text match to the selected one
         question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
@@ -172,8 +174,12 @@ def process_generate(request):
 
         # get all questions that are meaning-identical
         all_similar_questions_query_set_1 = (qs1 & qs2)
-        
-        try:
+
+        df = pd.DataFrame(all_similar_questions_query_set_1.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
+        q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
+        graph_type = str(json.loads(request.GET['chart_type'])[0])
+        all_similar_questions_query_set_2 = ''
+        if q_subtype == 'vertical':
             # get the id of the first question in the database with an exact text match to the selected one
             question_2_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_2']))[0].cluster_id
             qs3 = Question.objects.filter(Q(cluster_id=question_2_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_2']))) # query set of all questions with matching cluster id OR clean text
@@ -181,17 +187,24 @@ def process_generate(request):
             all_similar_questions_query_set_2 = (qs3 & qs2)
             print(json.loads(request.GET['question_2']))
             print("len all_similar_questions_query_set_2: {}".format(len(all_similar_questions_query_set_2)))
-        except:
-            all_similar_questions_query_set_2 = ''
+            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set_1, True, question_query_set_2=all_similar_questions_query_set_2)
+            script, div = returned[0]
+            table_html = returned[1].to_html()
+            return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
+        elif q_type == 'matrix' and q_subtype == 'single':
+            # list of QuerySets, one for all ResponseOptions rows for selected graphs
+            script_divs = list()
+            tables = list()
+            for sqt in selected_sub_questions_text:
+                sq = ResponseOptions.objects.filter(row_text=sqt)
+                returned = chart_mappings[graph_type].generate(sq, False)
+                script_divs.append(returned[0])
+                tables.append(returned[1].to_html())
+            print(script_divs[0])
 
-        graph_type = str(json.loads(request.GET['chart_type'])[0])
-        print(graph_type)
+            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
 
-        returned = chart_mappings[graph_type].generate(all_similar_questions_query_set_1, question_query_set_2=all_similar_questions_query_set_2)
-        script, div = returned[0]
-        table_html = returned[1].to_html()
-
-        return JsonResponse({'script': script, 'div': div, 'table_html': table_html})
+            
 
 @login_required
 def stack_group_bar_chart(request):
