@@ -382,7 +382,7 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 								('open_ended', 'numerical'): [],
 								('single_choice', 'vertical_two_col'): [],
 								('open_ended', 'multi'): [],
-								('matrix', 'single'): [],
+								('matrix', 'single'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
 								('matrix', 'rating'): [],
 								('datetime', 'time_only'): [ScatterPlot()],
 								('single_choice', 'menu'): [],

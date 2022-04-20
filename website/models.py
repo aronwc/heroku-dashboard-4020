@@ -42,8 +42,8 @@ class Response(models.Model):
 	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0) # Survey to Response = One to Many
 	collector_id = models.BigIntegerField()
 	response_text = models.CharField(max_length=5000) # longest in given response_cleaned csv was 4576
-	row_id = models.BigIntegerField(default=0)
-	choice_id = models.BigIntegerField()
+	row_id = models.FloatField(default=0)
+	choice_id = models.FloatField(default=0)
 	other_id = models.BigIntegerField()
 	choice_text = models.CharField(max_length=200) # max is 195 in given data
 	choice_clean_text = models.CharField(max_length=200, default='')
@@ -56,9 +56,9 @@ class Response(models.Model):
 class ResponseOptions(models.Model):
 	response_option_id = models.CharField(max_length=40)
 	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0)
-	row_id = models.BigIntegerField()
+	row_id = models.FloatField(default=0)
 	row_text = models.CharField(max_length=300)
-	choice_id = models.BigIntegerField()
+	choice_id = models.FloatField(default=0)
 	response_option_text = models.CharField(max_length=500)
 	question = models.ForeignKey(Question, on_delete=models.CASCADE, default=0) # Question to ResponseOptions = One to Many
 
