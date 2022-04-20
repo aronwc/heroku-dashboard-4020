@@ -6,14 +6,47 @@
 <!DOCTYPE html>
 
 <style>
+    .separator-type, .title-type, .intro-type, .content-type .intro-type p {
+        position: relative;
+    }
     .about-section {
-        padding: 50px;
+        padding: 107px 0px 102px 0px !important;
         text-align: center;
         background-color: #ffda45;
         color: dark gray;
         font-family: "Lucida Console", Helvetica, Arial;
       }
-      
+      .red-border {
+        width: 50%;
+        border-bottom: 1px solid #d2282e;
+        margin: 0 auto;
+        height: 16px;
+    }
+    .company-sections h2, .careers-sections h2, .perks-section h2 {
+        font-weight: 700;
+        font-size: 45px;
+    }
+    .company-sections h2, .company-sections h3, .careers-sections h2, .perks-section h2 {
+        font-family: 'Helvetica', sans-serif;
+    }
+    .ct-u-size18 {
+        font-size: 18px;
+    }
+    .ct-u-fontWeight100 {
+        font-weight: 100;
+    }
+    .marginTop40 {
+        margin-top: 40px !important;
+    }
+    .ct-u-paddingBoth100 {
+        padding: 100px 15px;
+    }
+    .whistle-center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        filter: invert(1);
+      }
 </style>
 
 <head>
@@ -36,31 +69,37 @@
 
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/dockets_dashboard.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'website/css/base_template.css' %}">
-
+    
 
 
 </head>
 
 
 <body>
-    <div class="about-section">
-        <h1>About Us</h1>
-        <p>Throughout the last decade, inequalities in the criminal justice system have been exposed bringing a demand for reform. 
-            From unfair sentencing policies to racial profiling, many organizations have dedicated time and money to rectify the judiciary system in order to eliminate bias and corruption. 
-            Our group has teamed up with Court Watch Nola to design a dashboard to effectively communicate their findings and perform additional data analysis. 
-            We also plan to assist them on improving their back end and working with their data consultant to understand their data pipeline. 
-            Through data science techniques, we plan to clean and manage the data in order to create powerful visualizations and statistics displayed on a dashboard. 
-            Currently, the organization releases an annual report of approximately 100 pages with figures and recommendations but would also like to share social media friendly infographics of their findings.
-            With our dashboards, we will further CW NOLA’s mission of transparency by making its work more visible and accessible to the public. 
-        </p>
-        {% comment %} <p>
-            To consolidate their data flow, we built a more persistent way of holding their data on the backend, as well as producing an interactive user interface which can create convenient visualizations. To do this we have used:
-            - Heroku cloud platform: host database and site
-            - Django web framework: queries database
-            - PostgreSQL: relational database
-            - Supplemented CW NOLA data with Magistrate Court Dockets
-        </p> {% endcomment %}
-    </div>
+    <section class="story-section company-sections ct-u-paddingBoth100 paddingBothHalf noTopMobilePadding" id="section"> 
+        <img src="http://www.courtwatchnola.org/wp-content/uploads/2021/11/cwn-footer-icon.png" class="whistle-center">
+        <div class="container text-center">
+            <h2>
+                Dashboard Introduction
+            </h2>
+            <div class="col-md-8 col-md-offset-2">
+                <div class="red-border">
+                    &nbsp;
+                </div>
+                <p class="ct-u-size18 ct-u-fontWeight100 marginTop40">
+                    Throughout the last decade, inequalities in the criminal justice system have been exposed bringing a demand for reform. 
+                    From unfair sentencing policies to racial profiling, many organizations have dedicated time and money to rectify the judiciary system in order to eliminate bias and corruption. 
+                    Our group has teamed up with Court Watch Nola to design a dashboard to effectively communicate their findings and perform additional data analysis. 
+                    We also plan to assist them on improving their back end and working with their data consultant to understand their data pipeline. 
+                    Through data science techniques, we plan to clean and manage the data in order to create powerful visualizations and statistics displayed on a dashboard. 
+                    Currently, the organization releases an annual report of approximately 100 pages with figures and recommendations but would also like to share social media friendly infographics of their findings.
+                    With our dashboards, we will further CW NOLA’s mission of transparency by making its work more visible and accessible to the public. 
+                </p><!-- <a class="ct-u-marginTop60 btn btn-solodev-red btn-fullWidth-sm ct-u-size19" href="#">Learn More</a> -->
+            </div>
+            
+        </div>
+    </section>
+    {% comment %} <img src="https://i.imgur.com/o6oQFw3.jpg" style="max-width: 100%;"> {% endcomment %}
 </body>
 
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js"></script>
