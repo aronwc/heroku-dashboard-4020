@@ -374,10 +374,10 @@ class Counter_Table:
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''
 	question_type_subtype_graph_type_mapping = {
-								('single_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar(), Counter_Table()],
+								('single_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
 								('open_ended', 'essay'): [],
 								('open_ended', 'single'): [],
-								('multiple_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar(), Counter_Table()],
+								('multiple_choice', 'vertical'): [BarChart(), PieChart(), TwoQuestionsStackedBar()],
 								('open_ended', 'numerical'): [],
 								('single_choice', 'vertical_two_col'): [],
 								('open_ended', 'multi'): [],

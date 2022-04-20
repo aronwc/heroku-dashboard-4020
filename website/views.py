@@ -151,7 +151,7 @@ def generate_panel_2_options(request):
 
         return JsonResponse(data, safe=False)
 
-#@login_required
+@login_required
 def get_graphs_ajax(q_type, q_subtype):
 
     allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))
@@ -335,7 +335,6 @@ def psql(request):
     return render(request, 'website/responses_test.html')
 
 @login_required
-# do pie chart here with bokeh
 def pretrial(request):
     good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
     #print("list is ", good_qs_list)
@@ -355,20 +354,19 @@ def pretrial(request):
 
     plot.xgrid.grid_line_color = None
     plot.y_range.start = 0
-
+    print("plot: ", plot)
     script,div = components(plot)
-    print("bar components: ", components(plot))
+    #print("bar components: ", components(plot))
     
     # Pie Chart
     x = {
-        '0':output.count('0'),
-        '1':output.count('1'),
-        '2':output.count('2'),
-        '3':output.count('3'),
-        '4':output.count('4'),
-        '5':output.count('5'),
+        '0':345,
+        '1':31,
+        '2':657,
+        '3':864,
+        '4':56,
+        '5':200,
     }
-    print(x)
     new_source = pd.Series(x).reset_index(name='counts').rename(columns={'index':'possible_responses'})
     new_source['angle'] = new_source['counts']/new_source['counts'].sum() *2*pi
     new_source['color'] = Category20c[len(x)]
@@ -384,7 +382,7 @@ def pretrial(request):
     plot2.axis.visible = False
     plot2.grid.grid_line_color = None
 
-    script1, div1 = components(plot2)
+    #script1, div1 = components(plot2)
 
 	# for q in question_query_set:
 	# 	all_responses += [r.choice_clean_text for r in q.response_set.all()]
@@ -405,6 +403,7 @@ def pretrial(request):
     print("data table components: ", data_table)
 		#show(data_table)
 	#return [components(data_table), df]
+    script1, div1 = components(data_table)
 
     return render(request, 'website/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
 
