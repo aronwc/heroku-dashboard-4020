@@ -21,7 +21,7 @@ from website.models import Response, Question, ResponseOptions, Survey, DocketCh
 def run():
 
 	# delete all initial data
-	# Response.objects.all().delete()
+	Response.objects.all().delete()
 	Question.objects.all().delete()
 	ResponseOptions.objects.all().delete()
 	Survey.objects.all().delete()
@@ -113,25 +113,27 @@ def run():
 
 
 	
-	# print("Beginning Responses")
-	# # RESPONSES
-	# # ----------
-	# # transfer response csv/df to database
-	# # WORKS
+	print("Beginning Responses")
+	# RESPONSES
+	# ----------
+	# transfer response csv/df to database
+	# WORKS
 
-	# for index, row in responses_df.iterrows():
-	# 	# we use 0 instead of np.nan because IntegerField's cannot take nans
-	# 	fields = [row[i] if (type(row[i]) != float or (5 <= i <= 6)) else 0 for i in range(len(list(row)))]
-	# 	# some data validation for length of str fields
-	# 	fields[3] = str(fields[3])[:5000]
-	# 	fields[8] = str(fields[8])[:200]
-	# 	r = Response.objects.create(survey=Survey.objects.get(survey_id=fields[0]), collector_id=fields[1], responder_id=fields[2],
-	# 							question=Question.objects.get(question_id=fields[4]), response_text=fields[3], 
-	# 							row_id=fields[5], choice_id=fields[6], other_id=fields[7], choice_text=fields[8],
-	# 							choice_clean_text=str(fields[9]))
+	for index, row in responses_df.iterrows():
+		# we use 0 instead of np.nan because IntegerField's cannot take nans
+		fields = [row[i] if (type(row[i]) != float or (5 <= i <= 6)) else 0 for i in range(len(list(row)))]
+		# some data validation for length of str fields
+		fields[3] = str(fields[3])[:5000]
+		fields[8] = str(fields[8])[:200]
+		print(fields[3])
+		print(fields[8])
+		r = Response.objects.create(survey=Survey.objects.get(survey_id=fields[0]), collector_id=fields[1], responder_id=fields[2],
+								question=Question.objects.get(question_id=fields[4]), response_text=fields[3], 
+								row_id=fields[5], choice_id=fields[6], other_id=fields[7], choice_text=fields[8],
+								choice_clean_text=str(fields[9]))
 	
 	
-	# print("Done Responses {}".format('\n'*3))
+	print("Done Responses {}".format('\n'*3))
 
 
 	

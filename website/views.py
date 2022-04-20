@@ -113,12 +113,12 @@ def get_questions_ajax(request):
             # this might need to be changed to survey start date
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
             questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected)
-            print("questions: ", questions_to_display)
             # we only want to display questions that are in a 'content set' that has responses
             questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
 
             return HttpResponse('yo')
+        print("questions: ", questions_to_display_final)
         return JsonResponse(list(questions_to_display_final.values('question_clean_text')), safe=False)
 
 @login_required
