@@ -81,13 +81,6 @@
         </div>
       </div>
 
-
-
-
-
-      
-
-
     </div>
     
     <div class="panel2">
@@ -105,6 +98,19 @@
           </div>
         </div>
       </div>
+
+      <div id="matrix-single">
+        <div class="four">
+          <div class="form-group">
+            <label for="inputStatus">Sub-Questions </label>
+            <select id="sub-question-dropdown" class="selectpicker" name="sub-question-dropdown" data-show-subtext="true" data-live-search="true" multiple>
+              <option selected disabled>Choose sub-question(s)</option>
+            </select>
+        
+          </div>
+        </div>
+      </div>
+
 
 
       <div id="open-ended-essay-1">
@@ -186,10 +192,9 @@
 
     // hide all elements on second panel, show them conditionally after question 1 selected
     document.getElementById("vertical-1").style.display = "none";
+    document.getElementById("matrix-single").style.display = "none";
     document.getElementById("open-ended-essay-1").style.display = "none";
     document.getElementById("download-btn").style.display = "none";
-     
-        
 
     function downloadCSVFile(csv_data) {
      
@@ -294,6 +299,7 @@
     $('select[name=question-dropdown-1]').change(function () {
           // MAKE SURE TO DELETE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
           document.getElementById("vertical-1").style.display = "none";
+          document.getElementById("matrix-single").style.display = "none";
           document.getElementById("open-ended-essay-1").style.display = "none";
           document.getElementById("download-btn").style.display = "none";
 
@@ -325,19 +331,20 @@
 
                   });
 
-                  let html_data_questions = '<option data-tokens="" value="">---------</option>';
-
-                  data.questions.forEach(function (data) {
-                    html_data_questions += `<option data-tokens="${JSON.stringify(data.question_clean_text)} value="${data.question_clean_text}"" >${JSON.stringify(data.question_clean_text)}</option>`;
-
-                  });
 
                   $('select[name=chart-dropdown]').html(html_data_graphs);
-                  $('select[name=question-dropdown-2]').html(html_data_questions);
-                  $('select[name=question-dropdown-2]').selectpicker('refresh');
+                  
                   console.log(data.question_type);
                   // WRITE CONDITIONS FOR ALL TUPLES HERE, SHOWING ELEMENTS ACCORDINGLY
                   if (data.question_type == "single_choice" && data.question_subtype == "vertical") {
+                    let html_data_questions = '<option data-tokens="" value="">---------</option>';
+
+                    data.questions.forEach(function (data) {
+                      html_data_questions += `<option data-tokens="${JSON.stringify(data.question_clean_text)} value="${data.question_clean_text}"" >${JSON.stringify(data.question_clean_text)}</option>`;
+
+                    });
+                    $('select[name=question-dropdown-2]').html(html_data_questions);
+                    $('select[name=question-dropdown-2]').selectpicker('refresh');
                     document.getElementById("vertical-1").style.display = "block";
                     document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
@@ -345,6 +352,14 @@
                   } else if (data.question_type == "open_ended" && data.question_subtype == "single") { // DONE
 
                   } else if (data.question_type == "multiple_choice" && data.question_subtype == "vertical") { // DONE
+                    let html_data_questions = '<option data-tokens="" value="">---------</option>';
+
+                    data.questions.forEach(function (data) {
+                      html_data_questions += `<option data-tokens="${JSON.stringify(data.question_clean_text)} value="${data.question_clean_text}"" >${JSON.stringify(data.question_clean_text)}</option>`;
+
+                    });
+                    $('select[name=question-dropdown-2]').html(html_data_questions);
+                    $('select[name=question-dropdown-2]').selectpicker('refresh');
                     document.getElementById("vertical-1").style.display = "block";
                     document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
 
@@ -355,6 +370,15 @@
                   } else if (data.question_type == "open_ended" && data.question_subtype == "multi") { // DONE
 
                   } else if (data.question_type == "matrix" && data.question_subtype == "single") { // DONE
+                    document.getElementById("matrix-single").style.display = "block";
+                    let html_data_sub_questions = '<option data-tokens="" value="">---------</option>';
+
+                    data.sub_questions.forEach(function (data) {
+                      html_data_sub_questions += `<option data-tokens="${JSON.stringify(data.row_text)} value="${data.row_text}"" >${JSON.stringify(data.row_text)}</option>`;
+
+                    });
+                    $('select[name=sub-question-dropdown]').html(html_data_sub_questions);
+                    $('select[name=sub-question-dropdown]').selectpicker('refresh');
 
                   } else if (data.question_type == "matrix" && data.question_subtype == "rating") { // DONE
 
@@ -374,9 +398,17 @@
             
           });
         
-        
-        //
       });
+
+    // whenever question-dropdown-1 is changed (i.e. clicked), execute this
+    $('select[name=sub-question-dropdown]').change(function () {
+      const court_s = $('select[name=court-dropdown]').val();  
+      const year_s = $('select[name=year-dropdown]').val();
+      const question_1 = $('select[name=question-dropdown-1]').val();
+      $('select[name=question-dropdown-2]').selectpicker('refresh');
+      const question_2 = $('select[name=question-dropdown-2]').val();
+      const sub_questions = $('select[name=sub-question-dropdown]').val();
+      const chart_type = $('select[name=chart-dropdown]').val();
 
 
     document.getElementById("gen-button").onclick = function() {genButtonClickFunction()};
@@ -384,10 +416,11 @@
     function genButtonClickFunction() {
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
-      const question_1 = $('select[name=question-dropdown-1').val();
+      const question_1 = $('select[name=question-dropdown-1]').val();
       $('select[name=question-dropdown-2]').selectpicker('refresh');
-      const question_2 = $('select[name=question-dropdown-2').val();
-      const chart_type = $('select[name=chart-dropdown').val();
+      const question_2 = $('select[name=question-dropdown-2]').val();
+      const sub_questions = $('select[name=sub-question-dropdown]').val();
+      const chart_type = $('select[name=chart-dropdown]').val();
       console.log("in click function");
       console.log(chart_type);
       console.log(question_2);
@@ -399,6 +432,7 @@
           'years': JSON.stringify(year_s),
           'question_1': JSON.stringify(question_1),
           'question_2': JSON.stringify(question_2),
+          'sub_questions': JSON.stringify(sub_questions),
           'chart_type': JSON.stringify(chart_type)
         },
         success: function(result) {

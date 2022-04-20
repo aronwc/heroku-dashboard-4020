@@ -133,6 +133,7 @@ def generate_panel_2_options(request):
         q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
         data = {'question_type': q_type, 'question_subtype': q_subtype}
         data['questions'] = []
+        data['sub_questions'] = list()
         # for vertical subtype questions, we can pick a second vertical subtype question to compare by
         # so we want to filter Question 2 dropdown to show only those
         if q_subtype == "vertical":
@@ -140,19 +141,18 @@ def generate_panel_2_options(request):
             questions_2_to_display = (qs2 & qs3)
             questions_2_to_display_final = questions_2_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
             data['questions'] = list(questions_2_to_display_final.values('question_clean_text'))
+        if q_type == 'matrix' and q_subtype == 'single':
+            sub_questions = ResponseOptions.objects.filter(question__in=all_similar_questions_query_set)
+            data['sub_questions'] = list(sub_questions.values('row_text').distinct())
         
-        data['graphs'] = get_graphs_ajax(request)
+        data['graphs'] = get_graphs_ajax(q_type, q_subtype)
 
         return JsonResponse(data, safe=False)
 
-@login_required
-def get_graphs_ajax(request):
-    question_1_str = json.loads(request.GET['question_1'])
+#@login_required
+def get_graphs_ajax(q_type, q_subtype):
 
-    question_1_selected = Question.objects.filter(question_clean_text=question_1_str)
-
-
-    allowable_graph_types = determine_valid_graph_types((question_1_selected[0].question_type, question_1_selected[0].question_subtype))
+    allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))
     data = [{"graph_type":str(v)} for v in allowable_graph_types]
     print("data is: ", data)
     return data
