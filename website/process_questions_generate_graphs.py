@@ -30,11 +30,16 @@ class BarChart:
 	'''
 
 	@classmethod
-	def generate(cls, question_query_set, **kwargs):
+	def generate(cls, question_query_set, is_question, *args, **kwargs):
 		all_responses = list()
-		for q in question_query_set:
-			all_responses += [r.choice_clean_text for r in q.response_set.all()]
-			#q.response_set.all().values('choice_clean_text')
+		if is_question:
+			for q in question_query_set:
+				all_responses += [r.choice_clean_text for r in q.response_set.all()]
+			title = str(question_query_set[0].question_clean_text)
+			
+		else:
+			all_responses = [r.choice_clean_text for r in Response.objects.filter(choice_id__in=question_query_set.values('choice_id').distinct())]
+			title = str(question_query_set[0].row_text)
 		counter = Counter(all_responses)
 		print(counter)
 
@@ -46,7 +51,7 @@ class BarChart:
 	
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts, color=Viridis256[0:256:256 // len(choices)][:len(choices)]))
 
-		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=str(question_query_set[0].question_clean_text),
+		p = figure(x_range=choices, y_range=(0,max(counts)*1.05), height=500, title=title,
 		           toolbar_location=None, tools="hover", tooltips=('@choices: @counts'))
 
 		p.vbar(x='choices', top='counts', width=0.9, color='color', source=source)
@@ -63,7 +68,10 @@ class BarChart:
 
 class TwoQuestionsStackedBar:
 	@classmethod
-	def generate(cls, question_query_set, question_query_set_2, **kwargs):
+	def generate(cls, question_query_set, is_question, question_query_set_2, *args, **kwargs):
+
+		print(kwargs)
+		print(question_query_set_2)
 		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
 		df1 = pd.DataFrame(Response.objects.filter(question__in=question_query_set_2).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
 		print("\n" * 4)
@@ -103,7 +111,7 @@ class TwoQuestionsStackedBar:
 class StackedBarChart:
 
 	@classmethod
-	def generate(cls, question_query_set, stack_input, **kwargs):
+	def generate(cls, question_query_set, stack_input, *args, **kwargs):
 		# show_fiture=False, return_html=True
 		if stack_input == 'court':
 			survey_attribute = 'survey__court_id'
@@ -157,7 +165,7 @@ class StackedBarChart:
 class GroupedBarChart:
 
 	@classmethod
-	def generate_grouped(cls, question_query_set, group_input, **kwargs):
+	def generate_grouped(cls, question_query_set, group_input, *args, **kwargs):
 		if group_input == 'court':
 			survey_attribute = 'survey__court_id'
 		elif group_input == 'year':
@@ -205,7 +213,7 @@ class GroupedBarChart:
 class StackedGroupedBarChart:
 
 	@classmethod
-	def generate(cls, question_query_set, stack_input, group_input, **kwargs):
+	def generate(cls, question_query_set, stack_input, group_input, *args, **kwargs):
 		stack_group_mappings = {'court': 'survey__court_id', 'year': 'survey__survey_year'}
 		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(stack_group_mappings[stack_input], stack_group_mappings[group_input], 'choice_clean_text').annotate(count=Count('choice_clean_text')))
 		pivot1 = pd.pivot_table(df, values=['count'], index=[stack_group_mappings[stack_input], stack_group_mappings[group_input]], columns=['choice_clean_text'])
@@ -236,7 +244,7 @@ class StackedGroupedBarChart:
 
 class PieChart:
 	@classmethod
-	def generate(cls, question_query_set, **kwargs):
+	def generate(cls, question_query_set, *args, **kwargs):
 		all_responses = list()
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
@@ -272,7 +280,7 @@ class PieChart:
 class ScatterPlot: #can be used for categorical variables with continuous values; eg time
 	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
 	@classmethod
-	def generate(cls, question_query_set, **kwargs):
+	def generate(cls, question_query_set, *args, **kwargs):
 		all_responses = list()
 		for q in question_query_set:
 			all_responses += [r.choice_clean_text for r in q.response_set.all()]
