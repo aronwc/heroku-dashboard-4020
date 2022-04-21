@@ -160,7 +160,7 @@ class StackedBarChart:
 class GroupedBarChart:
 
 	@classmethod
-	def generate_grouped(cls, question_query_set, group_input, *args, **kwargs):
+	def generate(cls, question_query_set, group_input, *args, **kwargs):
 		if group_input == 'court':
 			survey_attribute = 'survey__court_id'
 		elif group_input == 'year':

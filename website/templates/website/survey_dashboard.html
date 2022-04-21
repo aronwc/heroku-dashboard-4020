@@ -421,8 +421,13 @@
       });
 
     document.getElementById("gen-button").onclick = function() {genButtonClickFunction()};
+    
     let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
     function genButtonClickFunction() {
+      document.getElementById("bar-char-controls-div").style.backgroundColor = "white";
+      // need to modify below to iterate through array of graph divs
+      document.getElementById("graph-1").style.backgroundColor = "white";
+      document.getElementById("graph-2").style.backgroundColor = "white";
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
       const question_1 = $('select[name=question-dropdown-1]').val();
@@ -450,8 +455,16 @@
             value.remove(); // remove element from HTML of page
           }
           console.log(total_clicks_view_graph_button);
+          // delete all previous graph controls and graph accessories (tables, download buttons, etc.)
           if (total_clicks_view_graph_button > 0) {
             created_elements.forEach(deleteElements);
+            raw_data_divs_array.forEach(function (element) {
+              $(element).html("");
+            });
+
+            bokeh_divs_array.forEach(function (element) {
+              $(element).html("");
+            });
           }
 
           total_clicks_view_graph_button += 1;
@@ -459,24 +472,32 @@
           var bokeh_data = result;
           console.log("success1");
           console.log(bokeh_data);
+          document.getElementById("graph-1").style.backgroundColor = "#f1f1f1";
+          document.getElementById("graph-2").style.backgroundColor = "#f1f1f1";
 
           bokeh_data.div.forEach((data, index) => {
             $(bokeh_divs_array[index]).html(data);
             $("head").append(bokeh_data.script[index]);
             $(raw_data_divs_array[index]).html(result.table_html[index]);
           });
+
           
 
           if (chart_type == "bar") {
 
+            document.getElementById("bar-char-controls-div").style.backgroundColor = "#fae363";
+
+            let stack_div = document.createElement("div");
+            stack_div.id = "stack-div";
+            stack_div.classList.add("stack-div");
+
             // create HTML elements for Stack_by radio select
             let stack_label = document.createElement("label");
-            stack_label.innerHTML = "Attribute to Stack by:";
+            stack_label.innerHTML = "Attribute to Stack by:    ";
             stack_label.classList.add("stack-label");
 
-            let stack_court = document.createElement("div");
-            stack_court.id = "stack-court-div";
-            stack_court.classList.add("stack-court-div");
+            
+
             let stack_court_input = document.createElement("input");
             stack_court_input.type = "radio";
             stack_court_input.id = "stack-court-radio";
@@ -488,10 +509,6 @@
             stack_court_input.classList.add("stack-court-input");
             
 
-
-            let stack_year = document.createElement("div");
-            stack_year.id = "stack-year-div";
-            stack_year.classList.add("stack-year-div");
             let stack_year_input = document.createElement("input");
             stack_year_input.type = "radio";
             stack_year_input.id = "stack-year-radio";
@@ -502,9 +519,6 @@
             stack_year_label.innerHTML = "Year";
             stack_year_input.classList.add("stack-year-input");
 
-            let stack_none = document.createElement("div");
-            stack_none.id = "stack-none-div";
-            stack_none.classList.add("stack-none-div");
             let stack_none_input = document.createElement("input");
             stack_none_input.type = "radio";
             stack_none_input.id = "stack-none-radio";
@@ -516,14 +530,16 @@
             stack_none_label.innerHTML = "None";
             stack_none_input.classList.add("stack-none-input");
 
+            let group_div = document.createElement("div");
+            group_div.id = "group-div";
+            group_div.classList.add("group-div");
+
              // create HTML elements for Group_by radio select
             let group_label = document.createElement("label");
-            group_label.innerHTML = "Attribute to Group by:"
+            group_label.innerHTML = "Attribute to Group by:    "
             group_label.classList.add("group-label");
 
-            let group_court = document.createElement("div");
-            group_court.id = "group-court-div";
-            group_court.classList.add("group-court-div");
+            
             let group_court_input = document.createElement("input");
             group_court_input.type = "radio";
             group_court_input.id = "group-court-radio";
@@ -534,9 +550,6 @@
             group_court_label.innerHTML = "Court";
             group_court_input.classList.add("group-court-input");
 
-            let group_year = document.createElement("div");
-            group_year.id = "group-year-div";
-            group_year.classList.add("group-year-div");
             let group_year_input = document.createElement("input");
             group_year_input.type = "radio";
             group_year_input.id = "group-year-radio";
@@ -547,9 +560,6 @@
             group_year_label.innerHTML = "Year";
             group_year_input.classList.add("group-year-input");
 
-            let group_none = document.createElement("div");
-            group_none.id = "group-none-div";
-            group_none.classList.add("group-none-div");
             let group_none_input = document.createElement("input");
             group_none_input.type = "radio";
             group_none_input.id = "group-none-radio";
@@ -570,39 +580,40 @@
             modify_graph_button.onclick = function() {modifyButtonClickFunction()};
             modify_graph_button.innerHTML = "Modify Graph";
 
-            window.created_elements = [stack_court, stack_year, stack_none, group_court, 
-                                      group_year, group_none, stack_label, group_label, 
+            window.created_elements = [stack_div, group_div, stack_label, group_label, 
                                       stack_court_label, stack_court_input, stack_year_label, 
                                       stack_year_input, stack_none_label, stack_none_input,
                                       group_court_label, group_court_input, group_year_label, 
                                       group_year_input, group_none_label, group_none_input,
                                       modify_graph_button];
 
-            document.getElementById("bar-char-controls-div").appendChild(stack_label);
-            document.getElementById("bar-char-controls-div").appendChild(stack_court);
-            document.getElementById("stack-court-div").appendChild(stack_court_label);
-            document.getElementById("stack-court-div").appendChild(stack_court_input);
-
-            document.getElementById("bar-char-controls-div").appendChild(stack_year);
-            document.getElementById("stack-year-div").appendChild(stack_year_label);
-            document.getElementById("stack-year-div").appendChild(stack_year_input);
-
-            document.getElementById("bar-char-controls-div").appendChild(stack_none);
-            document.getElementById("stack-none-div").appendChild(stack_none_label);
-            document.getElementById("stack-none-div").appendChild(stack_none_input);
             
-            document.getElementById("bar-char-controls-div").appendChild(group_label);
-            document.getElementById("bar-char-controls-div").appendChild(group_court);
-            document.getElementById("group-court-div").appendChild(group_court_label);
-            document.getElementById("group-court-div").appendChild(group_court_input);
+            document.getElementById("bar-char-controls-div").appendChild(stack_div);
+            document.getElementById("stack-div").appendChild(stack_label);
 
-            document.getElementById("bar-char-controls-div").appendChild(group_year);
-            document.getElementById("group-year-div").appendChild(group_year_label);
-            document.getElementById("group-year-div").appendChild(group_year_input);
+            document.getElementById("stack-div").appendChild(stack_court_label);
+            document.getElementById("stack-div").appendChild(stack_court_input);
 
-            document.getElementById("bar-char-controls-div").appendChild(group_none);
-            document.getElementById("group-none-div").appendChild(group_none_label);
-            document.getElementById("group-none-div").appendChild(group_none_input);
+
+            document.getElementById("stack-div").appendChild(stack_year_label);
+            document.getElementById("stack-div").appendChild(stack_year_input);
+
+            document.getElementById("stack-div").appendChild(stack_none_label);
+            document.getElementById("stack-div").appendChild(stack_none_input);
+
+            document.getElementById("bar-char-controls-div").appendChild(group_div);
+            document.getElementById("group-div").appendChild(group_label);
+
+            document.getElementById("group-div").appendChild(group_court_label);
+            document.getElementById("group-div").appendChild(group_court_input);
+
+            document.getElementById("group-div").appendChild(group_year_label);
+            document.getElementById("group-div").appendChild(group_year_input);
+
+            document.getElementById("group-div").appendChild(group_none_label);
+            document.getElementById("group-div").appendChild(group_none_input);
+            
+            
             
             document.getElementById("bar-char-controls-div").appendChild(modify_graph_button);
 
@@ -691,9 +702,18 @@
             console.log("in stack success");
             var bokeh_data = result;
             console.log("success1");
-            $('div[name=bokeh-div]').html(bokeh_data.div);
-            $("head").append(bokeh_data.script);
-            $('div[name=raw-data-div]').html(result.table_html);
+            raw_data_divs_array.forEach(function (element) {
+              $(element).html("");
+            });
+
+            bokeh_divs_array.forEach(function (element) {
+              $(element).html("");
+            });
+            bokeh_data.div.forEach((data, index) => {
+              $(bokeh_divs_array[index]).html(data);
+              $("head").append(bokeh_data.script[index]);
+              $(raw_data_divs_array[index]).html(result.table_html[index]);
+            });
           }
         });
       }
