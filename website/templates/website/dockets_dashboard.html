@@ -5,6 +5,28 @@
 {% block content %}
 <!DOCTYPE html>
 
+<style>
+  .yellow-border {
+    width: 25%;
+    border-bottom: 5px solid #f8d568;
+    margin: 0 auto;
+    height: 16px;
+  }
+  .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .whistle-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    filter: invert(1);
+  }
+  .bolded {
+    font-weight: bold;
+  }
+</style>
 
 
 <head>
@@ -54,10 +76,6 @@
     </div>
 
     {% include "./search_results.html" %} 
-
-
-
-
   </div> {% endcomment %}
   <div id="pivotContainer"></div>
         <script src="https://cdn.flexmonster.com/flexmonster.js"></script>
@@ -76,6 +94,19 @@
                 }
             });
         </script>
+  <br><br><br><br>
+  <img src="http://www.courtwatchnola.org/wp-content/uploads/2021/11/cwn-footer-icon.png" class="whistle-center">
+  <br>
+  <center><h3><b><u>Example of use from local Flexmonster Panel:</b></u></h4></center>
+  <video controls class="center">
+    <source src="https://i.imgur.com/qETVmiv.mp4" type=video/mp4>
+  </video>
+  <br>
+  <center><h3><b><u>Example of use from import csv:</b></u></h4></center>
+  <video controls class="center">
+    <source src="https://i.imgur.com/jULAjq3.mp4" type=video/mp4>
+  </video>
+  <br><br>
 
 
 </body>
