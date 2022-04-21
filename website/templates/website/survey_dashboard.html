@@ -1,10 +1,55 @@
-{% extends "./base_template.html" %}
+{% extends "./base_survey.html" %}
 
 {% load static %}
 <html>
 {% block content %}
 <!DOCTYPE html>
-
+<style>
+	.btn {
+    background-color: light gray;
+    border: none;
+    color: black;
+    padding: 12px 30px;
+    cursor: pointer;
+    font-size: 20px;
+  }
+  
+  .btn:hover {
+    background-color: RoyalBlue;
+    color: white;
+  }
+  .generate-button {
+    background-color: white;
+    border: none;
+    color: black;
+    padding: 12px 30px;
+    cursor: pointer;
+    border-radius:10px;
+  }
+  .generate-button:hover {
+    background-color: RoyalBlue;
+    color: white;
+  }
+  .custom-select {
+    cursor: pointer;
+    border: 1px solid var(--select-border);
+    border-radius: 3px;
+  }
+  .modify-btn {
+    grid-row: 4;
+    grid-column: 3;
+    background-color: light gray;
+    border: none;
+    color: black;
+    padding: 1px;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  .modify-btn:hover {
+    background-color: RoyalBlue;
+    color: white;
+  }
+</style>
 
 <head>
     <title>Survey Dashboard</title>
@@ -140,7 +185,7 @@
       </div>
 
       <div class="six">
-        <button id="gen-button" name="generate-graph" class="gen-button">View Graph</button>
+        <button id="gen-button" name="generate-graph" class="generate-button" style="border:none">View Graph</button>
       </div>
 
     </div>
@@ -148,7 +193,6 @@
     <div id="bar-char-controls-div" class="bar-chart-controls">
 
     </div>
-
     <div id="graph-1" class="graph">
 
       <div id="bokeh-div" class="bokeh-div" name="bokeh-div">
@@ -160,7 +204,7 @@
       </div>
 
       <div id="download-btn-div" class="download-btn-div">
-        <button id="download-btn" type="button">
+        <button id="download-btn" type="button" class="btn">
               Download Table
         </button>
       </div>
@@ -178,7 +222,7 @@
       </div>
 
       <div id="download-btn-div-1" class="download-btn-div" name="download-btn-div-1">
-        <button id="download-btn-1" type="button">
+        <button id="download-btn-1" type="button" class="btn">
               Download Table
         </button>
       </div>
@@ -569,6 +613,7 @@
             modify_graph_button.classList.add("modify-btn");
             modify_graph_button.onclick = function() {modifyButtonClickFunction()};
             modify_graph_button.innerHTML = "Modify Graph";
+            modify_graph_button.className = "modify-btn";
 
             window.created_elements = [stack_court, stack_year, stack_none, group_court, 
                                       group_year, group_none, stack_label, group_label, 
