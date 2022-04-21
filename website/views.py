@@ -33,7 +33,7 @@ from collections import Counter
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
-chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'two questions stacked bar': TwoQuestionsStackedBar(), 'table':Counter_Table()}
+chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'stacked bar': StackedBarChart(), 'table': Counter_Table()}
 
 @login_required
 def bennett_bokeh(request):
@@ -121,6 +121,18 @@ def get_questions_ajax(request):
         print("questions: ", questions_to_display_final)
         return JsonResponse(list(questions_to_display_final.values('question_clean_text')), safe=False)
 
+def get_graphs_ajax(q_type, q_subtype):
+
+    allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))
+    data = [{"graph_type":str(v)} for v in allowable_graph_types]
+    print("data is: ", data)
+    return data
+
+def get_question_type_subtype(question_query_set):
+    df = pd.DataFrame(question_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
+    q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
+    return q_type, q_subtype
+
 @login_required
 def generate_panel_2_options(request):
     if request.method == "GET":
@@ -128,12 +140,19 @@ def generate_panel_2_options(request):
         surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
         question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
+        global qs2
         qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
+        '''
+        we can define these variables as global here so that we only execute the code to get them once
+        any time Question 1 drop down is clicked, this function is called, so these variables will always reflect that selection
+        which is what we want!
+        '''
 
+        global all_similar_questions_query_set, q_type, q_subtype
         # get all questions that are meaning-identical
         all_similar_questions_query_set = (qs1 & qs2)
-        df = pd.DataFrame(all_similar_questions_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
-        q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
+        q_type, q_subtype = get_question_type_subtype(all_similar_questions_query_set)
+
         data = {'question_type': q_type, 'question_subtype': q_subtype}
         data['questions'] = []
         data['sub_questions'] = list()
@@ -152,34 +171,11 @@ def generate_panel_2_options(request):
 
         return JsonResponse(data, safe=False)
 
-#@login_required
-def get_graphs_ajax(q_type, q_subtype):
-
-    allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))
-    data = [{"graph_type":str(v)} for v in allowable_graph_types]
-    print("data is: ", data)
-    return data
     
 @login_required
 def process_generate(request):
     if request.method == "GET":
-        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
         selected_sub_questions_text = json.loads(request.GET['sub_questions'])
-        print(selected_sub_questions_text)
-
-        # get the id of the first question in the database with an exact text match to the selected one
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
-        
-        
-        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
-        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
-
-        # get all questions that are meaning-identical
-        all_similar_questions_query_set_1 = (qs1 & qs2)
-
-        df = pd.DataFrame(all_similar_questions_query_set_1.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
-        q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
         graph_type = str(json.loads(request.GET['chart_type'])[0])
         all_similar_questions_query_set_2 = ''
         if q_subtype == 'vertical':
@@ -190,7 +186,7 @@ def process_generate(request):
             all_similar_questions_query_set_2 = (qs3 & qs2)
             print(json.loads(request.GET['question_2']))
             print("len all_similar_questions_query_set_2: {}".format(len(all_similar_questions_query_set_2)))
-            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set_1, True, question_query_set_2=all_similar_questions_query_set_2)
+            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set, True, question_query_set_2=all_similar_questions_query_set_2)
             script, div = returned[0]
             table_html = returned[1].to_html()
             return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
@@ -199,46 +195,48 @@ def process_generate(request):
             script_divs = list()
             tables = list()
             for sqt in selected_sub_questions_text:
-                sq = ResponseOptions.objects.filter(row_text=sqt)
-                returned = chart_mappings[graph_type].generate(sq, False)
+                sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
+                returned = chart_mappings[graph_type].generate(sq_query_set, False)
                 script_divs.append(returned[0])
                 tables.append(returned[1].to_html())
-            print(script_divs[0])
 
-            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
+            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables, 
+                                'question_type': q_type, 'question_subtype': q_subtype,
+                                'all_similar_questions_query_set': all_similar_questions_query_set})
 
             
 
 @login_required
 def stack_group_bar_chart(request):
     if request.method == "GET":
-        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-
-        # get the id of the first question in the database with an exact text match to the selected one
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         
-        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
-        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
-
-        # get all questions that are meaning-identical
-        all_similar_questions_query_set = (qs1 & qs2)
-
-
         stack_input = json.loads(request.GET['stack_input'])
         group_input = json.loads(request.GET['group_input'])
-
         if stack_input != 'none' and group_input == 'none':
-            returned = StackedBarChart.generate(all_similar_questions_query_set, stack_input)
+            chart_class = StackedBarChart()
         elif stack_input == 'none' and group_input != 'none':
-            returned = GroupedBarChart.generate(all_similar_questions_query_set, group_input)
+            chart_class = GroupedBarChart()
         else:
-            returned = StackedGroupedBarChart.generate(all_similar_questions_query_set, stack_input, group_input)
-        script, div = returned[0]
-        table_html = returned[1].to_html()
+            chart_class = StackedGroupedBarChart()
 
+        script_divs = list()
+        tables = list()
 
-        return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
+        if q_subtype == 'vertical':
+            returned = chart_class.generate(all_similar_questions_query_set, stack_input, group_input)
+            script, div = returned[0]
+            table_html = returned[1].to_html()
+            return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
+        elif q_type == 'matrix' and q_subtype == 'single':
+            script_divs = list()
+            tables = list()
+            selected_sub_questions_text = json.loads(request.GET['sub_questions'])
+            for sqt in selected_sub_questions_text:
+                sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
+                returned = chart_class.generate(sq_query_set, stack_input, group_input)
+                script_divs.append(returned[0])
+                tables.append(returned[1].to_html())
+            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
 
 @login_required
 def dockets_dashboard(request):

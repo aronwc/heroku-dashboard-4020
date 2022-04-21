@@ -357,8 +357,6 @@
             
           });
         
-        
-        //
       });
 
     // whenever question-dropdown-1 is changed (i.e. clicked), execute this
@@ -497,6 +495,8 @@
         },
         success: function(result) {
           console.log("IN SUCCESS OF GENBUTTON");
+          window.current_question_type = result.question_type;
+          window.current_question_subtype = result.question_subtype;
           function deleteElements(value, index, array) {
             value.remove(); // remove element from HTML of page
           }
@@ -683,11 +683,7 @@
       function downloadButtonClickFunction () {
         // Variable to store the final csv data
         var csv_data = [];
-
-
         var table_div = document.getElementById("raw-data-div");
-
-
         // Get each row data
         var rows = table_div.getElementsByTagName('tr');
         for (var i = 0; i < rows.length; i++) {
@@ -739,9 +735,10 @@
             'years': JSON.stringify(year_s),
             'question_1': JSON.stringify(question_1),
             'question_2': JSON.stringify(question_2),
+            'sub_questions': JSON.stringify(sub_questions),
             'chart_type': JSON.stringify(chart_type),
             'stack_input': JSON.stringify(stack_input),
-            'group_input': JSON.stringify(group_input)
+            'group_input': JSON.stringify(group_input),
           },
           success: function(result) {
             console.log("in stack success");
