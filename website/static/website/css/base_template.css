@@ -28,7 +28,7 @@
 }
 
 .header a img {
-    max-height: 50px;
+    max-height: 70px;
 }
 
 /* Change the background color on mouse-over */
@@ -58,8 +58,3 @@
   .header-right {
     float: none;
   }
-
-
-
-
-

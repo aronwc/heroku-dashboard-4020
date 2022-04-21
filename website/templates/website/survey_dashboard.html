@@ -6,12 +6,13 @@
 <!DOCTYPE html>
 <style>
 	.btn {
-    background-color: light gray;
+    background-color: white;
     border: none;
     color: black;
     padding: 12px 30px;
     cursor: pointer;
     font-size: 20px;
+    margin-top: 20px
   }
   
   .btn:hover {
@@ -44,6 +45,7 @@
     padding: 1px;
     cursor: pointer;
     border-radius: 5px;
+    text: 100px;
   }
   .modify-btn:hover {
     background-color: RoyalBlue;
@@ -528,8 +530,6 @@
           
 
           if (chart_type == "bar") {
-
-            document.getElementById("bar-char-controls-div").style.backgroundColor = "#fae363";
 
             let stack_div = document.createElement("div");
             stack_div.id = "stack-div";
