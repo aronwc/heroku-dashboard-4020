@@ -238,7 +238,7 @@ def stack_group_bar_chart(request):
         table_html = returned[1].to_html()
 
 
-        return JsonResponse({'script': script, 'div': div, 'table_html': table_html})
+        return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
 
 @login_required
 def dockets_dashboard(request):
