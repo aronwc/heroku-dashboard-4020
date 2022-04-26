@@ -130,7 +130,7 @@
     
     <div class="panel2">
 
-      <div id="vertical-1">
+      <div id="vertical-1" class="question-type-div">
         <!-- Drop down for question 2-->
         <div class="four">
           <div class="form-group">
@@ -144,7 +144,7 @@
         </div>
       </div>
 
-      <div id="matrix-single">
+      <div id="matrix-single" class="question-type-div">
         <div class="four">
           <div class="form-group">
             <label for="inputStatus">Sub-Questions </label>
@@ -158,7 +158,7 @@
 
 
 
-      <div id="open-ended-essay-1">
+      <div id="open-ended-essay-1" class="question-type-div">
         <div class="four">
           <div class="form-group">
             <label for="inputStatus">Word/Phrase</label>
@@ -175,7 +175,7 @@
       </div>
 
       <!-- Drop down for chart type -->
-      <div class="five">
+      <div id="chart-drop-down-div" class="five">
         <div class="form-group">
           <label for="inputStatus">Chart Type </label>
           <select id="chart-dropdown" name="chart-dropdown" class="form-control-sm custom-select" method="get" multiple>
@@ -195,6 +195,7 @@
     <div id="bar-char-controls-div" class="bar-chart-controls">
 
     </div>
+
     <div id="graph-1" class="graph">
 
       <div id="bokeh-div" class="bokeh-div" name="bokeh-div">
@@ -231,6 +232,114 @@
 
     </div>
 
+    <div id="graph-3" class="graph">
+
+      <div id="bokeh-div-3" class="bokeh-div" name="bokeh-div-3">
+
+      </div>
+
+      <div id="raw-data-div-3" class="raw-data-div" name="raw-data-div-3">
+        
+      </div>
+
+      <div id="download-btn-div-3" class="download-btn-div">
+        <button id="download-btn-3" type="button" class="btn">
+              Download Table
+        </button>
+      </div>
+
+    </div>
+
+    <div id="graph-4" class="graph">
+
+      <div id="bokeh-div-4" class="bokeh-div" name="bokeh-div-4">
+
+      </div>
+
+      <div id="raw-data-div-4" class="raw-data-div" name="raw-data-div-4">
+        
+      </div>
+
+      <div id="download-btn-div-4" class="download-btn-div" name="download-btn-div-4">
+        <button id="download-btn-4" type="button" class="btn">
+              Download Table
+        </button>
+      </div>
+
+    </div>
+
+    <div id="graph-5" class="graph">
+
+      <div id="bokeh-div-5" class="bokeh-div" name="bokeh-div-5">
+
+      </div>
+
+      <div id="raw-data-div-5" class="raw-data-div" name="raw-data-div-5">
+        
+      </div>
+
+      <div id="download-btn-div-5" class="download-btn-div">
+        <button id="download-btn-5" type="button" class="btn">
+              Download Table
+        </button>
+      </div>
+
+    </div>
+
+    <div id="graph-6" class="graph">
+
+      <div id="bokeh-div-6" class="bokeh-div" name="bokeh-div-6">
+
+      </div>
+
+      <div id="raw-data-div-6" class="raw-data-div" name="raw-data-div-6">
+        
+      </div>
+
+      <div id="download-btn-div-6" class="download-btn-div" name="download-btn-div-6">
+        <button id="download-btn-6" type="button" class="btn">
+              Download Table
+        </button>
+      </div>
+
+    </div>
+
+    <div id="graph-7" class="graph">
+
+      <div id="bokeh-div-7" class="bokeh-div" name="bokeh-div-7">
+
+      </div>
+
+      <div id="raw-data-div-7" class="raw-data-div" name="raw-data-div-7">
+        
+      </div>
+
+      <div id="download-btn-div-7" class="download-btn-div">
+        <button id="download-btn-7" type="button" class="btn">
+              Download Table
+        </button>
+      </div>
+
+    </div>
+
+    <div id="graph-8" class="graph">
+
+      <div id="bokeh-div-8" class="bokeh-div" name="bokeh-div-8">
+
+      </div>
+
+      <div id="raw-data-div-8" class="raw-data-div" name="raw-data-div-8">
+        
+      </div>
+
+      <div id="download-btn-div-8" class="download-btn-div" name="download-btn-div-8">
+        <button id="download-btn-8" type="button" class="btn">
+              Download Table
+        </button>
+      </div>
+
+    </div>
+
 
 
   </div>
@@ -252,15 +361,21 @@
 
   <script>
 
-    // hide all elements on second panel, show them conditionally after question 1 selected
-    document.getElementById("vertical-1").style.display = "none";
-    document.getElementById("matrix-single").style.display = "none";
-    document.getElementById("open-ended-essay-1").style.display = "none";
-    document.getElementById("download-btn").style.display = "none";
-    document.getElementById("download-btn-1").style.display = "none";
+    
+    $(document).ready(function(){
+      // hide all elements on second panel, show them conditionally after question 1 selected
+      $("div.panel2").find("div.question-type-div").hide();
+      window.graph_divs_array = $("div.graph").toArray(); // this is jquery to select all div elements with class = "graph"
+      window.bokeh_divs_array = $("div.bokeh-div").toArray();
+      window.raw_data_divs_array = $("div.raw-data-div").toArray();
+      window.download_btn_divs_array = $("div.download-btn-div").toArray();
 
-    window.bokeh_divs_array = [document.getElementById("bokeh-div"), document.getElementById("bokeh-div-1")]
-    window.raw_data_divs_array = [document.getElementById("raw-data-div-1"), document.getElementById("raw-data-div-1")]
+      $("div.graph").find("div.download-btn-div").hide(); // jquery to hide all descendants of each div with class = "graph"
+
+    });
+
+
+
 
     function downloadCSVFile(csv_data) {
      
@@ -361,12 +476,8 @@
 
     // whenever question-dropdown-1 is changed (i.e. clicked), execute this
     $('select[name=question-dropdown-1]').change(function () {
-          // MAKE SURE TO DELETE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
-          document.getElementById("vertical-1").style.display = "none";
-          document.getElementById("matrix-single").style.display = "none";
-          document.getElementById("open-ended-essay-1").style.display = "none";
-          document.getElementById("download-btn").style.display = "none";
-          document.getElementById("download-btn-1").style.display = "none";
+          // MAKE SURE TO HIDE ALL PANEL 2 ELEMENTS FOR CLICKS AFTER FIRST
+          $("div.panel2").find("div.question-type-div").hide();
 
 
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
@@ -387,6 +498,7 @@
               success: function (data) {   // `data` is from `get_topics_ajax` view function
                   console.log("in success function");
                   console.log(data);
+           
 
                   let html_data_graphs = '<option value="" selected>---------</option>';
 
@@ -410,7 +522,12 @@
                     });
                     $('select[name=question-dropdown-2]').html(html_data_questions);
                     $('select[name=question-dropdown-2]').selectpicker('refresh');
-                    document.getElementById("vertical-1").style.display = "block";
+                    $("#vertical-1").show();
+                    
+                    
+                    
+                    console.log("RIGHT BEFORE")
+                    //document.getElementById("vertical-1").style.display = "block";
                     document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
                       document.getElementById("open-ended-essay-1").style.display = "block";
@@ -425,7 +542,7 @@
                     });
                     $('select[name=question-dropdown-2]').html(html_data_questions);
                     $('select[name=question-dropdown-2]').selectpicker('refresh');
-                    document.getElementById("vertical-1").style.display = "block";
+                    $("#vertical-1").show();
                     document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
 
                   } else if (data.question_type == "open_ended" && data.question_subtype == "numerical") { // DONE
@@ -435,7 +552,7 @@
                   } else if (data.question_type == "open_ended" && data.question_subtype == "multi") { // DONE
 
                   } else if (data.question_type == "matrix" && data.question_subtype == "single") { // DONE
-                    document.getElementById("matrix-single").style.display = "block";
+                    $("#matrix-single").show();
                     let html_data_sub_questions = '<option data-tokens="" value="">---------</option>';
 
                     data.sub_questions.forEach(function (data) {
@@ -468,10 +585,11 @@
     
     let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
     function genButtonClickFunction() {
+      $("div.graph").find("div.download-btn-div").hide(); // hide any previously shown download buttons 
+
       document.getElementById("bar-char-controls-div").style.backgroundColor = "white";
       // need to modify below to iterate through array of graph divs
-      document.getElementById("graph-1").style.backgroundColor = "white";
-      document.getElementById("graph-2").style.backgroundColor = "white";
+      $("div.graph").css("background-color", "white"); // jquery to sett all div.graphs' bg color to white
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
       const question_1 = $('select[name=question-dropdown-1]').val();
@@ -516,15 +634,15 @@
           total_clicks_view_graph_button += 1;
           console.log("IN SUCCESS OF GENBUTTON2");
           var bokeh_data = result;
-          console.log("success1");
-          console.log(bokeh_data);
-          document.getElementById("graph-1").style.backgroundColor = "#f1f1f1";
-          document.getElementById("graph-2").style.backgroundColor = "#f1f1f1";
+
+          $("div.graph").css("background-color", "#f1f1f1");
+
 
           bokeh_data.div.forEach((data, index) => {
             $(bokeh_divs_array[index]).html(data);
             $("head").append(bokeh_data.script[index]);
             $(raw_data_divs_array[index]).html(result.table_html[index]);
+            $(download_btn_divs_array[index]).show();
           });
 
           
@@ -673,7 +791,7 @@
           console.log("success2");
           // this code needs to incorporate what chart type selected because controls will differ
           console.log("finished click function");
-          document.getElementById("download-btn").style.display = "block";
+          $("div.graph").find("div.bokeh-div", "div.raw-data-div", "div.download-btn-div").show();
         }
 
       });

@@ -33,7 +33,7 @@ from collections import Counter
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
-chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'stacked bar': StackedBarChart(), 'table': Counter_Table()}
+chart_mappings = {'bar': BarChart(), 'stacked bar': StackedBarChart(), 'grouped bar': GroupedBarChart(), 'pie': PieChart(), 'table': Counter_Table()}
 
 @login_required
 def bennett_bokeh(request):
@@ -186,7 +186,7 @@ def process_generate(request):
             all_similar_questions_query_set_2 = (qs3 & qs2)
             print(json.loads(request.GET['question_2']))
             print("len all_similar_questions_query_set_2: {}".format(len(all_similar_questions_query_set_2)))
-            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set, True, question_query_set_2=all_similar_questions_query_set_2)
+            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set, query_set_2=all_similar_questions_query_set_2, qs_type='question')
             script, div = returned[0]
             table_html = returned[1].to_html()
             return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
@@ -196,13 +196,12 @@ def process_generate(request):
             tables = list()
             for sqt in selected_sub_questions_text:
                 sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
-                returned = chart_mappings[graph_type].generate(sq_query_set, False)
+                returned = chart_mappings[graph_type].generate(sq_query_set, qs_type='response_option')
                 script_divs.append(returned[0])
                 tables.append(returned[1].to_html())
 
             return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables, 
-                                'question_type': q_type, 'question_subtype': q_subtype,
-                                'all_similar_questions_query_set': all_similar_questions_query_set})
+                                'question_type': q_type, 'question_subtype': q_subtype})
 
             
 
@@ -223,7 +222,7 @@ def stack_group_bar_chart(request):
         tables = list()
 
         if q_subtype == 'vertical':
-            returned = chart_class.generate(all_similar_questions_query_set, stack_input, group_input)
+            returned = chart_class.generate(all_similar_questions_query_set, qs_type='question', stack_input=stack_input, group_input=group_input)
             script, div = returned[0]
             table_html = returned[1].to_html()
             return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
@@ -233,7 +232,7 @@ def stack_group_bar_chart(request):
             selected_sub_questions_text = json.loads(request.GET['sub_questions'])
             for sqt in selected_sub_questions_text:
                 sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
-                returned = chart_class.generate(sq_query_set, stack_input, group_input)
+                returned = chart_class.generate(sq_query_set, qs_type='response_option', stack_input=stack_input, group_input=group_input)
                 script_divs.append(returned[0])
                 tables.append(returned[1].to_html())
             return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})

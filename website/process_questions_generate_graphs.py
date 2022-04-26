@@ -17,7 +17,6 @@ import math
 import pandas as pd
 import numpy as np
 from django.db.models import Count
-
 import itertools as it
 
 stack_group_mappings = {'court': 'survey__court_id', 'year': 'survey__survey_year'}
@@ -31,9 +30,10 @@ class BarChart:
 	'''
 
 	@classmethod
-	def generate(cls, question_query_set, is_question, *args, **kwargs):
+	def generate(cls, question_query_set, *args, **kwargs):
+		qs_type = kwargs['qs_type']
 		all_responses = list()
-		if is_question:
+		if qs_type == 'question':
 			for q in question_query_set:
 				all_responses += [r.choice_clean_text for r in q.response_set.all()]
 			title = str(question_query_set[0].question_clean_text)
@@ -66,40 +66,107 @@ class BarChart:
 	def __str__(self):
 		return "bar"
 
+def get_chart_data(qs_type, query_set, query_set_2, df_qs_values):
+	if qs_type == 'question':
+		df = pd.DataFrame(Response.objects.filter(question__in=query_set).values(*df_qs_values).annotate(count=Count('choice_clean_text')))	
+		df0 = pd.DataFrame(Response.objects.filter(question__in=query_set).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		df1 = pd.DataFrame(Response.objects.filter(question__in=query_set_2).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		title_arg_1 = str(query_set[0].question_clean_text)
+	else:
+		df = pd.DataFrame(Response.objects.filter(choice_id__in=query_set.values('choice_id').distinct()).values(*df_qs_values).annotate(count=Count('choice_clean_text')))
+		df0 = pd.DataFrame(Response.objects.filter(choice_id__in=query_set.values('choice_id').distinct()).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		try:
+			df1 = pd.DataFrame(Response.objects.filter(choice_id__in=query_set_2.values('choice_id').distinct()).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
+		except:
+			df1 = pd.DataFrame()
+		title_arg_1 = str(query_set[0].row_text)
+
+	return df, df0, df1, title_arg_1
+
+def get_bokeh_data_dict(stack_group_input, survey_attribute, query_set, query_set_2, qs_type, df, df0, df1, title_arg_1):
+	# called from stack_group_bar_chart() in views.py and we are stacking by court/year
+	if stack_group_input != '':
+		bokeh_data_df = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
+		bokeh_data_df.columns = [t[1] for t in list(bokeh_data_df.columns)]
+		index_attribute = survey_attribute
+		title = '\'{}\' vs. \'{}\''.format(title_arg_1, stack_group_input)
+
+	# called process_generate() in views.py and we are stacking by Question 2
+	else:
+		merged = df0.merge(df1, how='outer', on='responder_id')
+		both_merged = merged[(merged['question__question_clean_text_x'].apply(lambda x: isinstance(x, str))) & (merged['question__question_clean_text_y'].apply(lambda x: isinstance(x, str)))]
+		bokeh_data_df = pd.crosstab(both_merged.choice_clean_text_x, both_merged.choice_clean_text_y)
+		index_attribute = 'choice_clean_text_x'
+		title_arg_2 = str(query_set[1].question_clean_text) if qs_type == 'question' else str(query_set[1].row_text)
+		title = "\'{}\' vs. \'{}\'".format(title_arg_1, title_arg_2)
+
+	stackable_list = list(bokeh_data_df.columns) # we want the columns from here before we reset_index
+
+
+	bokeh_data_df.reset_index(level=[index_attribute], inplace=True)
+	bokeh_data_df.fillna(0, inplace=True)
+
+
+	# generate dictionary required for bokeh
+	bokeh_data_dict = {c:bokeh_data_df[c].tolist() for c in bokeh_data_df.columns}
+	bokeh_data_dict[index_attribute] = list(map(str, bokeh_data_dict[index_attribute])) # cast stack input to string, in case int
+
+	y_max = bokeh_data_df[stackable_list].sum(1).max() * 1.05
+	return bokeh_data_dict, bokeh_data_df, stackable_list, index_attribute, title, y_max
+
+class GroupedBarChart:
+
+	@classmethod
+	def generate(cls, query_set, query_set_2='', group_input='', *args, **kwargs):
+		qs_type = kwargs['qs_type']
+		try: 
+			survey_attribute = stack_group_mappings[group_input]
+		except:
+			# set to this, so we don't get error
+			survey_attribute = 'survey__survey_year'
+
+		df, df0, df1, title_arg_1 = get_chart_data(qs_type, query_set, query_set_2, [survey_attribute, 'choice_clean_text'])
+		bokeh_data_dict, bokeh_data_df, stackable_list, index_attribute, title, y_max = get_bokeh_data_dict(group_input, survey_attribute, query_set, query_set_2, qs_type, df, df0, df1, title_arg_1)
+
+		x = [ (y, response) for y in bokeh_data_dict[index_attribute] for response in stackable_list]
+		counts = sum(zip(*[bokeh_data_dict[r] for r in stackable_list]), ())
+
+		source = ColumnDataSource(data=dict(x=x, counts=counts))
+
+		p = figure(x_range=FactorRange(*x),  y_range=(0, y_max), width=700, height=700, 
+					title=title, toolbar_location=None, tools="")
+
+		p.vbar(x='x', top='counts', width=0.9, source=source)
+
+		p.y_range.start = 0
+		p.x_range.range_padding = 0.1
+		p.xaxis.major_label_orientation = 1
+		p.xgrid.grid_line_color = None
+		return [components(p), bokeh_data_df]
+
+	def __str__(self):
+		return "grouped bar"
+
+
 
 class StackedBarChart:
 
 	@classmethod
-	def generate(cls, query_set, qs_type, *args, **kwargs):
-		query_set_2 = kwargs['query_set_2']
-		stack_input = kwargs['stack_input']
-
-		if qs_type == 'question':
+	def generate(cls, query_set, query_set_2='', stack_input='', *args, **kwargs):
+		qs_type = kwargs['qs_type']
+		try: 
 			survey_attribute = stack_group_mappings[stack_input]
-			df = pd.DataFrame(Response.objects.filter(question__in=query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
-			bokeh_data_df = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
-			index_attribute = survey_attribute
-		elif qs_type == 'response_option':
-			df = pd.DataFrame(Response.objects.filter(question__in=query_set).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
-			df1 = pd.DataFrame(Response.objects.filter(question__in=query_set_2).values('survey__survey_year', 'survey__survey_id', 'question__question_clean_text', 'responder_id', 'choice_clean_text'))
-			merged = df.merge(df1, how='outer', on='responder_id')
-			both_merged = merged[(merged['question__question_clean_text_x'].apply(lambda x: isinstance(x, str))) & (merged['question__question_clean_text_y'].apply(lambda x: isinstance(x, str)))]
-			bokeh_data_df = pd.crosstab(both_merged.choice_clean_text_x, both_merged.choice_clean_text_y)
-			index_attribute = 'choice_clean_text_x'
+		except:
+			# set to this, so we don't get error
+			survey_attribute = 'survey__survey_year'
 
-		bokeh_data_df.columns = [t[1] for t in list(bokeh_data_df.columns)]
-		stackable_list = list(bokeh_data_df.columns) # we want the columns from here before we reset_index
-		print(stackable_list)
+		df, df0, df1, title_arg_1 = get_chart_data(qs_type, query_set, query_set_2, [survey_attribute, 'choice_clean_text'])
+		bokeh_data_dict, bokeh_data_df, stackable_list, index_attribute, title, y_max = get_bokeh_data_dict(stack_input, survey_attribute, query_set, query_set_2, qs_type, df, df0, df1, title_arg_1)
+		
 
-		bokeh_data_df.reset_index(level=[index_attribute], inplace=True)
-		bokeh_data_df.fillna(0, inplace=True)
-		print(bokeh_data_df.columns)
 
-		# generate dictionary required for bokeh
-		bokeh_data_dict = {c:list(map(str, bokeh_data_df[c].tolist())) for c in bokeh_data_df.columns}
-
-		p = figure(x_range=bokeh_data_dict[survey_attribute], y_range=(0, bokeh_data_df[stackable_list].sum(1).max() * 1.05), 
-					height=700, title="Responses by {}".format(stack_input), toolbar_location='right', 
+		p = figure(x_range=bokeh_data_dict[index_attribute], y_range=(0, y_max), 
+					height=700, title=title, toolbar_location='right', 
 					tools="hover", tooltips="$name @{}: @$name".format(index_attribute))
 
 		p.vbar_stack(stackable_list, x=index_attribute, width=0.4,
@@ -119,52 +186,6 @@ class StackedBarChart:
 	def __str__(self):
 		return "stacked bar"
 
-class GroupedBarChart:
-
-	@classmethod
-	def generate(cls, question_query_set, group_input, *args, **kwargs):
-
-		survey_attribute = stack_group_mappings[stack_input]
-		
-
-		df = pd.DataFrame(Response.objects.filter(question__in=question_query_set).values(survey_attribute, 'choice_clean_text').annotate(count=Count('choice_clean_text')))
-
-		#pivot = pd.pivot_table(df, values=['count'], index=['choice_clean_text'], columns=['survey__court_id'])
-		pivot1 = pd.pivot_table(df, values=['count'], index=[survey_attribute], columns=['choice_clean_text'])
-
-		pivot1.columns = [t[1] for t in list(pivot1.columns)]
-		#pivot.columns = ['magistrate', 'municipal']
-		responses_list = list(pivot1.columns) # we want the columns from here before we reset_index
-
-		#pivot.reset_index(level=['choice_clean_text'], inplace=True)
-		#pivot.fillna(0, inplace=True)
-		pivot1.reset_index(level=[survey_attribute], inplace=True)
-		pivot1.fillna(0, inplace=True)
-
-		data = dict()
-		for c in pivot1.columns:
-			data[c] = pivot1[c].tolist()
-		data[survey_attribute] = list(map(str, data[survey_attribute])) # cast stack input to string, in case int
-		surveys = data[survey_attribute]
-
-		x = [ (year, response) for year in data[survey_attribute] for response in responses_list]
-		counts = sum(zip(*[data[r] for r in responses_list]), ())
-
-		source = ColumnDataSource(data=dict(x=x, counts=counts))
-
-		p = figure(x_range=FactorRange(*x),  y_range=(0, pivot1[responses_list].sum(1).max() * 1.05), height=700, title="Responses by {}".format(group_input),
-					toolbar_location=None, tools="")
-
-		p.vbar(x='x', top='counts', width=0.9, source=source)
-
-		p.y_range.start = 0
-		p.x_range.range_padding = 0.1
-		p.xaxis.major_label_orientation = 1
-		p.xgrid.grid_line_color = None
-		return [components(p), pivot1]
-
-	def __str__(self):
-		return "grouped bar"
 
 class StackedGroupedBarChart:
 
@@ -340,10 +361,10 @@ class Counter_Table:
 def determine_valid_graph_types(question_type_subtype_tuple):
 	''' Returns list of valid graph types given a tuple of form (question_type, question_subtype) '''
 	question_type_subtype_graph_type_mapping = {
-								('single_choice', 'vertical'): [BarChart(), PieChart(), StackedBarChart()],
+								('single_choice', 'vertical'): [BarChart(), PieChart(), StackedBarChart(), GroupedBarChart()],
 								('open_ended', 'essay'): [],
 								('open_ended', 'single'): [],
-								('multiple_choice', 'vertical'): [BarChart(), PieChart(), StackedBarChart()],
+								('multiple_choice', 'vertical'): [BarChart(), PieChart(), StackedBarChart(), GroupedBarChart()],
 								('open_ended', 'numerical'): [],
 								('single_choice', 'vertical_two_col'): [],
 								('open_ended', 'multi'): [],
