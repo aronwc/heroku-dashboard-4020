@@ -127,14 +127,28 @@
       </div>
 
     </div>
-    
+     
     <div class="panel2">
 
       <div id="vertical-1" class="question-type-div">
         <!-- Drop down for question 2-->
         <div class="four">
           <div class="form-group">
-            <label for="inputStatus">Question 2 (Optional)</label>
+            <label for="inputStatus">
+              Question 2 (Optional)
+              <a class="popup" id="apopup" href="#"> 
+                <span class="popuptext" id="myPopup"> 
+                  <ul>
+                    <li>
+                    Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts) </li>
+                    <li>
+                      To compare Question 1 and Question 2, choose "stacked bar" or "grouped bar" in the <strong> Chart Type </strong> dropdown.
+                    </li>
+                  </ul>
+                </span>
+                <i class="fa fa-eye" aria-hidden="true"></i>
+              </a>
+            </label>
             <p id="question-2-description"></p>
             <select id="question-dropdown-2" class="selectpicker" name="question-dropdown-2" data-show-subtext="true" data-live-search="true">
               <option data-tokens="Choose a question" selected disabled>Choose a second question</option>
@@ -430,6 +444,13 @@
       });
 
       $("div.graph").find("div.download-btn-div").hide(); // jquery to hide all descendants of each div with class = "graph"
+      $("div.graph").find("div.bokeh-div").hide();
+      $("#apopup").mouseenter(function() {
+        $("#myPopup").toggleClass("show");
+      });
+      $("#apopup").mouseleave(function() {
+        $("#myPopup").toggleClass("show");
+      });
 
     });
 
@@ -556,11 +577,6 @@
                     $('select[name=question-dropdown-2]').selectpicker('refresh');
                     $("#vertical-1").show();
                     
-                    
-                    
-                    console.log("RIGHT BEFORE")
-                    //document.getElementById("vertical-1").style.display = "block";
-                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "essay") { // DONE
                       document.getElementById("open-ended-essay-1").style.display = "block";
                   } else if (data.question_type == "open_ended" && data.question_subtype == "single") { // DONE
@@ -618,6 +634,7 @@
     let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
     function genButtonClickFunction() {
       $("div.graph").find("div.download-btn-div").hide(); // hide any previously shown download buttons 
+      $("div.graph").find("div.bokeh-div").hide();
 
       document.getElementById("bar-char-controls-div").style.backgroundColor = "white";
       // need to modify below to iterate through array of graph divs
@@ -675,6 +692,7 @@
             $("head").append(bokeh_data.script[index]);
             $(raw_data_divs_array[index]).html(result.table_html[index]);
             $(download_btn_divs_array[index]).show();
+            $(bokeh_divs_array[index]).show();
           });
 
           
@@ -823,7 +841,6 @@
           console.log("success2");
           // this code needs to incorporate what chart type selected because controls will differ
           console.log("finished click function");
-          $("div.graph").find("div.bokeh-div", "div.raw-data-div", "div.download-btn-div").show();
         }
 
       });
