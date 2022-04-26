@@ -361,6 +361,62 @@
 
   <script>
 
+    function downloadCSVFile(csv_data) {
+   
+      // Create CSV file object and feed our
+      // csv_data into it
+      CSVFile = new Blob([csv_data], { type: "text/csv" });
+   
+      // Create to temporary link to initiate
+      // download process
+      var temp_link = document.createElement('a');
+   
+      // Download csv file
+      temp_link.download = "table.csv";
+      var url = window.URL.createObjectURL(CSVFile);
+      temp_link.href = url;
+   
+      // This link should not be displayed
+      temp_link.style.display = "none";
+      document.body.appendChild(temp_link);
+   
+      // Automatically click the link to trigger download
+      temp_link.click();
+      document.body.removeChild(temp_link);
+    }
+
+    function downloadButtonClickFunction (table_div) {
+      // Variable to store the final csv data
+      var csv_data = [];
+      //var table_div = document.getElementById("raw-data-div");
+      // Get each row data
+      var rows = table_div.getElementsByTagName('tr');
+      for (var i = 0; i < rows.length; i++) {
+   
+          // Get each column data
+          var cols = rows[i].querySelectorAll('td,th');
+   
+          // Stores each csv row data
+          var csvrow = [];
+          for (var j = 0; j < cols.length; j++) {
+   
+              // Get the text data of each cell of
+              // a row and push it to csvrow
+              csvrow.push(cols[j].innerHTML);
+          }
+   
+          // Combine each column value with comma
+          csv_data.push(csvrow.join(","));
+      }
+      // combine each row data with new line character
+      csv_data = csv_data.join('\n');
+   
+      /* We will use this function later to download
+      the data in a csv file downloadCSVFile(csv_data);
+      */
+      downloadCSVFile(csv_data);
+  
+    }
     
     $(document).ready(function(){
       // hide all elements on second panel, show them conditionally after question 1 selected
@@ -369,37 +425,13 @@
       window.bokeh_divs_array = $("div.bokeh-div").toArray();
       window.raw_data_divs_array = $("div.raw-data-div").toArray();
       window.download_btn_divs_array = $("div.download-btn-div").toArray();
+      download_btn_divs_array.forEach((element, index) => {
+        $(element).click(function() {downloadButtonClickFunction(raw_data_divs_array[index])});
+      });
 
       $("div.graph").find("div.download-btn-div").hide(); // jquery to hide all descendants of each div with class = "graph"
 
     });
-
-
-
-
-    function downloadCSVFile(csv_data) {
-     
-        // Create CSV file object and feed our
-        // csv_data into it
-        CSVFile = new Blob([csv_data], { type: "text/csv" });
-     
-        // Create to temporary link to initiate
-        // download process
-        var temp_link = document.createElement('a');
-     
-        // Download csv file
-        temp_link.download = "table.csv";
-        var url = window.URL.createObjectURL(CSVFile);
-        temp_link.href = url;
-     
-        // This link should not be displayed
-        temp_link.style.display = "none";
-        document.body.appendChild(temp_link);
-     
-        // Automatically click the link to trigger download
-        temp_link.click();
-        document.body.removeChild(temp_link);
-    }
 
 
     // whenever court-dropdown is changed (i.e. clicked), execute this
@@ -796,40 +828,6 @@
 
       });
 
-      document.getElementById("download-btn").onclick = function() {downloadButtonClickFunction()};
-
-      function downloadButtonClickFunction () {
-        // Variable to store the final csv data
-        var csv_data = [];
-        var table_div = document.getElementById("raw-data-div");
-        // Get each row data
-        var rows = table_div.getElementsByTagName('tr');
-        for (var i = 0; i < rows.length; i++) {
-     
-            // Get each column data
-            var cols = rows[i].querySelectorAll('td,th');
-     
-            // Stores each csv row data
-            var csvrow = [];
-            for (var j = 0; j < cols.length; j++) {
-     
-                // Get the text data of each cell of
-                // a row and push it to csvrow
-                csvrow.push(cols[j].innerHTML);
-            }
-     
-            // Combine each column value with comma
-            csv_data.push(csvrow.join(","));
-        }
-        // combine each row data with new line character
-        csv_data = csv_data.join('\n');
-     
-        /* We will use this function later to download
-        the data in a csv file downloadCSVFile(csv_data);
-        */
-        downloadCSVFile(csv_data);
-    
-      }
 
       // we add the court button function here because we want to use the drop down values from
       // when "View Graph" button was clicked (they mightve been changed without button being clicked)

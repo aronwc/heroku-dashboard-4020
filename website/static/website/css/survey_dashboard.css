@@ -1,6 +1,6 @@
 .wrapper {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   grid-auto-rows: minmax(100px, auto);
  
 }
@@ -9,7 +9,7 @@
   border-style: ridge;
   grid-column-start: 1;
   grid-column-end: 1;
-  grid-row: 1 / span 7;
+  grid-row: 1 / span 9;
 }
 
 .panel2 {
@@ -17,7 +17,7 @@
   border-style: ridge;
   grid-column-start: 2;
   grid-column-end: 2;
-  grid-row: 1 / span 7;
+  grid-row: 1 / span 9;
 }
 
 .one {
