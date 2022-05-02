@@ -71,6 +71,14 @@
   padding-top: 15px;
 }
 
+.seven {
+  grid-column: 2;
+  grid-row: 7;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 15px;
+}
+
 .graph {
   padding-left: 20px;
   padding-right: 20px;

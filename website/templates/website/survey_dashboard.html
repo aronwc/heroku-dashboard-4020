@@ -25,7 +25,7 @@
     color: black;
     padding: 12px 30px;
     cursor: pointer;
-    border-radius:10px;
+    border-radius: 10px;
   }
   .generate-button:hover {
     background-color: RoyalBlue;
@@ -106,9 +106,9 @@
         <div class="form-group">
           <label for="inputStatus">Year </label>
           <select id="year-dropdown" name="year-dropdown" class="form-control-sm custom-select" method="get" multiple>
-            <option selected disabled>Choose year(s)</option>
+            <option selected disabled value="None" >Choose year(s)</option>
             {% for year in years %}
-            <option id="{{court}}" value="{{court}}">{{year}}</option>
+            <option id="{{year}}" value="{{year}}">{{year}}</option>
             {% endfor %}
           </select>
         
@@ -202,6 +202,10 @@
 
       <div class="six">
         <button id="gen-button" name="generate-graph" class="generate-button" style="border:none">View Graph</button>
+      </div>
+
+      <div class="seven">
+        <button id="orig-data-button" name="orig-data-button" class="generate-button" style="border:none">Download Data</button>
       </div>
 
     </div>
@@ -499,6 +503,13 @@
           $('select[name=question-dropdown-2]').selectpicker();
           const court_s = $('select[name=court-dropdown]').val();  // get the selected courts from the HTML dropdown list 
           const year_s = $('select[name=year-dropdown]').val();
+          console.log(court_s);
+          console.log(typeof court_s);
+          if (court_s.length == 0) {
+            alert("You must select courts before selecting years.");
+            $('select[name=year-dropdown]').val("None");
+            return false;
+          }
           $.ajax({                       // initialize an AJAX request
               type: "get",
               url: '{% url "website:get_questions_ajax" %}',
@@ -591,7 +602,6 @@
                     $('select[name=question-dropdown-2]').html(html_data_questions);
                     $('select[name=question-dropdown-2]').selectpicker('refresh');
                     $("#vertical-1").show();
-                    document.getElementById("question-2-description").innerHTML = "Chosing a second question will allow you to compare it with the first (think pivot tables and stacked bar charts)";
 
                   } else if (data.question_type == "open_ended" && data.question_subtype == "numerical") { // DONE
 
@@ -633,12 +643,7 @@
     
     let total_clicks_view_graph_button = 0; // variable to track number of successful "View Graph" button clicks (for deleting HTML element purposes)
     function genButtonClickFunction() {
-      $("div.graph").find("div.download-btn-div").hide(); // hide any previously shown download buttons 
-      $("div.graph").find("div.bokeh-div").hide();
-
-      document.getElementById("bar-char-controls-div").style.backgroundColor = "white";
-      // need to modify below to iterate through array of graph divs
-      $("div.graph").css("background-color", "white"); // jquery to sett all div.graphs' bg color to white
+      
       const court_s = $('select[name=court-dropdown]').val();  
       const year_s = $('select[name=year-dropdown]').val();
       const question_1 = $('select[name=question-dropdown-1]').val();
@@ -646,9 +651,20 @@
       const question_2 = $('select[name=question-dropdown-2]').val();
       const sub_questions = $('select[name=sub-question-dropdown]').val();
       const chart_type = $('select[name=chart-dropdown]').val();
-      console.log("in click function");
-      console.log(chart_type);
-      console.log(question_2);
+
+      if (chart_type == '') {
+        alert("You have not selected a chart type.");
+        return false;
+      }
+
+
+      $("div.graph").find("div.download-btn-div").hide(); // hide any previously shown download buttons 
+      $("div.graph").find("div.bokeh-div").hide();
+
+      document.getElementById("bar-char-controls-div").style.backgroundColor = "white";
+      // need to modify below to iterate through array of graph divs
+      $("div.graph").css("background-color", "white"); // jquery to sett all div.graphs' bg color to white
+
       $.ajax({
         type: "get",
         url: '{% url "website:process_generate" %}',

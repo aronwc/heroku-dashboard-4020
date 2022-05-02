@@ -27,6 +27,8 @@ import json
 import pandas as pd
 import numpy as np
 import psycopg2
+import io
+import zipfile
 
 from collections import Counter
 
@@ -133,6 +135,14 @@ def get_question_type_subtype(question_query_set):
     q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
     return q_type, q_subtype
 
+def get_raw_data(*args):
+    ''' Given QuerySets, returns a list of DataFrames, one for each QuerySet (aka equivalent to the raw data) '''
+    csvs_dict= dict()
+    for qs in args:
+        #csvs_dict
+        dfs_list.append(pd.DataFrame.from_records(qs.values()))
+    return dfs_list
+
 @login_required
 def generate_panel_2_options(request):
     if request.method == "GET":
@@ -194,6 +204,7 @@ def process_generate(request):
             # list of QuerySets, one for all ResponseOptions rows for selected graphs
             script_divs = list()
             tables = list()
+            # WE ARE MATCHING ON TEXT HERE BUT WE WANT TO MATCH ON MEANING (NLP) LIKE SARAH DID WITH QUESTIONS!!!!!!!!
             for sqt in selected_sub_questions_text:
                 sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
                 returned = chart_mappings[graph_type].generate(sq_query_set, qs_type='response_option')
@@ -236,6 +247,10 @@ def stack_group_bar_chart(request):
                 script_divs.append(returned[0])
                 tables.append(returned[1].to_html())
             return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
+
+
+
+
 
 @login_required
 def dockets_dashboard(request):
