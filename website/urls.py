@@ -16,7 +16,6 @@ urlpatterns = [
     path('process-generate/', views.process_generate, name="process_generate"),
     path('stack-group-bar-chart/', views.stack_group_bar_chart, name="stack_group_bar_chart"),
     path('get-docket-charge-by-mag-num/', views.SearchResultsList.as_view(), name="get_docket_charge_by_mag_num"),
-    path("dockets", views.psql, name="dockets_query"),
     path("about/", views.about_page, name="about_page"),
 
 ]
