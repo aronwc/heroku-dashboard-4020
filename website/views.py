@@ -37,42 +37,6 @@ from .question_id_mappings import *
 
 chart_mappings = {'bar': BarChart(), 'stacked bar': StackedBarChart(), 'grouped bar': GroupedBarChart(), 'pie': PieChart(), 'table': Counter_Table()}
 
-@login_required
-def bennett_bokeh(request):
-    if request.method == "GET":
-        print("IN BENNETT BOKEH")
-     
-       #create a plot
-        plot = figure(plot_width=400, plot_height=400)
-     
-       # add a circle renderer with a size, color, and alpha
-     
-        plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
-     
-        script, div = components(plot)
-     
-        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
-        return JsonResponse({'script': script, 'div': div})
-
-@login_required
-# do pie chart here with bokeh
-def pretrial(request):
-    print('made')
-    good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
-
-    good_qs_ids = [q.question_id for q in list(good_qs_list)]
-
-    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
-
-
-    output = ', '.join([r.response_text for r in good_responses_list])
-
-    return HttpResponse(output)
-
-@login_required
-# pie chart with bokeh
-def afford_bond(request):
-    pass
 
 @login_required
 def survey_dashboard(request):
@@ -248,10 +212,6 @@ def stack_group_bar_chart(request):
                 tables.append(returned[1].to_html())
             return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
 
-
-
-
-
 @login_required
 def dockets_dashboard(request):
     ''' 'Pass in context of all DocketCharges, filtered by -mag_num '''
@@ -289,155 +249,6 @@ class SearchResultsList(ListView):
         return DocketCharge.objects.filter(*Q_objects)
 
 
-@login_required
-def psql(request):
-    
-    #Number of Case Appearances Observed Bar Graph
-    # for p in Responses.objects.raw('SELECT * FROM website_responses'):
-    #    print(p)
-    # def connect():
-    #     print("Connecting to database...")
-    #     conn = psycopg2.connect(
-    #         host="localhost",
-    #         database="website",
-    #         user="django",
-    #         password="Tulane4010"
-    #         )
-    #     df = pd.read_sql_query("""
-    #             SELECT * FROM website_responses
-    #             """, conn)
-        
-    #     #print(df)
-    #     return df #put this in config instead; doesn't need to be in views
-    # get_object_or_404() function
-    # get a online version up with a single query using database
-    #clean csv --> ucf-8
-    # responses = connect()
-    # data = dict(
-    #      year = [d for d in responses['year']],
-    #      id = [d for d in responses['id']],
-    #     # court = [d['court'] for d in responses],
-    #     # bail = [d['bail'] for d in responses],
-    #     # judge = [d['judge'] for d in responses],
-    #     # ethnicity = [d['ethnicity'] for d in responses],
-    # )
-    # #edit csv to count number of each element instead
-    # source = ColumnDataSource(data)
-    # print(data['year'])
-    # count = data['year'].count(2020)
-    
-    # sorted_ids = sorted(source.year, key=lambda x: source.id[source.year.index(x)])
-
-    homicides = ['Homicide Incidents', 'Homicide Arrests']
-    yrs = ['2020', '2021']
-    #years = ['2019', '2020']
-    courts = ['Magistrate', 'Municipal', 'Criminal']
-    # data = {
-    #     'homicides' : homicides,
-    #     '2019' : [124, 44],
-    #     '2020' : [184, 49]
-    # }
-    data = {
-        'yrs' : yrs,
-        'Magistrate': [10, 20],
-        'Municipal': [20, 10],
-        'Criminal' : [15, 15]
-    }
-    #x = [(homicide, year) for homicide in homicides for year in years]
-    x = [(yr, court) for yr in yrs for court in courts]
-    #counts = sum(zip(data['2019'], data['2020']), ())
-    counts = sum(zip(data['Magistrate'], data['Municipal'], data['Criminal']), ())
-    source = ColumnDataSource(data=dict(x=x, counts=counts))
-    plot = figure(x_range=FactorRange(*x), plot_height=250, title="Cases per Year", toolbar_location=None, tools="")
-    plot.vbar(x='x', top='counts', width=0.9, source=source, line_color = "white", fill_color=factor_cmap('x', palette=Spectral6, factors=yrs, start=1, end=2))
-    plot.y_range.start = 0
-    plot.x_range.range_padding = 0.1
-    plot.axis.major_label_orientation = 1
-    plot.xgrid.grid_line_color = None
-    
-    script,div = components(plot)
-
-    #return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
-    return render(request, 'website/responses_test.html')
-
-@login_required
-def pretrial(request):
-    good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
-    #print("list is ", good_qs_list)
-    good_qs_ids = [q.question_id for q in list(good_qs_list)]
-    #print("id is ", good_qs_ids)
-    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
-    output = ', '.join([r.response_text for r in good_responses_list])
-    possible_responses = [ '0', '1', '2', '3', '4', '5' ]
-
-    #counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #ignore 99
-    counts = [100, 122, 413, 52, 54, 610]
-    source = ColumnDataSource(dict(possible_responses=possible_responses, counts=counts))
-    
-    #Bar Graph
-    plot = figure(x_range=FactorRange(*possible_responses), plot_height=250, title="What is the defendant's pretrial risk score?", toolbar_location=None, tools="", x_axis_label = "Score", y_axis_label = "Total Count")
-    plot.vbar(x='possible_responses', top='counts', width=0.9, source=source)
-
-    plot.xgrid.grid_line_color = None
-    plot.y_range.start = 0
-    print("plot: ", plot)
-    script,div = components(plot)
-    #print("bar components: ", components(plot))
-    
-    # Pie Chart
-    x = {
-        '0':345,
-        '1':31,
-        '2':657,
-        '3':864,
-        '4':56,
-        '5':200,
-    }
-    new_source = pd.Series(x).reset_index(name='counts').rename(columns={'index':'possible_responses'})
-    new_source['angle'] = new_source['counts']/new_source['counts'].sum() *2*pi
-    new_source['color'] = Category20c[len(x)]
-
-    plot2 = figure(height=350, title="What is the defendant's pretrial risk score?", 
-    toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
-
-    plot2.wedge(x=0, y=1, radius=0.4,
-    start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'), 
-    line_color="white", fill_color="color", legend_field="possible_responses", source=new_source)
-
-    plot2.axis.axis_label = None
-    plot2.axis.visible = False
-    plot2.grid.grid_line_color = None
-
-    #script1, div1 = components(plot2)
-
-	# for q in question_query_set:
-	# 	all_responses += [r.choice_clean_text for r in q.response_set.all()]
-
-	# counter = Counter(all_responses)
-	# print(counter)
-    source = ColumnDataSource(data=dict(possible_responses=["yes", "no", "maybe", "possibly", "terrible", "zzz"], counts=[100, 122, 413, 52, 54, 610]))
-    columns = [
-		TableColumn(field="possible_responses", title="possible responses"),
-		TableColumn(field="counts", title="Counts"),
-	]
-    data_table = DataTable(source=source, columns=columns)
-
-	# df = pd.DataFrame.from_dict(counter, orient='index').reset_index()
-	# df.rename(columns={'index': 'Choice Text', 0: 'Total'}, inplace=True)
-    show(data_table)
-    #script1, div1 = data_table
-    print("data table components: ", data_table)
-		#show(data_table)
-	#return [components(data_table), df]
-    script1, div1 = components(data_table)
-
-    return render(request, 'website/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
-
-@login_required
-# pie chart with bokeh
-def afford_bond(request):
-    pass
-
 class LoginView(LoginView):
     template_name = 'error_login.html'
     print("this is the loginview")
@@ -445,25 +256,7 @@ class LoginView(LoginView):
         print("this is myview")
         if not request.user.is_authenticated:
             return render(request, 'website/error_login.html')
-    # login_url = '/admin'
-    # redirect_field_name = 'redirect_to'
 
-# def my_view(request):
-#     print("this is myview")
-#     username = request.POST['username']
-#     password = request.POST['password']
-#     user = authenticate(request, username=username, password=password)
-#     if user is not None:
-#         login(request, user)
-#         # Redirect to a success page.
-#         ...
-#     if not request.user.is_authenticated:
-#         return render(request, 'myapp/login_error.html')
-
-# def my_view(request):
-#         print("this is myview")
-#         if not request.user.is_authenticated:
-#             return render(request, 'myapp/error_login.html')
 
 def logout_view(request):
     logout(request)
