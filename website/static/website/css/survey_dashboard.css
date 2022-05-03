@@ -1,6 +1,6 @@
 .wrapper {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(9, 1fr);
   grid-auto-rows: minmax(100px, auto);
  
 }
@@ -9,8 +9,7 @@
   border-style: ridge;
   grid-column-start: 1;
   grid-column-end: 1;
-  grid-row-start: 1;
-  grid-row-end: 7;
+  grid-row: 1 / span 9;
 }
 
 .panel2 {
@@ -18,8 +17,7 @@
   border-style: ridge;
   grid-column-start: 2;
   grid-column-end: 2;
-  grid-row-start: 1;
-  grid-row-end: 7;
+  grid-row: 1 / span 9;
 }
 
 .one {
@@ -49,6 +47,11 @@
   padding-left: 20px;
   padding-right: 20px;
 }
+
+.four ul {
+  margin-left: -15px;
+}
+
 .gen-button {
   background-color: rgb(15, 47, 111);
   color: white;
@@ -68,47 +71,95 @@
   padding-top: 15px;
 }
 
-#graph-1 {
-  grid-column: 3;
-  grid-row: 2;
+.seven {
+  grid-column: 2;
+  grid-row: 7;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 15px;
+}
+
+.graph {
   padding-left: 20px;
   padding-right: 20px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+}
+
+#graph-1 {
+  grid-column: 3;
+  grid-row: 2;
   
 }
 
 #graph-2 {
   grid-column: 3;
   grid-row: 3;
-  padding-left: 20px;
-  padding-right: 20px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+
+}
+
+#graph-3 {
+  grid-column: 3;
+  grid-row: 4;
+  
+}
+
+#graph-4 {
+  grid-column: 3;
+  grid-row: 5;
+
+}
+
+#graph-5 {
+  grid-column: 3;
+  grid-row: 6;
+  
+}
+
+#graph-6 {
+  grid-column: 3;
+  grid-row: 7;
+
+}
+
+#graph-7 {
+  grid-column: 3;
+  grid-row: 8;
+  
+}
+
+#graph-8 {
+  grid-column: 3;
+  grid-row: 9;
+
 }
 
 .graph .bokeh-div {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 1 / span 2;
   margin-left: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
   margin-top: 30px;
+  border-radius: 25px;
+  border: 6px solid RoyalBlue;
 }
 
 .graph .raw-data-div {
   grid-column: 2;
   grid-row: 1;
+  margin-left: 30px;
+  margin-top: 20px;
+  margin-bottom: 10px;
   padding: 10px;
 
 }
 
 .graph .download-btn-div {
   grid-column: 2;
-  grid-row: 1;
-  margin-left: 20px;
+  grid-row: 2;
+  margin-left: 30px;
   padding-left: 20px;
   padding-right: 20px;
+
 }
 
 .bar-chart-controls {
@@ -244,3 +295,100 @@
     
 }
 
+/* below styling for popup taken from 'https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_popup' */
+
+/* Popup container - can be anything you want */
+.popup {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* The actual popup */
+.popup .popuptext {
+  visibility: hidden;
+  width: 160px;
+  background-color: #555;
+  color: #fff;
+  border-radius: 6px;
+  padding: 8px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -80px;
+  font-size: 8px;
+}
+
+/* Popup arrow */
+.popup .popuptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Toggle this class - hide and show the popup */
+.popup .show {
+  visibility: visible;
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+/* Add animation (fade in the popup) */
+@-webkit-keyframes fadeIn {
+  from {opacity: 0;} 
+  to {opacity: 1;}
+}
+
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity:1 ;}
+}
+
+/* Below styling for table and table children from 'https://dev.to/dcodeyt/creating-beautiful-html-tables-with-css-428l' */
+
+table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+table thead tr {
+    background-color: RoyalBlue;
+    color: #ffffff;
+    text-align: left;
+}
+
+table th,
+table td {
+    padding: 12px 15px;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+table tbody tr:last-of-type {
+    border-bottom: 2px solid RoyalBlue;
+}
+
+table tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}

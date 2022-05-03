@@ -27,54 +27,20 @@ import json
 import pandas as pd
 import numpy as np
 import psycopg2
+import io
+import zipfile
 
 from collections import Counter
 
 from .process_questions_generate_graphs import *
 from .question_id_mappings import *
 
-chart_mappings = {'bar': BarChart(), 'pie': PieChart(), 'two questions stacked bar': TwoQuestionsStackedBar(), 'table':Counter_Table()}
+chart_mappings = {'bar': BarChart(), 'stacked bar': StackedBarChart(), 'grouped bar': GroupedBarChart(), 'pie': PieChart(), 'table': Counter_Table()}
 
-@login_required
-def bennett_bokeh(request):
-    if request.method == "GET":
-        print("IN BENNETT BOKEH")
-     
-       #create a plot
-        plot = figure(plot_width=400, plot_height=400)
-     
-       # add a circle renderer with a size, color, and alpha
-     
-        plot.circle([1, 2, 3, 4, 5], [6, 7, 2, 4, 5], size=20, color="navy", alpha=0.5)
-     
-        script, div = components(plot)
-     
-        #return render(request, 'website/bennett_bokeh.html', {'script': script, 'div': div})
-        return JsonResponse({'script': script, 'div': div})
-
-@login_required
-# do pie chart here with bokeh
-def pretrial(request):
-    print('made')
-    good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
-
-    good_qs_ids = [q.question_id for q in list(good_qs_list)]
-
-    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
-
-
-    output = ', '.join([r.response_text for r in good_responses_list])
-
-    return HttpResponse(output)
-
-@login_required
-# pie chart with bokeh
-def afford_bond(request):
-    pass
 
 @login_required
 def survey_dashboard(request):
-    # this shouldnt be hard coded
+    '''Render function for survey dashboard'''
     years = [x['survey_year'] for x in list(Survey.objects.order_by().values('survey_year').distinct())]
     context = {'courts': ['cdc', 'magistrate', 'municipal'], 'years': years}
     return render(request, 'website/survey_dashboard.html', context)
@@ -82,58 +48,151 @@ def survey_dashboard(request):
 
 @login_required
 def get_years_ajax(request):
-    '''This function gets executed when Court drop down on display/ page clicked'''
+    '''
+    - Gets executed when Court drop down on survey dashboard page clicked
+
+    Returns
+    -------
+    JsonResponse() of valid years and valid questions to display on respective dropdowns
+
+    '''
     if request.method == "GET":
         try:
+            '''
+            we can define these variables as global here so that we only execute the code to get them once
+            any time Question 1 drop down is clicked, this function is called, so these variables will always reflect that selection
+            which is what we want!
+            '''
+            global surveys_with_courts_selected
             surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
             # if any of the selected courts have an instance with year x, year x in this query set; else, not in
             # THESE ARE THE YEARS TO DISPLAY on drop down BASED ON selected courts
             years_to_display = surveys_with_courts_selected.order_by('survey_year').distinct()
-            # these are the years that have been/are selected
-            # this might need to be changed to survey start date
-
-            surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected)
-            #questions_to_display = Question.objects.filter(survey_id__in=final_filtered_survey_ids).distinct()
+            # get all questions that have appeared in selected court(s) and year(s)
+            questions_to_display = Question.objects.filter(survey__in=(surveys_with_courts_selected))
+            # filter questions to only those that are in a content sets that has responses
             questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
             print(e)
-            print("ERROR")
-            return HttpResponse('yo')
+            return HttpResponse('An error has occured')
         return JsonResponse(list(years_to_display.values('survey_year')) + list(questions_to_display_final.values('question_clean_text')), safe=False)
 
 @login_required
 def get_questions_ajax(request):
-    '''This function gets executed when Year drop down on display/ page clicked'''
+    '''
+    - Gets executed when Year drop down on survey dashboard page clicked
+
+    Returns
+    -------
+    JsonResponse() of valid questions to display on dropdowns
+    '''
     if request.method == "GET":
     
         try:
-            surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
+            #surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
             # these are the years that have been/are selected
-            # this might need to be changed to survey start date
+            global surveys_with_years_selected
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-            questions_to_display = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected)
+            questions_to_display = Question.objects.filter(survey__in=(surveys_with_years_selected & surveys_with_courts_selected))
             # we only want to display questions that are in a 'content set' that has responses
             questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
-
-            return HttpResponse('yo')
-        print("questions: ", questions_to_display_final)
+            print(e)
+            return HttpResponse('An error has occured')
         return JsonResponse(list(questions_to_display_final.values('question_clean_text')), safe=False)
+
+def get_graphs_ajax(q_type: str, q_subtype: str) -> list:
+    """
+    - Given a question type and question subtype, get allowable graph types
+
+    Parameters
+    ----------
+    * q_type (str): the question type
+    * q_subtype (str): the question subtype
+
+    Returns
+    -------
+    [{'graph_type':v} for v in allowable_graph_types]
+        * allowable_graph_types -> a list of strings of valid graphs
+    """
+    allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))
+    data = [{"graph_type":str(v)} for v in allowable_graph_types]
+    return data
+
+def get_question_type_subtype(question_query_set):
+    """
+    - Given a question query set representing a content set (i.e. the set of all question objects with the same cluster id),
+    'infer' the question type and subtype 
+
+    Parameters
+    ----------
+    * question_query_set (Django QuerySet): QuerySet of questions 
+
+    Returns
+    -------
+    * q_type (str) -> the 'infered' question type
+    * q_subtype (str) -> the 'infered' question subtype
+    """
+    df = pd.DataFrame(question_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
+    q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
+    return q_type, q_subtype
+
+def get_files(*args):
+    ''' Given QuerySets, returns a list of DataFrames, one for each QuerySet (aka equivalent to the raw data) '''
+    '''
+    csvs_dict= dict()
+    for qs in args:
+        csvs_dict[qs[0].whatami()] = pd.DataFrame.from_records(qs.values()).to_csv(qs[0].whatami())
+        #dfs_list.append(pd.DataFrame.from_records(qs.values()))
+    return csvs_dict
+    '''
+    return {'a': pd.DataFrame({'a': [1, 2, 4], 'b': [5, 6, 7]}).to_csv(), 'b': pd.DataFrame({'a': [8,9,10], 'b': [11,12,13]})}
+@login_required
+def download_zip(request):
+    files = get_files()
+    zip_filename = 'RawData.zip'
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        for k, file in files.items():
+            zip_file.writestr(k + '.csv', file)
+    zip_buffer.seek(0)
+    resp = HttpResponse(zip_buffer, content_type='application/zip')
+    resp['Content-Disposition'] = 'attachment; filename = %s' % zip_filename
+    return resp
 
 @login_required
 def generate_panel_2_options(request):
-    if request.method == "GET":
-        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
-        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
-        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
+    """
+    - Executed when Question 1 Dropdown on Survey Dashboard page changes
+    - Returns a JsonResponse with all information needed for Panel 2 on the front end 
+        - Response based on question type and subtype of selected Question 1
 
-        # get all questions that are meaning-identical
+    Returns
+    -------
+    JsonResponse of:
+        * 'questions' -> list of all questions to display on Question 2 Dropdown
+            - relevant for Questions with subtype of 'vertical'
+        * 'sub_questions' -> list of all sub questions to display on Question 2 Dropdown
+            - relevant for matrix single Questions
+        * 'graphs' -> list of allowable graphs for Question 1
+        * 'question_type' -> the question type of Question 1
+        * 'question_subtype' -> the question subtype of Question 1
+    """
+    if request.method == "GET":
+        # get the cluster_id of the first Question in database that has question_clean_text matching the Dropdown-selected question
+        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
+        # query set of all questions with matching cluster id OR clean text (i.e. meaning identical)
+            # matching on clean text is a fail safe; ideally, the NLP's cluster_id caught everything
+        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) 
+        
+        # query set of all questions meeting court and year filters
+        global qs2
+        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) 
+        global all_similar_questions_query_set, q_type, q_subtype
+        # get a QuerySet of questions that are meaning-identical to selected Question 1 AND meeting the court, year selections
         all_similar_questions_query_set = (qs1 & qs2)
-        df = pd.DataFrame(all_similar_questions_query_set.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
-        q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
+        q_type, q_subtype = get_question_type_subtype(all_similar_questions_query_set)
+
         data = {'question_type': q_type, 'question_subtype': q_subtype}
         data['questions'] = []
         data['sub_questions'] = list()
@@ -152,93 +211,99 @@ def generate_panel_2_options(request):
 
         return JsonResponse(data, safe=False)
 
-#@login_required
-def get_graphs_ajax(q_type, q_subtype):
-
-    allowable_graph_types = determine_valid_graph_types((q_type, q_subtype))
-    data = [{"graph_type":str(v)} for v in allowable_graph_types]
-    print("data is: ", data)
-    return data
     
 @login_required
 def process_generate(request):
+    """
+    - Main function for generating visualization
+    - Executed when "View Graph" button clicked
+    - Essentially passes relevant Question QuerySets to appropriate generate()
+        method of process_questions_generate_graphs.py
+
+    Returns
+    -------
+    JsonResponse of:
+        * 'script' -> list of all HTML scripts for all Bokeh graphs (recall that each Bokeh graph needs a script & div)
+        * 'div' -> list of all HTML divs for all Bokeh graphs
+        * 'table_html' -> list of all HTML tables for all Bokeh graphs
+        * 'question_type' -> the question type of Question 1
+        * 'question_subtype' -> the question subtype of Question 1
+    """
     if request.method == "GET":
-        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
+        # get list of all selected sub questions
         selected_sub_questions_text = json.loads(request.GET['sub_questions'])
-        print(selected_sub_questions_text)
-
-        # get the id of the first question in the database with an exact text match to the selected one
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
-        
-        
-        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
-        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
-
-        # get all questions that are meaning-identical
-        all_similar_questions_query_set_1 = (qs1 & qs2)
-
-        df = pd.DataFrame(all_similar_questions_query_set_1.values('question_type', 'question_subtype').annotate(count=Count('question_id')))
-        q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
         graph_type = str(json.loads(request.GET['chart_type'])[0])
         all_similar_questions_query_set_2 = ''
         if q_subtype == 'vertical':
             # get the id of the first question in the database with an exact text match to the selected one
             question_2_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_2']))[0].cluster_id
             qs3 = Question.objects.filter(Q(cluster_id=question_2_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_2']))) # query set of all questions with matching cluster id OR clean text
-            # get all questions that are meaning-identical
+            # get a QuerySet of questions that are meaning-identical to selected Question 1 AND meeting the court, year selections
             all_similar_questions_query_set_2 = (qs3 & qs2)
-            print(json.loads(request.GET['question_2']))
-            print("len all_similar_questions_query_set_2: {}".format(len(all_similar_questions_query_set_2)))
-            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set_1, True, question_query_set_2=all_similar_questions_query_set_2)
+
+            # call the generate() method of the selected graph type
+            returned = chart_mappings[graph_type].generate(all_similar_questions_query_set, query_set_2=all_similar_questions_query_set_2, qs_type='question')
             script, div = returned[0]
             table_html = returned[1].to_html()
             return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
         elif q_type == 'matrix' and q_subtype == 'single':
-            # list of QuerySets, one for all ResponseOptions rows for selected graphs
             script_divs = list()
             tables = list()
+            # WE ARE MATCHING ON TEXT HERE BUT WE WANT TO MATCH ON MEANING (NLP) LIKE SARAH DID WITH QUESTIONS!!!!!!!!
             for sqt in selected_sub_questions_text:
-                sq = ResponseOptions.objects.filter(row_text=sqt)
-                returned = chart_mappings[graph_type].generate(sq, False)
+                # get QuerySet of all ResponseOptions where row_text (i.e. sub question column) equal to selected sub question
+                sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
+                returned = chart_mappings[graph_type].generate(sq_query_set, qs_type='response_option')
                 script_divs.append(returned[0])
                 tables.append(returned[1].to_html())
-            print(script_divs[0])
 
-            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
+            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables, 
+                                'question_type': q_type, 'question_subtype': q_subtype})
 
             
 
 @login_required
 def stack_group_bar_chart(request):
+    """
+    - Executed when "Modify Graph" button clicked
+    - Very similar to process_generate() function above!
+
+    Returns
+    -------
+    JsonResponse of:
+        * 'script' -> list of all HTML scripts for all Bokeh graphs (recall that each Bokeh graph needs a script & div)
+        * 'div' -> list of all HTML divs for all Bokeh graphs
+        * 'table_html' -> list of all HTML tables for all Bokeh graphs
+    """
     if request.method == "GET":
-        surveys_with_courts_selected = Survey.objects.filter(court_id__in=json.loads(request.GET['courts']))
-        surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
-
-        # get the id of the first question in the database with an exact text match to the selected one
-        question_1_selected_first_instance_cluster_id = Question.objects.filter(question_clean_text=json.loads(request.GET['question_1']))[0].cluster_id
         
-        qs1 = Question.objects.filter(Q(cluster_id=question_1_selected_first_instance_cluster_id) | Q(question_clean_text=json.loads(request.GET['question_1']))) # query set of all questions with matching cluster id OR clean text
-        qs2 = Question.objects.filter(survey__in=surveys_with_years_selected & surveys_with_courts_selected) # query set of all questions meeting court and year filters
-
-        # get all questions that are meaning-identical
-        all_similar_questions_query_set = (qs1 & qs2)
-
-
         stack_input = json.loads(request.GET['stack_input'])
         group_input = json.loads(request.GET['group_input'])
-
         if stack_input != 'none' and group_input == 'none':
-            returned = StackedBarChart.generate(all_similar_questions_query_set, stack_input)
+            chart_class = StackedBarChart()
         elif stack_input == 'none' and group_input != 'none':
-            returned = GroupedBarChart.generate(all_similar_questions_query_set, group_input)
+            chart_class = GroupedBarChart()
         else:
-            returned = StackedGroupedBarChart.generate(all_similar_questions_query_set, stack_input, group_input)
-        script, div = returned[0]
-        table_html = returned[1].to_html()
+            chart_class = StackedGroupedBarChart()
 
+        script_divs = list()
+        tables = list()
 
-        return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
+        if q_subtype == 'vertical':
+            returned = chart_class.generate(all_similar_questions_query_set, qs_type='question', stack_input=stack_input, group_input=group_input)
+            script, div = returned[0]
+            table_html = returned[1].to_html()
+            return JsonResponse({'script': [script], 'div': [div], 'table_html': [table_html]})
+        elif q_type == 'matrix' and q_subtype == 'single':
+            script_divs = list()
+            tables = list()
+            selected_sub_questions_text = json.loads(request.GET['sub_questions'])
+            for sqt in selected_sub_questions_text:
+                sq_query_set = ResponseOptions.objects.filter(row_text=sqt)
+                returned = chart_class.generate(sq_query_set, qs_type='response_option', stack_input=stack_input, group_input=group_input)
+                script_divs.append(returned[0])
+                tables.append(returned[1].to_html())
+            return JsonResponse({'script': [t[0] for t in script_divs], 'div': [t[1] for t in script_divs], 'table_html': tables})
 
 @login_required
 def dockets_dashboard(request):
@@ -277,155 +342,6 @@ class SearchResultsList(ListView):
         return DocketCharge.objects.filter(*Q_objects)
 
 
-@login_required
-def psql(request):
-    
-    #Number of Case Appearances Observed Bar Graph
-    # for p in Responses.objects.raw('SELECT * FROM website_responses'):
-    #    print(p)
-    # def connect():
-    #     print("Connecting to database...")
-    #     conn = psycopg2.connect(
-    #         host="localhost",
-    #         database="website",
-    #         user="django",
-    #         password="Tulane4010"
-    #         )
-    #     df = pd.read_sql_query("""
-    #             SELECT * FROM website_responses
-    #             """, conn)
-        
-    #     #print(df)
-    #     return df #put this in config instead; doesn't need to be in views
-    # get_object_or_404() function
-    # get a online version up with a single query using database
-    #clean csv --> ucf-8
-    # responses = connect()
-    # data = dict(
-    #      year = [d for d in responses['year']],
-    #      id = [d for d in responses['id']],
-    #     # court = [d['court'] for d in responses],
-    #     # bail = [d['bail'] for d in responses],
-    #     # judge = [d['judge'] for d in responses],
-    #     # ethnicity = [d['ethnicity'] for d in responses],
-    # )
-    # #edit csv to count number of each element instead
-    # source = ColumnDataSource(data)
-    # print(data['year'])
-    # count = data['year'].count(2020)
-    
-    # sorted_ids = sorted(source.year, key=lambda x: source.id[source.year.index(x)])
-
-    homicides = ['Homicide Incidents', 'Homicide Arrests']
-    yrs = ['2020', '2021']
-    #years = ['2019', '2020']
-    courts = ['Magistrate', 'Municipal', 'Criminal']
-    # data = {
-    #     'homicides' : homicides,
-    #     '2019' : [124, 44],
-    #     '2020' : [184, 49]
-    # }
-    data = {
-        'yrs' : yrs,
-        'Magistrate': [10, 20],
-        'Municipal': [20, 10],
-        'Criminal' : [15, 15]
-    }
-    #x = [(homicide, year) for homicide in homicides for year in years]
-    x = [(yr, court) for yr in yrs for court in courts]
-    #counts = sum(zip(data['2019'], data['2020']), ())
-    counts = sum(zip(data['Magistrate'], data['Municipal'], data['Criminal']), ())
-    source = ColumnDataSource(data=dict(x=x, counts=counts))
-    plot = figure(x_range=FactorRange(*x), plot_height=250, title="Cases per Year", toolbar_location=None, tools="")
-    plot.vbar(x='x', top='counts', width=0.9, source=source, line_color = "white", fill_color=factor_cmap('x', palette=Spectral6, factors=yrs, start=1, end=2))
-    plot.y_range.start = 0
-    plot.x_range.range_padding = 0.1
-    plot.axis.major_label_orientation = 1
-    plot.xgrid.grid_line_color = None
-    
-    script,div = components(plot)
-
-    #return render(request, 'pages/responses_test.html', {'script':script, 'div':div})
-    return render(request, 'website/responses_test.html')
-
-@login_required
-def pretrial(request):
-    good_qs_list = Question.objects.filter(question_clean_text__contains='What is the defendant\x92s pretrial risk score?')
-    #print("list is ", good_qs_list)
-    good_qs_ids = [q.question_id for q in list(good_qs_list)]
-    #print("id is ", good_qs_ids)
-    good_responses_list = list(Response.objects.filter(question_id__in=good_qs_ids))
-    output = ', '.join([r.response_text for r in good_responses_list])
-    possible_responses = [ '0', '1', '2', '3', '4', '5' ]
-
-    #counts = [ output.count('0'), output.count('1'), output.count('2'), output.count('3'), output.count('4'), output.count('5')] #ignore 99
-    counts = [100, 122, 413, 52, 54, 610]
-    source = ColumnDataSource(dict(possible_responses=possible_responses, counts=counts))
-    
-    #Bar Graph
-    plot = figure(x_range=FactorRange(*possible_responses), plot_height=250, title="What is the defendant's pretrial risk score?", toolbar_location=None, tools="", x_axis_label = "Score", y_axis_label = "Total Count")
-    plot.vbar(x='possible_responses', top='counts', width=0.9, source=source)
-
-    plot.xgrid.grid_line_color = None
-    plot.y_range.start = 0
-    print("plot: ", plot)
-    script,div = components(plot)
-    #print("bar components: ", components(plot))
-    
-    # Pie Chart
-    x = {
-        '0':345,
-        '1':31,
-        '2':657,
-        '3':864,
-        '4':56,
-        '5':200,
-    }
-    new_source = pd.Series(x).reset_index(name='counts').rename(columns={'index':'possible_responses'})
-    new_source['angle'] = new_source['counts']/new_source['counts'].sum() *2*pi
-    new_source['color'] = Category20c[len(x)]
-
-    plot2 = figure(height=350, title="What is the defendant's pretrial risk score?", 
-    toolbar_location=None, tools="hover", tooltips="@possible_responses: @counts", x_range=(-0.5, 1.0))
-
-    plot2.wedge(x=0, y=1, radius=0.4,
-    start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'), 
-    line_color="white", fill_color="color", legend_field="possible_responses", source=new_source)
-
-    plot2.axis.axis_label = None
-    plot2.axis.visible = False
-    plot2.grid.grid_line_color = None
-
-    #script1, div1 = components(plot2)
-
-	# for q in question_query_set:
-	# 	all_responses += [r.choice_clean_text for r in q.response_set.all()]
-
-	# counter = Counter(all_responses)
-	# print(counter)
-    source = ColumnDataSource(data=dict(possible_responses=["yes", "no", "maybe", "possibly", "terrible", "zzz"], counts=[100, 122, 413, 52, 54, 610]))
-    columns = [
-		TableColumn(field="possible_responses", title="possible responses"),
-		TableColumn(field="counts", title="Counts"),
-	]
-    data_table = DataTable(source=source, columns=columns)
-
-	# df = pd.DataFrame.from_dict(counter, orient='index').reset_index()
-	# df.rename(columns={'index': 'Choice Text', 0: 'Total'}, inplace=True)
-    show(data_table)
-    #script1, div1 = data_table
-    print("data table components: ", data_table)
-		#show(data_table)
-	#return [components(data_table), df]
-    script1, div1 = components(data_table)
-
-    return render(request, 'website/pretrial.html', {'script':script, 'div':div, 'script1':script1, 'div1': div1}) 
-
-@login_required
-# pie chart with bokeh
-def afford_bond(request):
-    pass
-
 class LoginView(LoginView):
     template_name = 'error_login.html'
     print("this is the loginview")
@@ -433,29 +349,12 @@ class LoginView(LoginView):
         print("this is myview")
         if not request.user.is_authenticated:
             return render(request, 'website/error_login.html')
-    # login_url = '/admin'
-    # redirect_field_name = 'redirect_to'
 
-# def my_view(request):
-#     print("this is myview")
-#     username = request.POST['username']
-#     password = request.POST['password']
-#     user = authenticate(request, username=username, password=password)
-#     if user is not None:
-#         login(request, user)
-#         # Redirect to a success page.
-#         ...
-#     if not request.user.is_authenticated:
-#         return render(request, 'myapp/login_error.html')
-
-# def my_view(request):
-#         print("this is myview")
-#         if not request.user.is_authenticated:
-#             return render(request, 'myapp/error_login.html')
 
 def logout_view(request):
     logout(request)
     
 @login_required
 def about_page(request):
+    '''Render function for survey dashboard'''
     return render(request, 'website/about_page.html')

@@ -18,6 +18,9 @@ class Survey(models.Model):
 	court_id = models.CharField(max_length=20)
 	survey_notes = models.CharField(max_length=40)
 
+	def whatami(self):
+		return "survey"
+
 	def __str__(self):
 		return str(self.court_id) + ', Survey ID: ' + str(self.survey_id)
 
@@ -29,6 +32,8 @@ class Question(models.Model):
 	survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=0) # Survey to Question = One to Many
 	question_clean_text = models.CharField(max_length=600, default='')
 	cluster_id = models.IntegerField(default=-1)
+	def whatami(self):
+		return "question"
 	def __str__(self):
 		return str(self.question_text)
 
@@ -48,6 +53,8 @@ class Response(models.Model):
 	choice_text = models.CharField(max_length=200) # max is 195 in given data
 	choice_clean_text = models.CharField(max_length=200, default='')
 	question = models.ForeignKey(Question, on_delete=models.CASCADE, default=0) # One Question has many Response(s) and one Response has many Question(s)
+	def whatami(self):
+		return "response"
 	def __str__(self):
 		return str(self.response_text)
 
@@ -61,7 +68,8 @@ class ResponseOptions(models.Model):
 	choice_id = models.FloatField(default=0)
 	response_option_text = models.CharField(max_length=500)
 	question = models.ForeignKey(Question, on_delete=models.CASCADE, default=0) # Question to ResponseOptions = One to Many
-
+	def whatami(self):
+		return "response_option"
 
 	def __str__(self):
 		return str(self.response_option_text)
