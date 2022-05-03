@@ -850,16 +850,10 @@
             window.created_elements = [];
           }
 
-
-          //document.getElementById("bar-char-controls-div").appendChild(court_btn);
-          //document.getElementById("bar-char-controls-div").appendChild(year_btn);
-          //button_html += `<button>${"Stack by Year"}</button>`;
-          console.log("success2");
-          // this code needs to incorporate what chart type selected because controls will differ
-          console.log("finished click function");
         }
 
       });
+
 
 
       // we add the court button function here because we want to use the drop down values from
@@ -890,9 +884,8 @@
             'group_input': JSON.stringify(group_input),
           },
           success: function(result) {
-            console.log("in stack success");
             var bokeh_data = result;
-            console.log("success1");
+
             raw_data_divs_array.forEach(function (element) {
               $(element).html("");
             });
@@ -907,6 +900,38 @@
             });
           }
         });
+      }
+
+      document.getElementById("orig-data-button").onclick = function() {downloadButtonClickFunction()};
+
+      function downloadButtonClickFunction () {
+        console.log("in download click function");
+        const court_s = $('select[name=court-dropdown]').val();  
+        const year_s = $('select[name=year-dropdown]').val();
+        const question_1 = $('select[name=question-dropdown-1]').val();
+        $('select[name=question-dropdown-2]').selectpicker('refresh');
+        const question_2 = $('select[name=question-dropdown-2]').val();
+        const sub_questions = $('select[name=sub-question-dropdown]').val();
+        const chart_type = $('select[name=chart-dropdown]').val();
+
+
+        $.ajax({
+          type: "get",
+          url: '{% url "website:download_zip" %}',
+          data: {
+            'courts': JSON.stringify(court_s),
+            'years': JSON.stringify(year_s),
+            'question_1': JSON.stringify(question_1),
+            'question_2': JSON.stringify(question_2),
+            'sub_questions': JSON.stringify(sub_questions),
+            'chart_type': JSON.stringify(chart_type)
+          },
+          success: function(result) {
+            alert("data downloaded");
+            return true;
+          }
+          });
+
       }
 
     }

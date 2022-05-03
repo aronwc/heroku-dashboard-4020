@@ -14,6 +14,7 @@ urlpatterns = [
     path('generate-panel-2-options/', views.generate_panel_2_options, name="generate_panel_2_options"),
     path('get-graphs-ajax/', views.get_graphs_ajax, name="get_graphs_ajax"),
     path('process-generate/', views.process_generate, name="process_generate"),
+    path('download-zip/', views.download_zip, name="download_zip"),
     path('stack-group-bar-chart/', views.stack_group_bar_chart, name="stack_group_bar_chart"),
     path('get-docket-charge-by-mag-num/', views.SearchResultsList.as_view(), name="get_docket_charge_by_mag_num"),
     path("about/", views.about_page, name="about_page"),

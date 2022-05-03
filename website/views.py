@@ -137,13 +137,28 @@ def get_question_type_subtype(question_query_set):
     q_type, q_subtype = df.iloc[df['count'].idxmax()]['question_type'], df.iloc[df['count'].idxmax()]['question_subtype']
     return q_type, q_subtype
 
-def get_raw_data(*args):
+def get_files(*args):
     ''' Given QuerySets, returns a list of DataFrames, one for each QuerySet (aka equivalent to the raw data) '''
+    '''
     csvs_dict= dict()
     for qs in args:
-        #csvs_dict
-        dfs_list.append(pd.DataFrame.from_records(qs.values()))
-    return dfs_list
+        csvs_dict[qs[0].whatami()] = pd.DataFrame.from_records(qs.values()).to_csv(qs[0].whatami())
+        #dfs_list.append(pd.DataFrame.from_records(qs.values()))
+    return csvs_dict
+    '''
+    return {'a': pd.DataFrame({'a': [1, 2, 4], 'b': [5, 6, 7]}).to_csv(), 'b': pd.DataFrame({'a': [8,9,10], 'b': [11,12,13]})}
+@login_required
+def download_zip(request):
+    files = get_files()
+    zip_filename = 'RawData.zip'
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        for k, file in files.items():
+            zip_file.writestr(k + '.csv', file)
+    zip_buffer.seek(0)
+    resp = HttpResponse(zip_buffer, content_type='application/zip')
+    resp['Content-Disposition'] = 'attachment; filename = %s' % zip_filename
+    return resp
 
 @login_required
 def generate_panel_2_options(request):
