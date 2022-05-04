@@ -491,7 +491,7 @@ class PieChart:
 		return "pie"
 
 class ScatterPlot: #can be used for categorical variables with continuous values; eg time
-	#ColumnDataSource takes in pandas dataframe....not sure which variable that is
+	#ColumnDataSource takes in pandas dataframe
 	@classmethod
 	def generate(cls, question_query_set, *args, **kwargs):
 		all_responses = list()
@@ -507,19 +507,11 @@ class ScatterPlot: #can be used for categorical variables with continuous values
 		choices = list(all_responses.keys())
 		counts = list(all_responses.values())
 		DAYS = ['Sun', 'Sat', 'Fri']
-		# choices = [1, 2, 3, 4, 5]
-		# counts = [7, 5, 3, 6, 4]
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
-		# data = pd.Series(counter).reset_index(name="value").rename(columns={"index": "response"})
 		plot = figure(x_range = counts, y_range=choices, height=300, title=str(question_query_set[0]),
 		 toolbar_location=None, tools="hover", tooltips=[('Total','@value')], sizing_mode="stretch_width")
 
 		plot.circle(x="choice", y=jitter("count", width=0.6, range=plot.y_range), source=comdata, alpha=0.3)
-
-		# plot2 = figure(title=str(question_query_set[0]), tools="hover")
-		# plot2.xaxis.axis_label = "x-axis"
-		# plot2.yaxis.axis_label = "y-axis"
-		# plot2.scatter(choices, counts)
 
 		script1, div1 = components(plot)
 
@@ -528,31 +520,7 @@ class ScatterPlot: #can be used for categorical variables with continuous values
 	def __str__(self):
 		return "scatter"
 
-class HeatMap:
-	@classmethod
-	def generate(cls, question_query_set, **kwargs):
-		return
-
-	def __str__(self):
-		return "heatmap"
-
-class BoxPlot:
-	@classmethod
-	def generate(cls, question_query_set, **kwargs):
-		return 
-
-	def __str__(self):
-		return "boxplot"
-
-class LineGraph:
-	@classmethod
-	def generate(cls, question_query_set, **kwargs):
-		return 
-
-	def __str__(self):
-		return "line"
-
-class Counter_Table:
+class Counter_Table: #still not functioning
 	@classmethod
 	def generate(cls, question_query_set):
 		#output_file("survey_dashboard.html")
@@ -571,8 +539,6 @@ class Counter_Table:
 
 		print("choices: ", choices)
 		print("counts: ", counts)
-		# choices = [1, 2, 3, 4, 5]
-		# counts = [7, 5, 3, 6, 4]
 		source = ColumnDataSource(data=dict(choices=choices, counts=counts))
 
 		columns = [
@@ -604,7 +570,7 @@ def determine_valid_graph_types(question_type_subtype_tuple):
 								('open_ended', 'multi'): [],
 								('matrix', 'single'): [BarChart(), PieChart(), StackedBarChart()],
 								('matrix', 'rating'): [],
-								('datetime', 'time_only'): [ScatterPlot()],
+								('datetime', 'time_only'): [],
 								('single_choice', 'menu'): [],
 								('datetime', 'date_only'): []
 	}
