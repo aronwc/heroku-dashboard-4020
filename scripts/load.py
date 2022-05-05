@@ -22,25 +22,25 @@ def run():
 
 	# delete all initial data
 	Response.objects.all().delete()
-	Question.objects.all().delete()
+	#Question.objects.all().delete()
 	ResponseOptions.objects.all().delete()
-	Survey.objects.all().delete()
+	#Survey.objects.all().delete()
 	#DocketCharge.objects.all().delete()
 	#DocketProceeding.objects.all().delete()
 
 
-	# responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1', index_col=0)
+	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1', index_col=0)
 
-	# questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.cleaned.with_clusters.csv', encoding='latin1')
+	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.cleaned.with_clusters.csv', encoding='latin1')
 
-	# response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_response_options.csv', encoding='latin1', index_col=0)
+	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_response_options.csv', encoding='latin1', index_col=0)
 
-	# surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
+	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
 
-	# all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
+	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
-	# all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
-
+	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
+	'''
 	responses_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1', index_col=0)
 
 	questions_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_questions_cleaned_with_clusters.csv', encoding='latin1')
@@ -52,6 +52,7 @@ def run():
 	all_dockets_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
 	all_proceedings_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
+	'''
 
 	'''
 	
@@ -60,7 +61,7 @@ def run():
 
 	'''
 
-	
+	'''
 	# SURVEYS
 	# --------
 	# WORKS
@@ -75,9 +76,9 @@ def run():
 	 						survey_part_id=fields[7], survey_observation_level=fields[8],
 	 						observer_type=fields[9], court_id=fields[10], survey_notes=fields[11])
 	print("Done Surveys {}".format('\n'*3))
+	'''
 
-
-
+	'''
 	print("Beginning Questions")
 	# QUESTIONS
 	# ----------
@@ -91,9 +92,9 @@ def run():
 								question_subtype=fields[3], survey=Survey.objects.get(survey_id=fields[4]),
 								question_clean_text=fields[5], cluster_id=fields[6])
 	print("Done Questions {}".format('\n'*3))
+	'''
+
 	
-
-
 	print("Beginning ResponseOptions")
 	# # RESPONSE_OPTIONS
 	# # ----------------
@@ -102,8 +103,7 @@ def run():
 	for index, row in response_options_df.iterrows():
 		fields = [row[i] if (type(row[i]) != float or (i == 5 or i == 3)) else 0 for i in range(len(list(row)))] 
 		# unpack an iterable with '*'
-		print(fields[4])
-		print(fields[6])
+
 		ResponseOptions.objects.create(response_option_id=fields[0], survey=Survey.objects.get(survey_id=fields[1]), question=Question.objects.get(question_id=fields[2]), 
 	 									row_id=fields[3], row_text=fields[4], choice_id=fields[5], 
 										response_option_text=fields[6])
@@ -125,8 +125,7 @@ def run():
 		# some data validation for length of str fields
 		fields[3] = str(fields[3])[:5000]
 		fields[8] = str(fields[8])[:200]
-		print(fields[3])
-		print(fields[8])
+
 		r = Response.objects.create(survey=Survey.objects.get(survey_id=fields[0]), collector_id=fields[1], responder_id=fields[2],
 								question=Question.objects.get(question_id=fields[4]), response_text=fields[3], 
 								row_id=fields[5], choice_id=fields[6], other_id=fields[7], choice_text=fields[8],
@@ -134,7 +133,7 @@ def run():
 	
 	
 	print("Done Responses {}".format('\n'*3))
-
+	
 
 	
 
