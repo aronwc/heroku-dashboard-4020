@@ -70,7 +70,7 @@ def get_years_ajax(request):
             years_to_display = surveys_with_courts_selected.order_by('survey_year').distinct()
             # get all questions that have appeared in selected court(s) and year(s)
             questions_to_display = Question.objects.filter(survey__in=(surveys_with_courts_selected))
-            # filter questions to only those that are in a content sets that has responses
+            # filter questions to only those that are in a cluster sets that has responses
             questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
             print(e)
@@ -94,7 +94,7 @@ def get_questions_ajax(request):
             global surveys_with_years_selected
             surveys_with_years_selected = Survey.objects.filter(survey_year__in=json.loads(request.GET['years']))
             questions_to_display = Question.objects.filter(survey__in=(surveys_with_years_selected & surveys_with_courts_selected))
-            # we only want to display questions that are in a 'content set' that has responses
+            # we only want to display questions that are in a 'cluster set' that has responses
             questions_to_display_final = questions_to_display.values('question_clean_text', 'cluster_id').annotate(num_responses=Count('response')).filter(num_responses__gt=0).distinct()
         except Exception as e:
             print(e)
@@ -121,7 +121,7 @@ def get_graphs_ajax(q_type: str, q_subtype: str) -> list:
 
 def get_question_type_subtype(question_query_set):
     """
-    - Given a question query set representing a content set (i.e. the set of all question objects with the same cluster id),
+    - Given a question query set representing a cluster set (i.e. the set of all question objects with the same cluster id),
     'infer' the question type and subtype 
 
     Parameters
@@ -138,18 +138,19 @@ def get_question_type_subtype(question_query_set):
     return q_type, q_subtype
 
 def get_files(*args):
-    ''' Given QuerySets, returns a list of DataFrames, one for each QuerySet (aka equivalent to the raw data) '''
-    '''
+    ''' Given QuerySets, returns a Dictionary of DataFrames, one for each QuerySet (aka equivalent to the raw data) '''
+    
     csvs_dict= dict()
     for qs in args:
         csvs_dict[qs[0].whatami()] = pd.DataFrame.from_records(qs.values()).to_csv(qs[0].whatami())
         #dfs_list.append(pd.DataFrame.from_records(qs.values()))
     return csvs_dict
-    '''
-    return {'a': pd.DataFrame({'a': [1, 2, 4], 'b': [5, 6, 7]}).to_csv(), 'b': pd.DataFrame({'a': [8,9,10], 'b': [11,12,13]})}
+    
+    #return {'a': pd.DataFrame({'a': [1, 2, 4], 'b': [5, 6, 7]}).to_csv(), 'b': pd.DataFrame({'a': [8,9,10], 'b': [11,12,13]}).to_csv()}
+
 @login_required
 def download_zip(request):
-    files = get_files()
+    files = get_files(all_similar_questions_query_set)
     zip_filename = 'RawData.zip'
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
@@ -158,6 +159,7 @@ def download_zip(request):
     zip_buffer.seek(0)
     resp = HttpResponse(zip_buffer, content_type='application/zip')
     resp['Content-Disposition'] = 'attachment; filename = %s' % zip_filename
+    print('returning file')
     return resp
 
 @login_required

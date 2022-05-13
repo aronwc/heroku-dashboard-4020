@@ -205,7 +205,9 @@
       </div>
 
       <div class="seven">
-        <button id="orig-data-button" name="orig-data-button" class="generate-button" style="border:none">Download Data</button>
+        <!--<a href="{% url 'website:download_zip' %}" download=""></a>-->
+        <input type="button" id="orig-data-button" value="Download Raw Data" name="orig-data-button" class="generate-button" style="border:none" >
+        </input>
       </div>
 
     </div>
@@ -852,7 +854,8 @@
 
         }
 
-      });
+        });
+      }
 
 
 
@@ -901,8 +904,9 @@
           }
         });
       }
-
-      document.getElementById("orig-data-button").onclick = function() {downloadButtonClickFunction()};
+      // $(element).click(function() {downloadButtonClickFunction(raw_data_divs_array[index])});
+      //onclick="window.open('download-zip')"
+      //document.getElementById("orig-data-button").onclick = function() {downloadButtonClickFunction()};
 
       function downloadButtonClickFunction () {
         console.log("in download click function");
@@ -925,16 +929,12 @@
             'question_2': JSON.stringify(question_2),
             'sub_questions': JSON.stringify(sub_questions),
             'chart_type': JSON.stringify(chart_type)
-          },
-          success: function(result) {
-            alert("data downloaded");
-            return true;
           }
           });
 
       }
 
-    }
+    
 
 
   </script>

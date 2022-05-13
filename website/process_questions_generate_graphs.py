@@ -25,7 +25,7 @@ stack_group_mappings = {'court': 'survey__court_id', 'year': 'survey__survey_yea
 class BarChart:
 	"""
 	Given a query set of questions that have identical question_text (or possibly in the 
-	same content set for future purposes), BarChart.generate() returns the HTML components 
+	same cluster set for future purposes), BarChart.generate() returns the HTML components 
 	needed for the corresponding bar chart of the categorical data.
 
 	Methods
