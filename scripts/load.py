@@ -1,13 +1,5 @@
 '''
-File to initially load data from csv's into models
-
-'''
-'''
-CLEAN QUESTIONS BEFORE ADDING TO DATABASE
-	- CLEAN QUESTION_TEXT
-	- NEW COLUMN FOR CLUSTERS
-
-maybe new columns for ethnicity/race, judge
+RUN THIS FILE IF YOU HAVE TO UPLOAD DATA THAT MEETS FIGURE 2b (in INSTRUCTION MANUAL) SCHEMA!!!!!
 
 '''
 
@@ -21,25 +13,23 @@ from website.models import Response, Question, ResponseOptions, Survey, DocketCh
 def run():
 
 	# delete all initial data
-	Response.objects.all().delete()
+	#Response.objects.all().delete()
 	#Question.objects.all().delete()
-	ResponseOptions.objects.all().delete()
+	#ResponseOptions.objects.all().delete()
 	#Survey.objects.all().delete()
-	#DocketCharge.objects.all().delete()
-	#DocketProceeding.objects.all().delete()
 
+	# YOU MIGHT HAVE DIFFERENT FILE NAMES
 
-	responses_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1', index_col=0)
+	responses_df = pd.read_csv('./scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1')
+	questions_df = pd.read_csv('./scripts/data/all.questions.cleaned.with_clusters.csv', encoding='latin1')
+	response_options_df = pd.read_csv('./scripts/data/all_response_options.csv', encoding='latin1')
+	surveys_df = pd.read_csv('./scripts/data/all.surveys.csv', encoding='latin1')
 
-	questions_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.questions.cleaned.with_clusters.csv', encoding='latin1')
+	questions_df = questions_df.loc[:, ~questions_df.columns.str.contains('^Unnamed')]
+	response_clean_df = response_clean_df.loc[:, ~response_clean_df.columns.str.contains('^Unnamed')]
+	surveys_df = surveys_df.loc[:, ~surveys_df.columns.str.contains('^Unnamed')]
+	response_options_df = response_options_df.loc[:, ~response_options_df.columns.str.contains('^Unnamed')]
 
-	response_options_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_response_options.csv', encoding='latin1', index_col=0)
-
-	surveys_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all.surveys.csv', encoding='latin1')
-
-	all_dockets_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
-
-	all_proceedings_df = pd.read_csv('/Users/bennettkahn/heroku-dashboard-4020/scripts/data/all_proceedings.csv')
 	'''
 	responses_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/responses_cleaned_2_sarah_nlp.csv', encoding='latin1', index_col=0)
 
@@ -52,13 +42,6 @@ def run():
 	all_dockets_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_dockets.csv', index_col=0)
 
 	all_proceedings_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
-	'''
-
-	'''
-	
-	Use question_nlp.py to perform NLP for cleaning and similairty generation
-
-
 	'''
 
 	'''
@@ -137,34 +120,3 @@ def run():
 
 	
 
-	
-
-
-	#print("Beginning DocketCharges")
-
-	# for index, row in all_dockets_df.iterrows():
-	# 	fields = list(row)
-	# 	correct_date = datetime.strptime(fields[7], "%m/%d/%Y")
-	# 	tz_aware_date = pytz.timezone('US/Central').localize(correct_date) # best practice to have timezone aware dates
-	# 	DocketCharge.objects.create(mag_num=fields[0], defendant=fields[1], judge=fields[2], 
-	# 							count=fields[3], code=fields[4], charge=fields[5], bond=fields[6],
-	# 							date=tz_aware_date)
-	# print("Done DocketCharges")
-	
-	# print("Beginning DocketProceeding")
-	# for index, row in all_proceedings_df.iterrows():
-	# 	#print("index: ", index)
-	# 	fields = list(row)
-	# 	#print("field: ", fields[0])
-	# 	print("mag_num: ", fields[4])
-	# 	correct_date = datetime.strptime(fields[0], "%m/%d/%Y")
-	# 	tz_aware_date = pytz.timezone('US/Central').localize(correct_date)
-	# 	docket_proceeding = DocketProceeding(mag_num=index, date=tz_aware_date, 
-	# 										judge=fields[1], text=fields[2], bond_set_for=fields[3],
-	# 										mag_section=fields[4])
-
-
-	# 	docket_proceeding.save()
-	# 	docket_proceeding.docket_charges.add(*DocketCharge.objects.filter(mag_num=index))
-
-	# print("Done DocketProceeding")
