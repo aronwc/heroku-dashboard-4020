@@ -44,7 +44,7 @@ def run():
 	all_proceedings_df = pd.read_csv('/mnt/c/Users/victo/OneDrive/Documents/Github/heroku-dashboard-4020/scripts/data/all_proceedings.csv', index_col=0)
 	'''
 
-	'''
+
 	# SURVEYS
 	# --------
 	# WORKS
@@ -59,9 +59,9 @@ def run():
 	 						survey_part_id=fields[7], survey_observation_level=fields[8],
 	 						observer_type=fields[9], court_id=fields[10], survey_notes=fields[11])
 	print("Done Surveys {}".format('\n'*3))
-	'''
 
-	'''
+
+
 	print("Beginning Questions")
 	# QUESTIONS
 	# ----------
@@ -75,7 +75,7 @@ def run():
 								question_subtype=fields[3], survey=Survey.objects.get(survey_id=fields[4]),
 								question_clean_text=fields[5], cluster_id=fields[6])
 	print("Done Questions {}".format('\n'*3))
-	'''
+
 
 	
 	print("Beginning ResponseOptions")

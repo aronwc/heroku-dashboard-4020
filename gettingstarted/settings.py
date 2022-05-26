@@ -108,7 +108,19 @@ DATABASES = {
 
         'HOST': 'localhost',
         'PORT': '5432',
+    },
+    "bk_local_testing_manual": {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+
+        'NAME': 'cwndashtest',
+        'USER': 'bennett',
+        'PASSWORD': 'django_tut_you_cant_guess123',
+
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
+
+
 }
 
 # set environment variable of database with 'export DJANGO_DATABASE='bk_local''

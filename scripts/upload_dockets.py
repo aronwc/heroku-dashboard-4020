@@ -5,12 +5,12 @@ from datetime import datetime
 from django.utils.dateparse import parse_date
 from website.models import Response, Question, ResponseOptions, Survey, DocketCharge, DocketProceeding
 
-#DocketCharge.objects.all().delete()
-#DocketProceeding.objects.all().delete()
+DocketCharge.objects.all().delete()
+DocketProceeding.objects.all().delete()
 
 all_dockets_df = pd.read_csv('./scripts/data/all_dockets.csv', index_col=0)
 
-all_proceedings_df = pd.read_csv('./scripts/data/all_proceedings.csv')
+all_proceedings_df = pd.read_csv('./scripts/data/all_proceedings.csv', index_col=0)
 
 print("Beginning DocketCharges")
 

@@ -11,7 +11,6 @@ then uploads new data to database
 import pandas as pd
 import numpy as np
 import datetime as dt
-import matplotlib.pyplot as plt
 import nltk, re, string
 import math as m
 import sklearn
