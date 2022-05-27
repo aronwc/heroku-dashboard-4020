@@ -14,6 +14,7 @@ import datetime as dt
 import nltk, re, string
 import math as m
 import sklearn
+import unicodedata
 import pytz
 from datetime import datetime
 from django.utils.dateparse import parse_date
@@ -25,11 +26,11 @@ def run():
 
 	# get DF's for each object as given in original schema
 	# YOU MIGHT HAVE DIFFERENT FILE NAMES
-	response_unclean_df = pd.read_csv("./data/cwn/2019.to.2021.responses.exported.before.cleaning.csv" ,encoding = "latin1")
-	response_clean_df = pd.read_csv("./data/cwn/2019.to.2021.responses.exported.after.cleaning.csv",encoding = "latin1")
-	response_options_df = pd.read_csv("./data/cwn/all.response.options.csv",encoding = "latin1")
-	questions_df = pd.read_csv("./data/cwn/all.questions.csv",encoding = "latin1")
-	surveys_df = pd.read_csv("./data/cwn/all.surveys.csv", encoding="latin1")
+	response_unclean_df = pd.read_csv("./scripts/data/2019.to.2021.responses.exported.before.cleaning.csv" ,encoding = "latin1")
+	response_clean_df = pd.read_csv("./scripts/data/2019.to.2021.responses.exported.after.cleaning.csv",encoding = "latin1")
+	response_options_df = pd.read_csv("./scripts/data/all.response.options.csv",encoding = "latin1")
+	questions_df = pd.read_csv("./scripts/data/all.questions.csv",encoding = "latin1")
+	surveys_df = pd.read_csv("./scripts/data/all.surveys.csv", encoding="latin1")
 
 
 	def cleanText(doc):
