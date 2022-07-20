@@ -13,6 +13,8 @@ Faculty Mentor:
 
 [Instruction Manual](https://docs.google.com/document/d/1_DvLFJmjNSnhWYEPGof-nAN2L7QyUnbbo7yOFsIQb3o/edit?usp=sharing) (For internal use only)
 
+[Video Demo](https://youtu.be/K3RSja-DPeY)
+
 This repository houses the source code for Court Watch NOLA's internal-facing data dashboard; it is the product of a year long, service learning computer science capstone project of four Tulane undergraduates.
 
 ### Court Watch NOLA ###
